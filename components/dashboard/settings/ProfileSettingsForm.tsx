@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { patientApi } from "@/api/patient.api";
+import { toast } from "react-toastify";
+import { useRef } from "react";
 
 const timeZoneOptions = [
   "Pacific Time (PT)",
@@ -87,6 +89,39 @@ export function ProfileSettingsForm({
     },
   });
 
+  const [image, setImage] = useState<string | null>(null)
+  const [error, setError] = useState("")
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif"]
+    if (!validTypes.includes(file.type)) {
+      setError("Only JPG, PNG or GIF allowed")
+      return
+    }
+
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      setError("File size should be less than 5MB")
+      return
+    }
+
+    setError("")
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setImage(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -123,10 +158,11 @@ export function ProfileSettingsForm({
         // address: values.address,
         // timeZone: values.timeZone,
       });
-
+      toast.success("Profile updated successfully");
       onSubmit?.(values);
     } catch (e) {
       console.log(e);
+      toast.error("Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -142,19 +178,40 @@ export function ProfileSettingsForm({
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
           <div className="flex flex-wrap items-center gap-4">
             <Avatar className="size-16">
-              <AvatarFallback>
-                {form.watch("firstName")?.[0]}
-                {form.watch("lastName")?.[0]}
-              </AvatarFallback>
+              {image ? (
+                <img src={image} className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <AvatarFallback>
+                  {form.watch("firstName")?.[0]}
+                  {form.watch("lastName")?.[0]}
+                </AvatarFallback>
+              )}
             </Avatar>
 
             <div className="space-y-1">
-              <Button type="button" className="bg-gradient-dash text-white">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+
+              <Button
+                type="button"
+                onClick={handleButtonClick}
+                className="bg-gradient-dash text-white"
+              >
                 Upload New Photo
               </Button>
+
               <p className="text-xs text-muted-foreground">
                 JPG, PNG or GIF. Max size 5MB
               </p>
+
+              {error && (
+                <p className="text-xs text-red-500">{error}</p>
+              )}
             </div>
           </div>
 

@@ -3,7 +3,13 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -11,6 +17,9 @@ import { Globe, ShieldIcon } from "lucide-react";
 import { useState } from "react";
 import { patientApi } from "@/api/patient.api";
 import { useRouter } from "next/navigation";
+import { settingApi } from "@/api/setting.api";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export const privacySchema = z.object({
   shareDataForResearch: z.boolean(),
@@ -43,29 +52,120 @@ export function PrivacySettingsForm({
     onSubmit?.(values);
   }
 
-  function handleDownloadData() {
-    console.log("download data");
-  }
+  const [downloading, setDownloading] = useState(false)
 
-  function handleViewPrivacyPolicy() {
-    console.log("view privacy policy");
-  }
-
-const [deleting, setDeleting] = useState(false);
-const role = localStorage.getItem("role");
-
-async function handleDeleteAccount() {
+const handleDownloadData = async () => {
   try {
-    setDeleting(true);
-    await patientApi.deleteAccount();
-    localStorage.clear();
-    router.push(`/${role?.toLowerCase()}-login`);
-  } catch (e) {
-    console.log(e);
-  } finally {
-    setDeleting(false);
+    const token = window.localStorage.getItem("patientToken")
+    if (!token) return
+
+    const res = await fetch(
+      "https://mr-telerxs-backend.vercel.app/api/v1/patient/settings/download-data",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await res.json()
+
+    if (!res.ok) throw new Error("Failed to download data")
+
+    const jsonString = JSON.stringify(data, null, 2)
+
+    const blob = new Blob([jsonString], {
+      type: "application/json",
+    })
+
+    const url = window.URL.createObjectURL(blob)
+
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `my-data-${new Date().toISOString()}.json`
+    document.body.appendChild(link)
+    link.click()
+
+    link.remove()
+    window.URL.revokeObjectURL(url)
+
+  } catch (err) {
+    console.error(err)
   }
 }
+
+  const [openPrivacy, setOpenPrivacy] = useState(false)
+  const [policy, setPolicy] = useState<any>(null)
+  const [loadingPolicy, setLoadingPolicy] = useState(false)
+
+  const handleViewPrivacyPolicy = async () => {
+    try {
+      setOpenPrivacy(true)
+      setLoadingPolicy(true)
+
+      const token = window.localStorage.getItem("patientToken")
+
+      const res = await fetch(
+        "https://mr-telerxs-backend.vercel.app/api/v1/patient/settings/privacy-policy",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json()
+
+      if (data?.data?.privacyPolicy) {
+        setPolicy(data.data.privacyPolicy)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoadingPolicy(false)
+    }
+  }
+
+  const [deleting, setDeleting] = useState(false);
+  const role = localStorage.getItem("role");
+
+  async function handleDeleteAccount() {
+    try {
+      setDeleting(true);
+      await patientApi.deleteAccount();
+      localStorage.clear();
+      router.push(`/${role?.toLowerCase()}-login`);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setDeleting(false);
+    }
+  }
+  async function handlePrivacy(values: PrivacyFormValues) {
+    try {
+      await settingApi.updatePrivacy(values, role || "");
+      toast.success("Privacy preferences saved successfully");
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to save privacy preferences");
+    } finally {
+      setDeleting(false);
+    }
+  }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await patientApi.getProfile();
+        const data = res?.data?.privacy;
+        form.reset({
+          shareDataForResearch: data?.shareDataForResearch,
+          marketingCommunications: data?.marketingCommunications,
+        });
+      } catch { }
+    };
+
+    fetchProfile();
+  }, [form]);
 
   return (
     <Card>
@@ -75,7 +175,7 @@ async function handleDeleteAccount() {
       <CardContent className="space-y-4">
         <div className="space-y-6">
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handlePrivacy)}
             className="space-y-2"
           >
             <Controller
@@ -118,9 +218,9 @@ async function handleDeleteAccount() {
               )}
             />
 
-            {/* <Button type="submit" size="lg" className="bg-gradient-dash">
-                Save Preferences
-              </Button> */}
+            <Button type="submit" size="lg" className="bg-gradient-dash">
+              Save Preferences
+            </Button>
           </form>
         </div>
 
@@ -129,6 +229,7 @@ async function handleDeleteAccount() {
           <div className="space-y-4">
             <Button
               variant="outline"
+              disabled={downloading}
               className="w-full justify-start"
               onClick={handleDownloadData}
             >
@@ -145,6 +246,33 @@ async function handleDeleteAccount() {
             </Button>
           </div>
         </div>
+
+        <Dialog open={openPrivacy} onOpenChange={setOpenPrivacy}>
+          <DialogContent className="lg:w-[900px] lg:max-w-[900px] sm:w-[600px] sm:max-w-[600px] w-[96%] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle>Privacy Policy</DialogTitle>
+              <DialogDescription>
+                Last updated: {policy?.lastUpdated}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="max-h-[80vh] overflow-auto pr-2 space-y-4 scroll-hide">
+              {loadingPolicy && (
+                <p className="text-sm text-muted-foreground min-h-[300px] flex items-center justify-center">Loading...</p>
+              )}
+
+              {!loadingPolicy &&
+                policy?.sections?.map((section: any, index: number) => (
+                  <div key={index}>
+                    <h3 className="text-sm font-semibold">{section.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                      {section.body}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="pt-4 border-t border-muted"></div>
 

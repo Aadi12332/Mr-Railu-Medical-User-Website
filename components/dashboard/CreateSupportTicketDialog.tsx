@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 const ticketSchema = z.object({
   category: z.enum(["Technical", "Billing", "Medical"], {
@@ -45,28 +46,30 @@ const categoryOptions: Array<{
   label: string;
   value: TicketFormValues["category"];
 }> = [
-  { label: "Technical", value: "Technical" },
-  { label: "Billing", value: "Billing" },
-  { label: "Medical", value: "Medical" },
-];
+    { label: "Technical", value: "Technical" },
+    { label: "Billing", value: "Billing" },
+    { label: "Medical", value: "Medical" },
+  ];
 
 const priorityOptions: Array<{
   label: string;
   value: TicketFormValues["priority"];
 }> = [
-  { label: "High", value: "High" },
-  { label: "Medium", value: "Medium" },
-  { label: "Low", value: "Low" },
-];
+    { label: "High", value: "High" },
+    { label: "Medium", value: "Medium" },
+    { label: "Low", value: "Low" },
+  ];
 
 type CreateSupportTicketDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 };
 
 export default function CreateSupportTicketDialog({
   open,
   onOpenChange,
+  onSuccess
 }: CreateSupportTicketDialogProps) {
   const form = useForm<TicketFormValues>({
     resolver: zodResolver(ticketSchema),
@@ -76,6 +79,50 @@ export default function CreateSupportTicketDialog({
     },
   });
 
+  const [loading, setLoading] = useState(false);
+
+const onSubmit = async (values: TicketFormValues) => {
+  if (loading) return
+
+  try {
+    setLoading(true)
+
+    const token = window.localStorage.getItem("patientToken")
+
+    const res = await fetch(
+      "https://mr-telerxs-backend.vercel.app/api/v1/patient/support",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          subject: values.subject,
+          message: values.description,
+          category: values.category.toLowerCase(),
+          priority: values.priority.toLowerCase(),
+        }),
+      }
+    )
+
+    const data = await res.json()
+
+      if (!res.ok) throw new Error(data?.message)
+
+onSuccess?.()
+onOpenChange(false)
+form.reset()
+
+    onOpenChange(false)
+    form.reset()
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
+  }
+}
+
   function handleOpenChange(nextOpen: boolean) {
     onOpenChange(nextOpen);
     if (!nextOpen) {
@@ -83,11 +130,6 @@ export default function CreateSupportTicketDialog({
     }
   }
 
-  function onSubmit(values: TicketFormValues) {
-    console.log("support ticket submitted", values);
-    onOpenChange(false);
-    form.reset();
-  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -190,9 +232,10 @@ export default function CreateSupportTicketDialog({
             <Button
               type="submit"
               size="lg"
+              disabled={loading}
               className="bg-gradient-dash text-white"
             >
-              Submit Ticket
+              {loading ? "Submitting..." : "Submit Ticket"}
             </Button>
           </div>
         </form>

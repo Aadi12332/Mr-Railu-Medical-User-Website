@@ -7,6 +7,10 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { useEffect } from "react";
+import { patientApi } from "@/api/patient.api";
+import { settingApi } from "@/api/setting.api";
+import { toast } from "react-toastify";
 
 export const notificationsSchema = z.object({
   emailNotifications: z.boolean(),
@@ -27,6 +31,8 @@ export function NotificationsSettingsForm({
   defaultValues,
   onSubmit,
 }: NotificationsSettingsFormProps) {
+    const role = localStorage.getItem("role")||"";
+
   const form = useForm<NotificationsFormValues>({
     resolver: zodResolver(notificationsSchema),
     defaultValues: {
@@ -38,10 +44,46 @@ export function NotificationsSettingsForm({
       ...defaultValues,
     },
   });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await patientApi.getProfile();
+        const data = res?.data?.notificationPrefs;
+        form.reset({
+          emailNotifications: data?.email ,
+          smsNotifications: data?.sms ,
+          appointmentReminders: data?.appointmentReminders ,
+          newMessages: data?.newMessages ,
+          treatmentsReminders: data?.treatmentReminders ,
+        });
+      } catch { }
+    };
 
-  function handleSubmit(values: NotificationsFormValues) {
-    console.log("notifications saved", values);
-    onSubmit?.(values);
+    fetchProfile();
+  }, [form]);
+
+  async function handleSubmit(values: NotificationsFormValues) {
+    console.log("notifications saved", values?.emailNotifications);
+    try{
+       await settingApi.updateNotifications({
+          email: values?.emailNotifications ,
+          sms: values?.smsNotifications ,
+          appointmentReminders: values?.appointmentReminders ,
+          newMessages: values?.newMessages ,
+          treatmentsReminders: values?.treatmentsReminders ,
+
+      },role);
+            onSubmit?.(values);
+
+      toast.success("Notifications saved successfully");
+    }
+    catch(e){
+      console.log(e);
+      toast.error("Failed to save notifications");
+    }
+    finally{
+      onSubmit?.(values);
+    }
   }
 
   return (

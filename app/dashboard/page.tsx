@@ -26,7 +26,6 @@ import {
 export default function page() {
   return (
     <div className="space-y-6 ">
-      {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium">
@@ -46,9 +45,7 @@ export default function page() {
         </div>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-12 gap-4">
-        {/* Upcoming Session (large) */}
         <Card className="col-span-12 lg:col-span-8">
           <CardHeader>
             <div>
@@ -98,7 +95,6 @@ export default function page() {
           </CardContent>
         </Card>
 
-        {/* Next Appointment (right) */}
         <Card className="col-span-12 lg:col-span-4">
           <CardHeader>
             <div>
@@ -131,7 +127,6 @@ export default function page() {
           </CardContent>
         </Card>
 
-        {/* Row: My Providers, Mental Health Plan, Today's Focus */}
         <Card className="col-span-12 md:col-span-6 lg:col-span-4">
           <CardHeader>
             <CardTitle>My Providers</CardTitle>

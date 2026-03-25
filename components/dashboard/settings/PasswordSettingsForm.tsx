@@ -13,6 +13,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { settingApi } from "@/api/setting.api";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 // password validation rules, used for zod
 const passwordRequirements = [
@@ -48,6 +51,8 @@ interface PasswordSettingsFormProps {
 }
 
 export function PasswordSettingsForm({ onSubmit }: PasswordSettingsFormProps) {
+    const router = useRouter();
+  const role = localStorage.getItem("role")||"";
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
@@ -57,9 +62,23 @@ export function PasswordSettingsForm({ onSubmit }: PasswordSettingsFormProps) {
     },
   });
 
-  function handleSubmit(values: PasswordFormValues) {
+  
+  async function handleSubmit(values: PasswordFormValues) {
     console.log("password change", values);
-    onSubmit?.(values);
+    try{
+      const res=await settingApi.changePassword({currentPassword: values.currentPassword, newPassword: values.newPassword},role)
+      if(res.status){
+        localStorage.clear()
+        if(role === "Patient"){
+          router.push("/patient-login");
+        }else{
+          router.push("/provider-login");
+        }
+      }
+    }catch(error:any){
+      console.log("password change error", error);
+      toast.error(error?.message || "Failed to change password");
+      }
   }
 
   return (

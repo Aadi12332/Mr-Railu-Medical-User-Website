@@ -10,6 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { settingApi } from "@/api/setting.api";
+import { patientApi } from "@/api/patient.api";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 interface PaymentMethod {
   id: string;
@@ -62,10 +66,38 @@ export function PaymentSettingsForm({
     },
   });
 
-  function handleSubmit(values: BillingFormValues) {
+  async function handleSubmit(values: BillingFormValues) {
     console.log("billing info saved", values);
-    onSubmit?.(values);
+    const role = localStorage.getItem("role")||"";
+try{
+   await settingApi.updateSettings({
+              billingAddress: values?.address ,
+              autoPay: values?.autoPay ,
+    
+          },role); 
+              onSubmit?.(values);
+
+          toast.success("Billing information saved successfully");
+}catch(e){
+  console.log(e);
+  toast.error("Failed to save billing information");
+}
+   
   }
+useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await patientApi.getProfile();
+        const data = res?.data?.billing;
+        form.reset({
+          address: data?.billingAddress ,
+          autoPay: data?.autoPay ,
+        });
+      } catch { }
+    };
+
+    fetchProfile();
+  }, [form]);
 
   function handleAddMethod() {
     // just a placeholder, real implementation would open a modal/stripe flow

@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateSupportTicketDialog from "@/components/dashboard/CreateSupportTicketDialog";
 import { CircleHelp, MessageSquare, Plus, Square } from "lucide-react";
+import { useEffect } from "react";
 
 type Ticket = {
+  id: string;
   title: string;
   category: "Technical" | "Billing" | "Medical";
   status: "Open" | "In Progress" | "Resolved";
@@ -16,36 +18,6 @@ type Ticket = {
   updatedAgo: string;
   messagesCount: number;
 };
-
-const tickets: Ticket[] = [
-  {
-    title: "Unable to join video session",
-    category: "Technical",
-    status: "Open",
-    priority: "High",
-    createdDate: "Jan 11, 2026",
-    updatedAgo: "2 hours ago",
-    messagesCount: 3,
-  },
-  {
-    title: "Question about insurance coverage",
-    category: "Billing",
-    status: "In Progress",
-    priority: "Medium",
-    createdDate: "Jan 9, 2026",
-    updatedAgo: "1 day ago",
-    messagesCount: 5,
-  },
-  {
-    title: "Treatments refill request",
-    category: "Medical",
-    status: "Resolved",
-    priority: "Low",
-    createdDate: "Jan 5, 2026",
-    updatedAgo: "4 days ago",
-    messagesCount: 2,
-  },
-];
 
 const statusColorMap: Record<Ticket["status"], string> = {
   Open: "bg-blue-50 text-blue-700 border-blue-100",
@@ -61,6 +33,68 @@ const priorityColorMap: Record<Ticket["priority"], string> = {
 
 export default function SupportPage() {
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState<boolean>(false);
+  const [tickets, setTickets] = useState<Ticket[]>([])
+
+const fetchTickets = async () => {
+  const token = window.localStorage.getItem("patientToken")
+  if (!token) return
+
+  try {
+    const res = await fetch(
+      "https://mr-telerxs-backend.vercel.app/api/v1/patient/support",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await res.json()
+
+    if (data?.data?.tickets) {
+      setTickets(data.data.tickets.map(transformTicket))
+    }
+  } catch (err) {
+    console.error("Error fetching tickets", err)
+  }
+}
+
+useEffect(() => {
+  fetchTickets()
+}, [])
+
+  const capitalize = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1)
+
+  const mapStatus = (status: string): Ticket["status"] => {
+    if (status === "open") return "Open"
+    if (status === "in-progress") return "In Progress"
+    return "Resolved"
+  }
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString()
+  }
+
+  const timeAgo = (date: string) => {
+    const diff = Date.now() - new Date(date).getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+
+    if (hours < 24) return `${hours}h ago`
+    const days = Math.floor(hours / 24)
+    return `${days}d ago`
+  }
+
+  const transformTicket = (t: any): Ticket => ({
+    id: t._id,
+    title: t.subject,
+    category: capitalize(t.category) as Ticket["category"],
+    status: mapStatus(t.status),
+    priority: capitalize(t.priority) as Ticket["priority"],
+    createdDate: formatDate(t.createdAt),
+    updatedAgo: timeAgo(t.updatedAt),
+    messagesCount: t.replies?.length || 0,
+  })
 
   function openTicketDialog() {
     setIsTicketDialogOpen(true);
@@ -127,46 +161,47 @@ export default function SupportPage() {
               </Button>
             </CardHeader>
 
-            <CardContent className="space-y-3">
-              {tickets.map(function renderTicket(ticket) {
-                return (
-                  <div key={ticket.title} className="rounded-lg border p-3">
-                    <div className="text-sm font-medium">{ticket.title}</div>
+            <CardContent className="space-y-3 max-h-[700px] overflow-auto">
+              {tickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="rounded-lg lg:rounded-xl p-3 lg:p-6 border bg-white"
+                >
+                  <div className="text-sm font-medium">{ticket.title}</div>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      <Badge
-                        variant="outline"
-                        className="h-5 px-1.5 text-[10px]"
-                      >
-                        {ticket.category}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={`h-5 px-1.5 text-[10px] ${statusColorMap[ticket.status]}`}
-                      >
-                        {ticket.status}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={`h-5 px-1.5 text-[10px] ${priorityColorMap[ticket.priority]}`}
-                      >
-                        {ticket.priority}
-                      </Badge>
-                    </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-700">
+                      {ticket.category}
+                    </span>
 
-                    <div className="mt-3 flex items-end justify-between gap-2 text-xs text-muted-foreground">
-                      <span>Created {ticket.createdDate}</span>
-                      <div className="flex items-center gap-3">
-                        <span>Updated {ticket.updatedAgo}</span>
-                        <span className="inline-flex items-center gap-1">
-                          <MessageSquare className="size-3" />{" "}
-                          {ticket.messagesCount} messages
-                        </span>
-                      </div>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-md ${statusColorMap[ticket.status]}`}
+                    >
+                      {ticket.status}
+                    </span>
+
+                    <span
+                      className={`text-xs px-2 py-1 rounded-md ${priorityColorMap[ticket.priority]}`}
+                    >
+                      {ticket.priority}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex items-end justify-between text-xs text-muted-foreground">
+                    <span>Created {ticket.createdDate}</span>
+
+                    <div className="flex items-center gap-4">
+                      <span>Updated {ticket.updatedAgo}</span>
+
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="size-3" />
+                        {ticket.messagesCount}
+                        <span className="ml-1">messages</span>
+                      </span>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </CardContent>
           </Card>
 
@@ -221,10 +256,11 @@ export default function SupportPage() {
         </div>
       </div>
 
-      <CreateSupportTicketDialog
-        open={isTicketDialogOpen}
-        onOpenChange={handleDialogChange}
-      />
+     <CreateSupportTicketDialog
+  open={isTicketDialogOpen}
+  onOpenChange={handleDialogChange}
+  onSuccess={fetchTickets}
+/>
     </>
   );
 }
