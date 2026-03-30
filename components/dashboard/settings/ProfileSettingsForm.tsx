@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import dayjs from "dayjs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,15 +127,17 @@ export function ProfileSettingsForm({
       try {
         const res = await patientApi.getProfile();
         const data = res?.data;
-
+        const dob = data?.dateOfBirth
+  ? dayjs(data.dateOfBirth).format("YYYY-MM-DD")
+  : "";
         form.reset({
           firstName: data?.firstName || "",
           lastName: data?.lastName || "",
           email: data?.email || "",
           phoneNumber: data?.phone || "",
-          dateOfBirth: data?.dateOfBirth || "",
+          dateOfBirth: dob || "",
           address: data?.address || "",
-          timeZone: "Pacific Time (PT)",
+          timeZone: data?.timezone || "Pacific Time (PT)",
         });
       } catch { }
     };
@@ -144,7 +146,6 @@ export function ProfileSettingsForm({
   }, [form]);
 
   const [loading, setLoading] = useState(false);
-
   async function handleSubmit(values: ProfileFormValues) {
     try {
       setLoading(true);
@@ -155,8 +156,8 @@ export function ProfileSettingsForm({
         phone: values.phoneNumber,
         dateOfBirth: values.dateOfBirth,
         // email: values.email,
-        // address: values.address,
-        // timeZone: values.timeZone,
+        address: values.address,
+        timezone: values.timeZone,
       });
       toast.success("Profile updated successfully");
       onSubmit?.(values);
@@ -247,6 +248,7 @@ export function ProfileSettingsForm({
                 </FieldLabel>
                 <Input
                   placeholder={fieldConfig.placeholder}
+                  disabled={fieldConfig.key === "email"}
                   className="bg-muted"
                   type={fieldConfig.key === "dateOfBirth" ? "date" : "text"}
                   {...form.register(fieldConfig.key)}

@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Pill, RefreshCcw } from "lucide-react";
 import { PrescriptionItem } from "@/components/dashboard/types";
 import { PrescriptionCard } from "@/components/dashboard/PrescriptionCard";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { dashboardApi } from "@/api/dashboard.service";
+import dayjs from "dayjs";
 
 type PrescriptionTab = "active" | "history";
 
@@ -17,78 +19,84 @@ interface PrescriptionSummaryCard {
   iconClassName: string;
 }
 
-const summaryCards: PrescriptionSummaryCard[] = [
-  {
-    id: "active",
-    label: "Active Medications",
-    value: 3,
-    icon: Pill,
-    iconClassName: "bg-blue-100 text-blue-600",
-  },
-  {
-    id: "refills",
-    label: "Refills Available",
-    value: 6,
-    icon: RefreshCcw,
-    iconClassName: "bg-emerald-100 text-emerald-600",
-  },
-  {
-    id: "expiring",
-    label: "Expiring Soon",
-    value: 1,
-    icon: AlertCircle,
-    iconClassName: "bg-amber-100 text-amber-600",
-  },
-];
 
-const prescriptions: PrescriptionItem[] = [
-  {
-    id: "rx-1",
-    medication: "Sertraline",
-    dosage: "50mg",
-    schedule: "1 tablet daily",
-    instructions: "Take with food. May cause drowsiness.",
-    provider: "Dr. Emily Chen",
-    prescribedDate: "Dec 15, 2025",
-    nextRefillDate: "Jan 15, 2026",
-    refillsLeft: 2,
-    status: "active",
-  },
-  {
-    id: "rx-2",
-    medication: "Alprazolam",
-    dosage: "0.5mg",
-    schedule: "As needed, max 3x daily",
-    instructions: "For anxiety. Do not operate heavy machinery.",
-    provider: "Dr. Michael Ross",
-    prescribedDate: "Jan 5, 2026",
-    nextRefillDate: "Feb 5, 2026",
-    refillsLeft: 1,
-    status: "active",
-  },
-  {
-    id: "rx-3",
-    medication: "Escitalopram",
-    dosage: "10mg",
-    schedule: "1 tablet daily",
-    instructions: "Take with food. May cause drowsiness.",
-    provider: "Dr. Sarah Miller",
-    prescribedDate: "Aug 10, 2025",
-    nextRefillDate: "",
-    refillsLeft: 0,
-    status: "history",
-    startDate: "Aug 10, 2025",
-    endDate: "Dec 10, 2025",
-  },
-];
 
 export default function PrescriptionsPage() {
   const [tab, setTab] = useState<PrescriptionTab>("active");
+const [prescriptionsData, setPrescriptionsData] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+ 
+useEffect(() => {
+  const fetchPrescriptions = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-  const filteredPrescriptions = useMemo(() => {
-    return prescriptions.filter((item) => item.status === tab);
-  }, [tab]);
+      const res = await dashboardApi.getActivePrescriptions("patient"); // apni API call
+     console.log({res})
+      setPrescriptionsData(res?.data?.prescriptions || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load prescriptions");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  fetchPrescriptions();
+}, []);
+const mappedPrescriptions: PrescriptionItem[] = useMemo(() => {
+  return prescriptionsData.map((item: any) => {
+    const med = item.medications?.[0];
+
+    return {
+      id: item._id,
+      medication: med?.name || "",
+      dosage: med?.dosage || "",
+      schedule: med?.frequency || "",
+      instructions: item?.instructions || "",
+      provider: `${item?.providerId?.firstName} ${item?.providerId?.lastName}`,
+      prescribedDate: dayjs(item?.date).format("MMM DD, YYYY"),
+      nextRefillDate: item?.nextRefillDate
+        ? dayjs(item?.nextRefillDate).format("MMM DD, YYYY")
+        : "",
+      refillsLeft: item?.refillsRemaining || 0,
+      status: item?.status === "active" ? "active" : "history",
+    };
+  });
+}, [prescriptionsData]);
+const summaryCards = useMemo(() => {
+  const active = mappedPrescriptions.filter((p) => p.status === "active");
+  const refills = active.reduce((sum, p) => sum + p.refillsLeft, 0);
+
+  return [
+    {
+      id: "active",
+      label: "Active Medications",
+      value: active.length,
+      icon: Pill,
+      iconClassName: "bg-blue-100 text-blue-600",
+    },
+    {
+      id: "refills",
+      label: "Refills Available",
+      value: refills,
+      icon: RefreshCcw,
+      iconClassName: "bg-emerald-100 text-emerald-600",
+    },
+    {
+      id: "expiring",
+      label: "Expiring Soon",
+      value: 0,
+      icon: AlertCircle,
+      iconClassName: "bg-amber-100 text-amber-600",
+    },
+  ];
+}, [mappedPrescriptions]);
+const filteredPrescriptions = useMemo(() => {
+  return mappedPrescriptions.filter((item) => item.status === tab);
+}, [tab, mappedPrescriptions]);
   return (
     <div className="space-y-5">
       <div>
@@ -142,17 +150,26 @@ export default function PrescriptionsPage() {
         ))}
       </div>
 
+    
       <div className="space-y-3">
-        {filteredPrescriptions.length === 0 ? (
-          <Card className="px-4 py-8 text-center text-sm text-muted-foreground">
-            No prescriptions available in this tab.
-          </Card>
-        ) : (
-          filteredPrescriptions.map((item) => (
-            <PrescriptionCard key={item.id} item={item} />
-          ))
-        )}
-      </div>
+  {loading ? (
+    <Card className="px-4 py-8 text-center text-sm text-muted-foreground animate-pulse">
+      Loading prescriptions...
+    </Card>
+  ) : error ? (
+    <Card className="px-4 py-8 text-center text-sm text-red-500">
+      {error}
+    </Card>
+  ) : filteredPrescriptions.length === 0 ? (
+    <Card className="px-4 py-8 text-center text-sm text-muted-foreground">
+      No prescriptions available in this tab.
+    </Card>
+  ) : (
+    filteredPrescriptions.map((item) => (
+      <PrescriptionCard key={item.id} item={item} />
+    ))
+  )}
+</div>
     </div>
   );
 }

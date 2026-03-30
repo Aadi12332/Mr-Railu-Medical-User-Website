@@ -19,4 +19,11 @@ export const settingApi = {
       console.log("updatePrivacy",payload)
       return axios.put(`/v1/${role}/settings/privacy`, payload)
     },
+       getSupport: (role:string) =>
+    { 
+      return axios.get(`/v1/${role}/support`)
+    },
+    getRoleProfile: (role:string) =>
+    axios.get( `/v1/${role}/profile`),
+
 }

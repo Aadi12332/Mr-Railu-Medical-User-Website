@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { PrescriptionItem } from "./types";
 import RequestRefillDialog from "./RequestRefillDialog";
+import { dashboardApi } from "@/api/dashboard.service";
+import { toast } from "react-toastify";
 
 const refillBadgeColorMap: Record<string, string> = {
   low: "bg-amber-100 text-amber-700",
@@ -32,7 +34,53 @@ function getRefillBadgeClassName(refillsLeft: number) {
 
 export function PrescriptionCard({ item }: { item: PrescriptionItem }) {
   const isHistory = item.status === "history";
+const handleRefill = async (id:any,values:any) => {
+  try {
+    const role = localStorage.getItem("role") || "";
 
+    await dashboardApi.postRequestRefill(
+      role?.toLocaleLowerCase(),
+      id,
+      {
+        message: values.notes || "Need refill", // ya form se lo
+      }
+    );
+
+    toast.success("Refill requested successfully");
+    // onClose();
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to request refill");
+  }
+};
+const handleDownload = async (id: any) => {
+  try {
+    const role = localStorage.getItem("role") || "";
+
+    const res:any = await dashboardApi.downloadPrescription(
+      role.toLowerCase(),
+      id
+    );
+    const blob = new Blob([res], { type: "application/pdf" });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `prescription-${id}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Prescription downloaded successfully");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to download prescription");
+  }
+};
   return (
     <Card className="px-4 py-4">
       <div className="flex items-start justify-between gap-3">
@@ -124,14 +172,17 @@ export function PrescriptionCard({ item }: { item: PrescriptionItem }) {
           {/* open refill dialog using same button as trigger */}
           <RequestRefillDialog
             prescription={item}
+            handleRefill={handleRefill}
             trigger={
-              <Button className="bg-gradient-dash text-white hover:opacity-90">
+              <Button className="bg-gradient-dash text-white hover:opacity-90" >
                 <RefreshCcw className="mr-1.5 size-3.5" />
                 Request Refill
               </Button>
             }
           />
-          <Button variant="outline">
+          <Button 
+          disabled={!item?.id}
+          variant="outline" onClick={()=>handleDownload(item?.id || "")}>
             <Download className="mr-1.5 size-3.5" />
             Download
           </Button>

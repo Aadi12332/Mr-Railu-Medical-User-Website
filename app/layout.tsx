@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Manrope, Arimo } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/context/auth.context";
 
 const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -29,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} ${manrope.variable} ${arimo.variable}`}
     >
-      <body className="antialiased">{children}</body>
+      <body className="antialiased"><AuthProvider>{children}</AuthProvider></body>
     </html>
   );
 }

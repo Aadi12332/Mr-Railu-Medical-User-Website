@@ -31,11 +31,13 @@ type RefillFormValues = z.infer<typeof refillSchema>;
 interface RequestRefillDialogProps {
   prescription: PrescriptionItem;
   trigger?: React.ReactNode;
+  handleRefill?: (id: string, values: RefillFormValues) => void;
 }
 
 export default function RequestRefillDialog({
   prescription,
   trigger,
+  handleRefill,
 }: RequestRefillDialogProps) {
   const [open, setOpen] = useState(false);
   const form = useForm<RefillFormValues>({
@@ -48,6 +50,9 @@ export default function RequestRefillDialog({
 
   const onSubmit = (values: RefillFormValues) => {
     console.log("refill request", prescription.id, values);
+    if (handleRefill) {
+      handleRefill(prescription.id, values);
+    }
     form.reset();
     setOpen(false);
   };

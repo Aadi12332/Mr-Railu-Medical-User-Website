@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CreateSupportTicketDialog from "@/components/dashboard/CreateSupportTicketDialog";
 import { CircleHelp, MessageSquare, Plus, Square } from "lucide-react";
 import { useEffect } from "react";
+import { settingApi } from "@/api/setting.api";
 
 type Ticket = {
   id: string;
@@ -34,28 +35,23 @@ const priorityColorMap: Record<Ticket["priority"], string> = {
 export default function SupportPage() {
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState<boolean>(false);
   const [tickets, setTickets] = useState<Ticket[]>([])
-
+const [loading, setLoading] = useState(false);
 const fetchTickets = async () => {
   const token = window.localStorage.getItem("patientToken")
   if (!token) return
+  setLoading(true);
 
   try {
-    const res = await fetch(
-      "https://mr-telerxs-backend.vercel.app/api/v1/patient/support",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
+    const res=await settingApi.getSupport("patient")
+  
 
-    const data = await res.json()
-
-    if (data?.data?.tickets) {
-      setTickets(data.data.tickets.map(transformTicket))
+    if (res?.data?.tickets) {
+      setTickets(res.data.tickets.map(transformTicket))
     }
   } catch (err) {
     console.error("Error fetching tickets", err)
+  } finally {
+    setLoading(false);
   }
 }
 
@@ -162,7 +158,17 @@ useEffect(() => {
             </CardHeader>
 
             <CardContent className="space-y-3 max-h-[700px] overflow-auto">
-              {tickets.map((ticket) => (
+             
+             {loading ? (
+  <div className="flex justify-center items-center py-10">
+    <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+  </div>
+) : tickets.length === 0 ? (
+  <p className="text-center text-sm text-gray-500 py-10">
+    No tickets found
+  </p>
+) : (
+  tickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   className="rounded-lg lg:rounded-xl p-3 lg:p-6 border bg-white"
@@ -201,7 +207,9 @@ useEffect(() => {
                     </div>
                   </div>
                 </div>
-              ))}
+              ))
+)}
+         
             </CardContent>
           </Card>
 
