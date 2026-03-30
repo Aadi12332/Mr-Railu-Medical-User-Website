@@ -127,7 +127,7 @@ const handleDownloadData = async () => {
   }
 
   const [deleting, setDeleting] = useState(false);
-  const role = localStorage.getItem("role");
+  const role = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : null;
 
   async function handleDeleteAccount() {
     try {

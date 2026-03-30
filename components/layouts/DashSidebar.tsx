@@ -74,7 +74,7 @@ const router = useRouter();
                 <SidebarMenuItem key={href}>
                   <button
                     onClick={async () => {
-                      const role = localStorage.getItem("role");
+                      const role = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : null;
                       const loginPath = role === "Patient" ? "/patient-login" : "/provider-login";
 
                       try {

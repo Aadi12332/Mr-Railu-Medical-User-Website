@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
-  const role = localStorage.getItem("role");
+  const role = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : null;
 
   const getProfile = async () => {
     const token = localStorage.getItem("patientToken");
