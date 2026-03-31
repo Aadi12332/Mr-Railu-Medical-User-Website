@@ -1,58 +1,74 @@
+"use client"
+import { dashboardApi } from "@/api/dashboard.service";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, Clock3, Video } from "lucide-react";
-
-type SessionStatus = "startingSoon" | "upcoming";
-
-interface VideoSession {
-  id: string;
-  providerName: string;
-  specialty: string;
-  initials: string;
-  date: string;
-  time: string;
-  duration: string;
-  status: SessionStatus;
-  statusLabel: string;
-}
-
-const UPCOMING_SESSIONS: VideoSession[] = [
-  {
-    id: "1",
-    providerName: "Dr. Emily Chen",
-    specialty: "Clinical Psychologist",
-    initials: "EC",
-    date: "January 13, 2026",
-    time: "2:00 PM",
-    duration: "60 min",
-    status: "startingSoon",
-    statusLabel: "Starting in 5 min",
-  },
-  {
-    id: "2",
-    providerName: "Dr. Michael Ross",
-    specialty: "Psychiatrist",
-    initials: "MR",
-    date: "January 15, 2026",
-    time: "10:00 AM",
-    duration: "45 min",
-    status: "upcoming",
-    statusLabel: "In 2 days",
-  },
-];
-
-const statusColorMap: Record<SessionStatus, string> = {
-  startingSoon: "bg-blue-100 text-blue-700",
-  upcoming: "bg-blue-100 text-blue-700",
-};
+import { useEffect, useState } from "react";
 
 export default function page() {
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSession = async () => {
+    try {
+      setLoading(true);
+      const res = await dashboardApi.getSessionData("patient");
+      setSessions(res?.data?.sessions || []);
+    } catch (error) {
+      console.error("Error fetching video sessions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSession();
+  }, []);
+
+  const [checking, setChecking] = useState(false);
+  const [status, setStatus] = useState<{
+    camera: string;
+    mic: string;
+  } | null>(null);
+
+  const handleTestAV = async () => {
+    try {
+      setChecking(true);
+      setStatus(null);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+
+      const videoTracks = stream.getVideoTracks();
+      const audioTracks = stream.getAudioTracks();
+
+      setStatus({
+        camera: videoTracks.length > 0 ? "Working ✅" : "Not detected ❌",
+        mic: audioTracks.length > 0 ? "Working ✅" : "Not detected ❌",
+      });
+
+      stream.getTracks().forEach((track) => track.stop());
+
+    } catch (error) {
+      console.error(error);
+      setStatus({
+        camera: "Permission denied ❌",
+        mic: "Permission denied ❌",
+      });
+    } finally {
+      setChecking(false);
+    }
+  };
+
+
   return (
     <div className="space-y-6 h-full">
       <div>
-        <h1 className="text-2xl font-medium">Video Sessions</h1>
+        <h1 className="text-2xl font-medium">Audio/Video Sessions</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Join your secure therapy sessions
         </p>
@@ -63,7 +79,7 @@ export default function page() {
           <div>
             <p className="text-base font-medium">Next Session Starting Soon</p>
             <p className="mt-1 text-sm text-white/90">
-              Your session with Dr. Emily Chen starts in 5 minutes
+              Your session will start soon
             </p>
             <Button
               variant="secondary"
@@ -77,7 +93,7 @@ export default function page() {
             <div className="size-20 md:size-24 rounded-full bg-white/20 flex items-center justify-center">
               <Clock3 className="size-10" />
             </div>
-            <span className="text-xs text-white/90">00:05:23</span>
+            <span className="text-xs text-white/90">--:--:--</span>
           </div>
         </div>
       </Card>
@@ -86,50 +102,78 @@ export default function page() {
         <h2 className="text-lg font-medium">Upcoming Sessions</h2>
 
         <div className="space-y-3">
-          {UPCOMING_SESSIONS.map((session) => (
-            <Card key={session.id} className="p-4 sm:p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <Avatar className="size-12 border border-slate-100 bg-white">
-                    <AvatarFallback>{session.initials}</AvatarFallback>
-                  </Avatar>
+          {loading
+            ? Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <Card key={i} className="p-4 sm:p-5 animate-pulse">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="size-12 rounded-full bg-gray-200" />
 
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-base font-medium leading-none">
-                        {session.providerName}
-                      </p>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {session.specialty}
-                      </p>
+                      <div className="space-y-2">
+                        <div className="h-4 w-40 bg-gray-200 rounded" />
+                        <div className="h-3 w-32 bg-gray-200 rounded" />
+                        <div className="h-3 w-52 bg-gray-200 rounded" />
+                        <div className="h-8 w-32 bg-gray-200 rounded" />
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Calendar className="size-3.5" />
-                        {session.date}
-                      </span>
-                      <span>•</span>
-                      <span>{session.time}</span>
-                      <span>•</span>
-                      <span>{session.duration}</span>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-                    >
-                      <Video className="size-4 mr-2" /> Join Session
-                    </Button>
+                    <div className="h-6 w-24 bg-gray-200 rounded" />
                   </div>
-                </div>
+                </Card>
+              ))
+            : sessions?.map((item: any) => {
+              const provider = item?.appointmentId?.providerId;
 
-                <Badge className={statusColorMap[session.status]}>
-                  {session.statusLabel}
-                </Badge>
-              </div>
-            </Card>
-          ))}
+              return (
+                <Card key={item?._id} className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="size-12 border border-slate-100 bg-white">
+                        <AvatarFallback>
+                          {provider?.firstName?.[0]}
+                          {provider?.lastName?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="space-y-2">
+                        <div>
+                          <p className="text-base font-medium leading-none">
+                            {provider?.firstName} {provider?.lastName}
+                          </p>
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {provider?.specialty}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Calendar className="size-3.5" />
+                            {new Date(
+                              item?.appointmentId?.date
+                            ).toDateString()}
+                          </span>
+                          <span>•</span>
+                          <span>{item?.appointmentId?.time}</span>
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                        >
+                          <Video className="size-4 mr-2" /> Join Session
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Badge className="bg-blue-100 text-blue-700">
+                      {item?.status}
+                    </Badge>
+                  </div>
+                </Card>
+              );
+            })}
         </div>
       </section>
 
@@ -147,10 +191,19 @@ export default function page() {
             <Button
               variant="outline"
               className="border-sky-300 text-sky-700 hover:bg-sky-100 mt-3 sm:mt-0"
+              onClick={handleTestAV}
+              disabled={checking}
             >
-              Test Audio & Video
+              {checking ? "Checking..." : "Test Audio & Video"}
             </Button>
           </div>
+
+          {status && (
+            <div className="text-sm text-sky-700 mt-2">
+              <p>Camera: {status.camera}</p>
+              <p>Microphone: {status.mic}</p>
+            </div>
+          )}
         </div>
       </Card>
     </div>

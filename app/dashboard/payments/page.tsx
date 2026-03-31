@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DollarSign, Clock, CheckCircle } from "lucide-react";
 import AddPaymentMethodDialog from "@/components/dashboard/AddPaymentMethodDialog";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import {
   PaymentItemCard,
   PaymentItem,
 } from "@/components/dashboard/PaymentItemCard";
+import { dashboardApi } from "@/api/dashboard.service";
 
 interface SummaryCard {
   id: string;
@@ -119,12 +120,53 @@ export default function PaymentsPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>(
     PAYMENT_METHODS_INITIAL,
   );
-  const [tab, setTab] = useState<Tab>("upcoming");
 
-  const filteredPayments = PAYMENT_ITEMS.filter((p) => {
-    if (tab === "upcoming") return p.status === "Scheduled";
-    return p.status !== "Scheduled";
-  });
+  const [tab, setTab] = useState<Tab>("upcoming");
+const [payments, setPayments] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+
+const fetchPayments = async () => {
+  try {
+    setLoading(true);
+    setError("");
+
+    const res = await dashboardApi.getPayments("patient");
+    setPayments(res?.data?.payments || []);
+
+  } catch (err) {
+    console.error("Payment error:", err);
+    setError("Failed to load payments");
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchPayments();
+}, []);
+const mappedPayments = payments.map((item) => {
+  const provider = item?.appointmentId?.providerId;
+
+  return {
+    id: item?._id,
+    description:
+      item?.description ||
+      `Session with Dr. ${provider?.firstName || ""} ${provider?.lastName || ""}`,
+    date: new Date(item?.createdAt).toDateString(),
+    amount: item?.amount / 100,
+    status: item?.status === "pending" ? "Scheduled" : "Paid",
+    method: item?.cardBrand
+      ? `${item?.cardBrand} **** ${item?.cardLast4}`
+      : "",
+    invoice: item?.invoiceNumber,
+  };
+});
+const filteredPayments = mappedPayments.filter((p) => {
+  if (tab === "upcoming") return p.status === "Scheduled";
+  return p.status === "Paid";
+});
+  
 
   function setAsDefault(id: string) {
     setMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === id })));
@@ -205,16 +247,34 @@ export default function PaymentsPage() {
       </div>
 
       {/* list of payments */}
-      <div className="space-y-4">
-        {filteredPayments.length === 0 && (
-          <p className="text-center text-muted-foreground">
-            No payments to show.
-          </p>
-        )}
-        {filteredPayments.map((item) => (
-          <PaymentItemCard key={item.id} item={item} />
-        ))}
-      </div>
+   <div className="space-y-4">
+  
+  {loading &&
+    Array(3)
+      .fill(0)
+      .map((_, i) => (
+        <div
+          key={i}
+          className="h-[100px] rounded-lg bg-gray-200 animate-pulse"
+        />
+      ))}
+
+  {error && (
+    <p className="text-center text-red-500">{error}</p>
+  )}
+
+  {!loading && !error && filteredPayments.length === 0 && (
+    <p className="text-center text-muted-foreground">
+      No payments to show.
+    </p>
+  )}
+
+  {!loading &&
+    !error &&
+    filteredPayments.map((item) => (
+      <PaymentItemCard key={item.id} item={item} />
+    ))}
+</div>
     </div>
   );
 }

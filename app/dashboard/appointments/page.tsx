@@ -1,75 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
-  Appointment,
   AppointmentCard,
 } from "@/components/dashboard/AppointmentCard";
 import { Calendar } from "lucide-react";
-
-const APPOINTMENTS: Appointment[] = [
-  {
-    id: "1",
-    providerName: "Dr. Emily Chen",
-    specialty: "Clinical Psychologist",
-    initials: "EC",
-    date: "January 13, 2026",
-    time: "2:00 PM",
-    duration: 60,
-    type: "Video Call",
-    status: "Confirmed",
-  },
-  {
-    id: "2",
-    providerName: "Dr. Michael Ross",
-    specialty: "Psychiatrist",
-    initials: "MR",
-    date: "January 15, 2026",
-    time: "10:00 AM",
-    duration: 45,
-    type: "Video Call",
-    status: "Confirmed",
-  },
-  {
-    id: "3",
-    providerName: "Dr. Sarah Miller",
-    specialty: "Licensed Therapist",
-    initials: "SM",
-    date: "January 18, 2026",
-    time: "3:30 PM",
-    duration: 60,
-    type: "Phone Call",
-    status: "Pending",
-  },
-  {
-    id: "4",
-    providerName: "Dr. Olivia Park",
-    specialty: "Psychiatrist",
-    initials: "OP",
-    date: "January 10, 2026",
-    time: "11:00 AM",
-    duration: 60,
-    type: "Video Call",
-    status: "Past",
-  },
-  {
-    id: "5",
-    providerName: "Dr. Aaron Lee",
-    specialty: "Clinical Psychologist",
-    initials: "AL",
-    date: "January 12, 2026",
-    time: "1:00 PM",
-    duration: 60,
-    type: "Video Call",
-    status: "Cancelled",
-  },
-];
+import { dashboardApi } from "@/api/dashboard.service";
 
 export default function AppointmentsPage() {
   const [tab, setTab] = useState<"upcoming" | "past" | "cancelled">("upcoming");
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = APPOINTMENTS.filter((a) => {
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const res = await dashboardApi.getAppointments("patient");
+      setAppointments(res?.data?.appointments || []);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const mappedAppointments = appointments.map((item) => {
+    const provider = item?.providerId;
+
+    return {
+      id: item?._id,
+      providerName: `${provider?.firstName || ""} ${provider?.lastName || ""}`,
+      specialty: provider?.specialty || "",
+      initials: `${provider?.firstName?.[0] || ""}${provider?.lastName?.[0] || ""}`,
+      date: new Date(item?.date).toDateString(),
+      time: item?.time,
+      duration: 60,
+      type: item?.type === "video" ? "Video Call" : "Audio Call",
+      status:
+        item?.status === "confirmed"
+          ? "Confirmed"
+          : item?.status === "cancelled"
+          ? "Cancelled"
+          : item?.status === "completed"
+          ? "Past"
+          : "Pending",
+    };
+  });
+
+  const filtered = mappedAppointments.filter((a) => {
     if (tab === "upcoming")
       return a.status === "Confirmed" || a.status === "Pending";
     if (tab === "past") return a.status === "Past";
@@ -77,9 +60,10 @@ export default function AppointmentsPage() {
     return false;
   });
 
-  const next = APPOINTMENTS.find((a) => a.status === "Confirmed");
+  const next = mappedAppointments.find((a) => a.status === "Confirmed");
 
-  function formatBannerDate(app: Appointment) {
+  function formatBannerDate(app: any) {
+    if (!app) return "";
     const today = new Date();
     const parsed = new Date(app.date);
     const diff = parsed.setHours(0, 0, 0) - today.setHours(0, 0, 0);
@@ -90,7 +74,7 @@ export default function AppointmentsPage() {
 
   return (
     <div className="space-y-6 h-full">
-      {/* header */}
+      
       <div>
         <h1 className="text-2xl font-medium">My Appointments</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -98,15 +82,14 @@ export default function AppointmentsPage() {
         </p>
       </div>
 
-      {/* upcoming banner */}
+      {next && (
+        <div className="rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800 flex items-center">
+          <Calendar className="size-4 mr-2" />
+          You have an upcoming session with {next?.providerName}{" "}
+          {formatBannerDate(next)} at {next?.time}
+        </div>
+      )}
 
-      <div className="rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800 flex items-center">
-        <Calendar className="size-4 mr-2" />
-        You have an upcoming session with {next?.providerName}{" "}
-        {formatBannerDate(next!)} at {next?.time}
-      </div>
-
-      {/* tabs */}
       <div className="flex space-x-2 bg-muted p-1 w-fit rounded-full">
         {(["upcoming", "past", "cancelled"] as const).map((t) => (
           <button
@@ -122,17 +105,28 @@ export default function AppointmentsPage() {
         ))}
       </div>
 
-      {/* list */}
       <div className="space-y-4">
-        {filtered.length === 0 && (
+        
+        {loading &&
+          Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <div
+                key={i}
+                className="h-[120px] rounded-lg bg-gray-200 animate-pulse"
+              />
+            ))}
+
+        {!loading && filtered.length === 0 && (
           <p className="text-center text-muted-foreground">
             No appointments to show.
           </p>
         )}
 
-        {filtered.map((app) => (
-          <AppointmentCard key={app.id} appointment={app} />
-        ))}
+        {!loading &&
+          filtered.map((app) => (
+            <AppointmentCard key={app.id} appointment={app} />
+          ))}
       </div>
     </div>
   );

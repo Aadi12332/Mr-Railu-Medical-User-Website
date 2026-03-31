@@ -35,7 +35,7 @@ const SIDEBAR_MENU = [
   { href: "/dashboard", icon: LayoutGrid, label: "Dashboard", isActive: true },
   { href: "/dashboard/providers", icon: Search, label: "Find Providers" },
   { href: "/dashboard/appointments", icon: Calendar, label: "Appointments" },
-  { href: "/dashboard/video-sessions", icon: Video, label: "Video Sessions" },
+  { href: "/dashboard/video-sessions", icon: Video, label: "Audio/Video Sessions" },
   { href: "/dashboard/prescriptions", icon: Pill, label: "Prescriptions" },
   { href: "/dashboard/payments", icon: CreditCard, label: "Payments" },
   { href: "/dashboard/messages", icon: MessageSquare, label: "Messages" },

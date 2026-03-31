@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { settingApi } from "@/api/setting.api";
 
 type MessagesSidebarProps = {
   conversations: Conversation[];
@@ -16,6 +18,30 @@ export function MessagesSidebar({
   activeConversationId,
   onConversationSelect,
 }: MessagesSidebarProps) {
+  const [chatList, setChatList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchChatList = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await settingApi.getChatList("patient");
+      setChatList(res?.data?.data || []);
+
+    } catch (err: any) {
+      console.error("Chat list error:", err);
+      setError("Failed to load chats");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChatList();
+  }, []);
+
   return (
     <aside className="h-full rounded-xl border bg-card">
       <div className="border-b p-3">
@@ -29,8 +55,17 @@ export function MessagesSidebar({
       </div>
 
       <div className="h-105 overflow-y-auto md:h-140">
+        {/* {loading && <p className="h-full flex justify-center items-center p-3 text-sm animate-pulse">Loading chats...</p>}
+
+        {error && <p className="text-red-500 h-full flex justify-center items-center p-3 text-sm">{error}</p>}
+
+        {!loading && !error && chatList.length === 0 && (
+          <p className="h-full flex justify-center items-center p-3 text-sm">No chats found</p>
+        )} */}
         <div className="divide-y">
-          {conversations.map((conversation) => {
+          {
+          // !loading &&
+          conversations.map((conversation) => {
             const isActive = activeConversationId === conversation.id;
 
             return (

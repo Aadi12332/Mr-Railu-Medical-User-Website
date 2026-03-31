@@ -119,6 +119,7 @@ export function PaymentItemCard({ item }: PaymentItemCardProps) {
             <div className="flex gap-2 mt-2">
               {/* view opens invoice details dialog */}
               <InvoiceDetailsDialog
+              
                 item={item}
                 trigger={
                   <Button

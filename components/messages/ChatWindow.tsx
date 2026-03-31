@@ -3,15 +3,19 @@ import { ChatHeader } from "@/components/messages/ChatHeader";
 import { ChatMessages } from "@/components/messages/ChatMessages";
 import { MessageComposer } from "@/components/messages/MessageComposer";
 import { MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
+import { settingApi } from "@/api/setting.api";
 
 type ChatWindowProps = {
   activeConversation?: Conversation;
   onCloseConversation: () => void;
+  chatId?: string;
 };
 
 export function ChatWindow({
   activeConversation,
   onCloseConversation,
+  chatId
 }: ChatWindowProps) {
   if (!activeConversation) {
     return (
@@ -29,6 +33,31 @@ export function ChatWindow({
     );
   }
 
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchMessages = async () => {
+    if (!chatId) return;
+
+    try {
+      setLoading(true);
+      setError("");
+      const res = await settingApi.getChatMessage("patient", chatId);
+      setMessages(res?.data?.data?.messages || []);
+    } catch (err: any) {
+      console.error("Get messages error:", err);
+      setError("Failed to load messages");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, [chatId]);
+
+
   return (
     <section className="w-full flex h-full min-h-[620px] flex-col rounded-xl border bg-card">
       <ChatHeader
@@ -36,7 +65,7 @@ export function ChatWindow({
         onClose={onCloseConversation}
       />
       <ChatMessages messages={activeConversation.messages} />
-      <MessageComposer />
+      <MessageComposer chatId={activeConversation.id} />
     </section>
   );
 }

@@ -16,8 +16,8 @@ export interface Appointment {
   date: string; // iso or human
   time: string; // human
   duration: number; // minutes
-  type: "Video Call" | "Phone Call";
-  status: "Confirmed" | "Pending" | "Cancelled" | "Past";
+  type: "Video Call" | "Phone Call"|"video"|any;
+  status: "Confirmed" | "Pending" | "Cancelled" | "Past"|any;
 }
 
 export function statusVariants(status: Appointment["status"]) {
