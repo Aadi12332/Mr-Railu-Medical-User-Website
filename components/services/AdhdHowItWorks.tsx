@@ -33,32 +33,32 @@ const steps = [
   },
 ];
 
-export default function AdhdHowItWorks() {
+export default function AdhdHowItWorks({data}: {data?: any}) {
   return (
     <section className="py-16 bg-[#F4FAF9]">
       <Container>
         <div className="max-w-4xl mx-auto text-center">
           <SectionHeader
-            title="How It"
-            subtitle="works"
-            description="Four simple steps to getting the ADHD care you deserve."
+            title={data?.howItWorksTitle?? "How It"}
+            subtitle={data?.howItWorksSubtitle?? "works"}
+            description={data?.howItWorksDescription?? "Four simple steps to getting the ADHD care you deserve."}
             className="mb-10"
           />
         </div>
 
         <div className="max-w-6xl mx-auto mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-          {steps.map((s) => {
-            const Icon = s.icon;
+          {(data?.howItWorksSteps??[]).map((s:any) => {
+            // const Icon = s.icon;
             return (
-              <div key={s.id} className="relative">
+              <div key={s.stepNumber} className="relative">
                 {/* numbered badge */}
                 <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-primary text-white shadow-lg flex items-center justify-center font-semibold">
-                  {s.id}
+                  {s.stepNumber}
                 </div>
 
                 <div className="rounded-2xl bg-white border border-slate-100 p-6 h-full shadow-sm">
                   <div className="w-10 h-10 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5" />
+                    {/* <Icon className="w-5 h-5" /> */}
                   </div>
 
                   <h3 className="font-medium text-slate-900">{s.title}</h3>

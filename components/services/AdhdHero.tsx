@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "../ui/container";
 import Link from "next/link";
 
-export default function AdhdHero() {
+export default function AdhdHero({data}:any) {
   const features = [
     "Licensed medical professionals",
     "Flexible online visits",
@@ -21,14 +21,18 @@ export default function AdhdHero() {
             src={bgPattern}
             alt="Background pattern"
             className="w-full h-full object-cover"
+              width={100}
+              height={100}
           />
         </div>
 
         <div className="absolute z-0 top-20 right-0 opacity-50 max-w-xs">
           <Image
-            src={bgPattern}
+            src={data?.heroImageUrl??bgPattern}
             alt="Background pattern"
             className="w-full h-full object-cover"
+            width={100}
+            height={100}
           />
         </div>
 
@@ -37,21 +41,20 @@ export default function AdhdHero() {
             {/* left: copy + CTAs */}
             <div className="md:col-span-6">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
-                <span className="block text-primary">Get Expert ADHD</span>
+                <span className="block text-primary">{data?.heroTitle??''}</span>
                 <span className="block text-primary">
                   Care <span className="text-slate-900">100% Online</span>
                 </span>
               </h1>
 
               <p className="mt-4 max-w-xl  text-muted-foreground leading-relaxed">
-                Connect With Licensed Professionals And Receive A Personalized
-                ADHD Treatment Plan From The Comfort Of Your Home.
+                {data?.heroSubtitle??'Connect With Licensed Professionals And Receive A Personalized ADHD Treatment Plan From The Comfort Of Your Home.'}
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Link href="/onboarding">
+                <Link href={data?.heroCTAUrl??'/onboarding'}>
                   <Button className="bg-gradient-primary" size="lg">
-                    Start your assessment
+                    {data?.heroCTALabel}
                   </Button>
                 </Link>
 

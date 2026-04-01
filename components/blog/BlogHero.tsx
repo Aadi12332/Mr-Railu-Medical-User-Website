@@ -9,6 +9,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { cn } from "@/lib/utils";
 
 const tags = [
+  "All",
   "ADHD",
   "Anxiety",
   "Depression",
@@ -27,7 +28,6 @@ export default function BlogHero() {
   return (
     <section className="py-20 bg-[#F3FEFB]">
       <Container className="relative">
-        {/* decorative patterns */}
         <div className="absolute -top-5 -scale-x-100 z-0 opacity-50 max-w-xs">
           <Image
             src={bgPattern}

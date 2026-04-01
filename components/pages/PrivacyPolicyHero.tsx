@@ -1,7 +1,24 @@
 import Image from "next/image";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
+import dayjs from "dayjs";
 
-export default function PrivacyPolicyHero() {
+export default function PrivacyPolicyHero({data,loading,error}:any) {
+    if (loading) {
+    return (
+      <section className="py-16 bg-[#F3FEFB] flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 bg-[#F3FEFB] flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 bg-[#F3FEFB] relative">
       {/* background decorations */}
@@ -22,23 +39,20 @@ export default function PrivacyPolicyHero() {
 
       <div className="text-center max-w-3xl mx-auto px-4">
         <div className="inline-block bg-[#CBFBF1] rounded-full px-4 py-1 text-xs font-semibold tracking-wide text-primary">
-          Privacy Policy
+          {data?.title??""}
         </div>
 
         <h1 className="text-4xl md:text-5xl max-w-lg font-semibold tracking-tight mt-2 mx-auto">
-          <span className="text-primary">Member Terms</span> &amp; Conditions
+          <span className="text-primary">{data?.metaTitle??""}</span>
         </h1>
 
         <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-          Welcome to our healthcare platform. These terms outline your rights
-          and responsibilities when using our services. Please read them
-          carefully to understand how we work together to provide you with
-          quality care.
+          {data?.metaDescription??""}
         </p>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          Last Updated: January 29, 2026 &nbsp;&bull;&nbsp; Effective Date:
-          January 1, 2026
+          Last Updated:  {dayjs(data?.lastUpdated).format("MMMM D, YYYY")} &nbsp;&bull;&nbsp; Effective Date:
+          {dayjs(data?.effectiveDate).format("MMMM D, YYYY")}
         </p>
       </div>
     </section>

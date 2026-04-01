@@ -25,14 +25,17 @@ export default function ArticleCard({ article }: ArticleCardProps) {
   return (
     <Link href={article.href} className="group">
       <Card className="h-full p-0 shadow-sm">
-        <div className="relative w-full h-48">
-          <Image
-            src={article.image}
-            alt={article.title}
-            fill
-            className="object-cover rounded-t-xl"
-          />
+        <div className="relative w-full h-48 bg-gray-100">
+          {article.image ? (
+            <Image
+              src={article.image}
+              alt={article.title}
+              fill
+              className="object-cover rounded-t-xl"
+            />
+          ) : null}
         </div>
+
         <CardContent className="flex flex-col flex-1 p-3 pt-1">
           <div className="flex justify-between items-center gap-2 mb-2">
             <Badge className="bg-[#CBFBF1] text-primary">
@@ -42,7 +45,11 @@ export default function ArticleCard({ article }: ArticleCardProps) {
               {article.date}
             </span>
           </div>
-          <CardTitle className="line-clamp-2">{article.title}</CardTitle>
+
+          <CardTitle className="line-clamp-2">
+            {article.title}
+          </CardTitle>
+
           <CardDescription className="mt-1 text-sm line-clamp-3">
             {article.description}
           </CardDescription>

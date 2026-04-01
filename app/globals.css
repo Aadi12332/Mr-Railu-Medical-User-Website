@@ -155,3 +155,9 @@
 .scroll-hide::-webkit-scrollbar { 
     display: none;  /* Older Safari and Chromium */
 }
+.blog-content h2{
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 48px;
+  margin-bottom: 16px;
+}

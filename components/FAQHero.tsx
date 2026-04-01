@@ -7,10 +7,9 @@ import {
 } from "@/components/ui/input-group";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
 
-export default function FAQHero() {
+export default function FAQHero({ search, setSearch }: any) {
   return (
     <section className="py-16 bg-[#F3FEFB] relative">
-      {/* background decorations */}
       <div className="absolute -top-5 -scale-x-100 z-0 opacity-50 max-w-xs">
         <Image
           src={bgPattern}
@@ -50,6 +49,8 @@ export default function FAQHero() {
                 type="search"
                 placeholder="Search for questions..."
                 aria-label="Search FAQs"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </InputGroup>
           </div>

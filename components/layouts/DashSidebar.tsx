@@ -89,7 +89,7 @@ const router = useRouter();
                     <SidebarMenuButton
                       className={cn(
                         "h-10 rounded-none",
-                        "hover:bg-red-50 text-red-500 [&_svg]:text-red-500 hover:text-red-600 focus:!text-red-600"
+                        "hover:bg-red-50 text-red-500 [&_svg]:text-red-500 hover:text-red-600 focus:text-red-600!"
                       )}
                     >
                       <Icon />

@@ -17,137 +17,109 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { publicPageApi } from "@/api/publicpage.api";
 
 const categories = [
   {
     title: "About MEDvidi",
     icon: Building2Icon,
-    items: [
-      {
-        q: "What is MEDvidi?",
-        a: "",
-      },
-      {
-        q: "Which conditions do you treat?",
-        a: "",
-      },
-      {
-        q: "Where are services available?",
-        a: "",
-      },
-      {
-        q: "How does MEDvidi work?",
-        a: "",
-      },
-      {
-        q: "What type of providers work with MEDvidi?",
-        a: "",
-      },
-      {
-        q: "Do you provide disability letters?",
-        a: "",
-      },
-    ],
+    items: [],
   },
   {
     title: "Appointments",
     icon: Calendar,
-    items: [
-      {
-        q: "What happens during the first and follow-up visits?",
-        a: "",
-      },
-      {
-        q: "How do I join my online appointment?",
-        a: "",
-      },
-      {
-        q: "What if I miss my appointment?",
-        a: "",
-      },
-      {
-        q: "How long does diagnosis take?",
-        a: "",
-      },
-      {
-        q: "What is included in a treatment plan?",
-        a: "",
-      },
-      {
-        q: "Should I book several appointments in advance?",
-        a: "",
-      },
-    ],
+    items: [],
   },
   {
     title: "Prescription",
     icon: Pill,
-    items: [
-      {
-        q: "Can I get a prescription without seeing a provider?",
-        a: "",
-      },
-      {
-        q: "What medications can be prescribed?",
-        a: "",
-      },
-      {
-        q: "Is a prescription guaranteed after booking?",
-        a: "",
-      },
-      {
-        q: "Why is my prescription different from what I requested?",
-        a: "",
-      },
-      {
-        q: "Do you prescribe controlled medications?",
-        a: "",
-      },
-    ],
+    items: [],
   },
   {
     title: "Pricing",
     icon: DollarSign,
-    items: [
-      {
-        q: "How much do services cost?",
-        a: "",
-      },
-      {
-        q: "Are there extra charges for prescriptions?",
-        a: "",
-      },
-      {
-        q: "Do I need insurance?",
-        a: "",
-      },
-      {
-        q: "Does MEDvidi accept insurance?",
-        a: "",
-      },
-    ],
+    items: [],
   },
   {
     title: "DEA Update",
     icon: ShieldIcon,
-    items: [
-      {
-        q: "Have telehealth prescribing rules been extended to 2026?",
-        a: "",
-      },
-      {
-        q: "What is a controlled substance?",
-        a: "",
-      },
-    ],
+    items: [],
   },
 ];
 
-export default function FAQCategories() {
+export default function FAQCategories({ search }: { search: string }) {
   const [active, setActive] = useState(0);
   const sectionRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-  // observe sections coming into view to update active tab
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchFAQs = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await publicPageApi.getFAQ();
+      setFaqs(res?.data?.faqs || []);
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFAQs();
+  }, []);
+
+  const categoryMap: Record<string, string> = {
+    about: "About MEDvidi",
+    appointments: "Appointments",
+    prescription: "Prescription",
+    pricing: "Pricing",
+    "dea-update": "DEA Update",
+    providers: "About MEDvidi",
+  };
+
+  const groupedFaqs = faqs.reduce((acc: any, faq: any) => {
+    const key = categoryMap[faq.category] || faq.category;
+
+    if (!acc[key]) acc[key] = [];
+
+    acc[key].push({
+      q: faq.question,
+      a: faq.answer,
+      order: faq.displayOrder,
+    });
+
+    acc[key].sort((a: any, b: any) => a.order - b.order);
+
+    return acc;
+  }, {});
+
+  const filteredFaqs = Object.keys(groupedFaqs).reduce((acc: any, key) => {
+    acc[key] = groupedFaqs[key].filter((item: any) =>
+      item.q.toLowerCase().includes(search.toLowerCase()) ||
+      item.a.toLowerCase().includes(search.toLowerCase())
+    );
+    return acc;
+  }, {});
+
+  useEffect(() => {
+  const handleScroll = () => {
+    const offsets = sectionRefs.current.map((el) =>
+      el ? Math.abs(el.getBoundingClientRect().top) : Infinity
+    );
+
+    const minIndex = offsets.indexOf(Math.min(...offsets));
+    setActive(minIndex);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -160,12 +132,13 @@ export default function FAQCategories() {
           }
         });
       },
-      { rootMargin: "-40% 0px -60% 0px", threshold: 0 },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0.1 }
     );
 
     sectionRefs.current.forEach((el) => {
       if (el) observer.observe(el);
     });
+
     return () => observer.disconnect();
   }, []);
 
@@ -174,10 +147,31 @@ export default function FAQCategories() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  if (loading)
+    return (
+      <p className="text-center h-[300px] flex items-center justify-center">
+        Loading...
+      </p>
+    );
+
+  if (error)
+    return (
+      <p className="text-center h-[300px] flex items-center justify-center">
+        {error}
+      </p>
+    );
+
+  if (!loading && faqs.length === 0) {
+    return (
+      <p className="text-center h-[300px] flex items-center justify-center">
+        No FAQs found
+      </p>
+    );
+  }
+
   return (
     <section className="pb-16">
       <Container>
-        {/* sticky category nav */}
         <nav className="sticky top-0 z-10 bg-white py-4">
           <div className="flex justify-center space-x-4 overflow-x-auto scrollbar-none">
             {categories.map((cat, idx) => (
@@ -188,7 +182,7 @@ export default function FAQCategories() {
                   "flex items-center gap-2 whitespace-nowrap px-4 py-2 border-b-2 transition-colors",
                   idx === active
                     ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground",
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 )}
               >
                 <cat.icon className="size-4" />
@@ -198,7 +192,6 @@ export default function FAQCategories() {
           </div>
         </nav>
 
-        {/* content sections all rendered so anchors work */}
         {categories.map((cat, idx) => (
           <div
             key={idx}
@@ -216,28 +209,37 @@ export default function FAQCategories() {
             </div>
 
             <Accordion type="single" collapsible className="space-y-2">
-              {cat.items.map((item, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`${idx}-${i}`}
-                  className="rounded-xl border bg-white"
-                >
-                  <AccordionTrigger className="p-3">{item.q}</AccordionTrigger>
-                  {item.a && (
-                    <AccordionContent className="p-3 pt-0">
-                      <div className="text-sm text-muted-foreground">
-                        {item.a}
-                      </div>
-                    </AccordionContent>
-                  )}
-                </AccordionItem>
-              ))}
+              {(filteredFaqs[cat.title] || []).length === 0 ? (
+                <div className="text-center text-muted-foreground py-3 text-sm rounded-xl border bg-white">
+                  No FAQs found
+                </div>
+              ) : (
+                (filteredFaqs[cat.title] || []).map((item: any, i: number) => (
+                  <AccordionItem
+                    key={i}
+                    value={`${idx}-${i}`}
+                    className="rounded-xl border bg-white"
+                  >
+                    <AccordionTrigger className="p-3">
+                      {item.q}
+                    </AccordionTrigger>
+
+                    {item.a && (
+                      <AccordionContent className="p-3 pt-0">
+                        <div className="text-sm text-muted-foreground">
+                          {item.a}
+                        </div>
+                      </AccordionContent>
+                    )}
+                  </AccordionItem>
+                ))
+              )}
             </Accordion>
           </div>
         ))}
 
         <div className="mt-12 flex justify-center">
-          <Link href="/company/contact">
+          <Link href="/contact">
             <Button size="lg" className="bg-gradient-primary px-6">
               Contact Us
             </Button>

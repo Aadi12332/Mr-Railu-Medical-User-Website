@@ -141,7 +141,7 @@ export default function ContactSection() {
                 </div>
               </div>
 
-              <div className="mt-6 p-6 rounded-lg bg-gradient-to-br from-[#F0FDFA] to-[#ECFDF5] shadow-inner">
+              <div className="mt-6 p-6 rounded-lg bg-linear-to-br from-[#F0FDFA] to-[#ECFDF5] shadow-inner">
                 <p className="text-sm font-medium text-slate-800 mb-4">
                   Send us a message
                 </p>

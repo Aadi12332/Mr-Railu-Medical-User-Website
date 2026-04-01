@@ -31,28 +31,28 @@ const symptoms = [
   },
 ];
 
-export default function AdhdSymptomsSection() {
+export default function AdhdSymptomsSection({data}: {data: any}) {
   return (
     <section className="py-16 bg-[#F9FAFB]">
       <Container>
         <SectionHeader
           title=""
-          subtitle="Common ADHD symptoms in adults"
-          description="These signs are common, and you're not alone. If they sound familiar, we can help."
+          subtitle={data?.symptomsTitle??'Common ADHD symptoms in adults'}
+          description={data?.symptomsDescription??'These signs are common, and you\'re not alone. If they sound familiar, we can help.'}
           className="mb-6"
         />
 
         <div className="max-w-2xl mx-auto">
           <Accordion type="single" className="space-y-4" collapsible>
-            {symptoms.map((s, i) => (
+            {(data?.symptoms??symptoms).map((s: any, i: number) => (
               <AccordionItem
-                key={s.title}
+                key={s.text}
                 value={`symptom-${i + 1}`}
                 className="shadow-md bg-white border p-3 px-4 rounded-xl"
               >
-                <AccordionTrigger>{s.title}</AccordionTrigger>
+                <AccordionTrigger>{s.text}</AccordionTrigger>
                 <AccordionContent>
-                  <div className="text-sm text-muted-foreground">{s.body}</div>
+                  <div className="text-sm text-muted-foreground">{s.description??""}</div>
                 </AccordionContent>
               </AccordionItem>
             ))}

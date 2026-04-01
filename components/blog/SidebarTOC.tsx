@@ -25,7 +25,7 @@ function SidebarTOC({ items, title = "Content" }: SidebarTOCProps) {
                 }`}
               >
                 <span
-                  className={`flex-shrink-0 w-5 text-center ${
+                  className={`shrink-0 w-5 text-center ${
                     index === 0 ? "text-teal-600" : "text-slate-400"
                   }`}
                 >

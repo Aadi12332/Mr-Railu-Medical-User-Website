@@ -276,7 +276,7 @@ const sections = [
   },
 ];
 
-export default function TermsOfUseContent() {
+export default function TermsOfUseContent({data,error,loading}:any) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   React.useEffect(() => {

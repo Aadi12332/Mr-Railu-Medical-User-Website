@@ -19,19 +19,49 @@ import Link from "next/link";
 import Image from "next/image";
 
 import userIcon from "@/assets/icons/user-icon.svg";
+import { useEffect, useState } from "react";
+import { publicPageApi } from "@/api/publicpage.api";
 
 export function Header() {
-  const navItems = [
+  
+  const [navTeams,setNavTeams]=useState([])
+  const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    
+    const fetchPolicy = async () => {
+      setLoading(true);
+      setError(null);
+    
+      try {
+        const res = await publicPageApi.getConditions(); // 👈 API bana lena
+       const pages = res?.data?.pages || [];
+
+const conditionItems = pages.map((item: any) => ({
+  label: item.name,
+  to: `/conditions/${item.slug}`,
+}));
+
+setNavTeams(conditionItems);
+      } catch (err: any) {
+        setError(err?.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    useEffect(() => {
+      fetchPolicy();
+    }, []);
+ 
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+ const navItems = [
     {
       label: "Conditions",
       to: "/conditions",
-      items: [
-        { label: "ADHD", to: "/conditions/adhd" },
-        { label: "Anxiety", to: "/conditions/anxiety" },
-        { label: "Depression", to: "/conditions/depression" },
-        { label: "Insomnia", to: "/conditions/insomnia" },
-        { label: "OCD", to: "/conditions/ocd" },
-      ],
+         items: navTeams.length ? navTeams : [],
+
     },
     {
       label: "Services",
@@ -60,12 +90,9 @@ export function Header() {
     { label: "FAQs", to: "/faqs", items: [{ label: "General", to: "/faqs" }] },
   ];
 
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
   return (
     <header>
-      <div className="container mx-auto flex items-center gap-6 px-4 py-4">
+      <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">
         {/* mobile hamburger */}
         <div className="md:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -133,7 +160,7 @@ export function Header() {
           <Image
             src={logo}
             alt="Mental Health Tele logo"
-            className="h-9 w-auto"
+            className="sm:h-9 h-6 w-auto"
           />
         </Link>
 

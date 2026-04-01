@@ -1,6 +1,5 @@
 import BlogHero from "@/components/blog/BlogHero";
 import ArticleGrid from "@/components/blog/ArticleGrid";
-import { articles } from "@/lib/blog";
 
 import { Suspense } from "react";
 
@@ -14,7 +13,9 @@ export default function page() {
         <BlogHero />
       </Suspense>
 
-      <ArticleGrid articles={articles} />
+       <Suspense fallback={<div>Loading articles...</div>}>
+        <ArticleGrid />
+      </Suspense>
     </>
   );
 }

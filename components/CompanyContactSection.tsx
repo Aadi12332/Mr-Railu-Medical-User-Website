@@ -3,13 +3,15 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import { useState } from "react";
+import { Controller } from "react-hook-form";
 import { Container } from "./ui/container";
 import { SectionHeader } from "./ui/section-header";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
+import { publicPageApi } from "@/api/publicpage.api";
 
 const contactSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -24,20 +26,51 @@ const contactSchema = z.object({
 type ContactFormValues = z.infer<typeof contactSchema>;
 
 export default function CompanyContactSection() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
+    mode: "onSubmit",
+
     defaultValues: {
       fullName: "",
       email: "",
       subject: "",
       message: "",
+      agree: false,
     },
   });
+  const onSubmit = async (values: ContactFormValues) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
-  const onSubmit = (values: ContactFormValues) => {
-    // replace with real integration
-    console.log("company contact submitted", values);
-    form.reset();
+    try {
+      const payload = {
+        name: values.fullName,
+        email: values.email,
+        subject: values.subject || "",
+        message: values.message,
+      };
+
+      const res: any = await publicPageApi.sendContact(payload);
+      setSuccess(res?.message || "Submitted successfully");
+      form.reset({
+        fullName: "",
+        email: "",
+        subject: "",
+        message: "",
+        agree: false,
+      });
+
+      form.clearErrors();
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,15 +84,24 @@ export default function CompanyContactSection() {
 
         <div className="mt-10 max-w-lg mx-auto bg-white rounded-xl p-8 shadow">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+            {success && (
+              <p className="text-green-600 text-sm font-medium">
+                ✅ {success}
+              </p>
+            )}
+
+            {error && (
+              <p className="text-red-500 text-sm font-medium">
+                {error}
+              </p>
+            )}
+
             <div>
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label className="block text-sm font-medium text-slate-700">
                 Full Name *
               </label>
               <Input
-                id="fullName"
                 placeholder="Enter your full name"
                 className="bg-gray-50"
                 {...form.register("fullName")}
@@ -72,14 +114,10 @@ export default function CompanyContactSection() {
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label className="block text-sm font-medium text-slate-700">
                 Email Address *
               </label>
               <Input
-                id="email"
                 placeholder="your.email@example.com"
                 className="bg-gray-50"
                 {...form.register("email")}
@@ -92,14 +130,10 @@ export default function CompanyContactSection() {
             </div>
 
             <div>
-              <label
-                htmlFor="subject"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label className="block text-sm font-medium text-slate-700">
                 Subject
               </label>
               <Input
-                id="subject"
                 placeholder="Brief topic of inquiry"
                 className="bg-gray-50"
                 {...form.register("subject")}
@@ -107,16 +141,12 @@ export default function CompanyContactSection() {
             </div>
 
             <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label className="block text-sm font-medium text-slate-700">
                 How can we assist you? *
               </label>
               <Textarea
-                id="message"
                 rows={4}
-                placeholder="Share your thoughts, questions, or concerns with us..."
+                placeholder="Share your thoughts..."
                 className="bg-gray-50"
                 {...form.register("message")}
               />
@@ -128,21 +158,25 @@ export default function CompanyContactSection() {
             </div>
 
             <div className="flex items-start space-x-2">
-              <Checkbox
-                id="agree"
-                className="bg-gray-50"
-                {...form.register("agree")}
+              <Controller
+                control={form.control}
+                name="agree"
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
               />
-              <label htmlFor="agree" className="text-sm text-slate-700">
+              <label className="text-sm text-slate-700">
                 I agree to the{" "}
-                <Link href="/terms" className="underline hover:text-primary">
+                <Link href="/terms" className="underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="underline hover:text-primary">
+                <Link href="/privacy" className="underline">
                   Privacy Policy
                 </Link>
-                .
               </label>
             </div>
             {form.formState.errors.agree && (
@@ -151,8 +185,12 @@ export default function CompanyContactSection() {
               </p>
             )}
 
-            <Button type="submit" className="w-full bg-gradient-primary h-10">
-              Send Message
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-primary h-10"
+            >
+              {loading ? "Sending..." : "Send Message"}
             </Button>
           </form>
         </div>

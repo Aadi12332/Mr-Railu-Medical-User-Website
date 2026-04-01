@@ -11,7 +11,7 @@ import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/ui/section-header";
 import Link from "next/link";
 
-export default function AdhdWhyChoose() {
+export default function AdhdWhyChoose({data}: {data?: any}) {
   const features = [
     {
       id: 1,
@@ -50,25 +50,24 @@ export default function AdhdWhyChoose() {
       <Container>
         <div className="max-w-4xl mx-auto text-center">
           <SectionHeader
-            title="Why Choose"
-            subtitle=" Our Platform"
-            description="Healthcare designed around your life, delivered with compassion and expertise."
+            title={data?.whyChooseTitle?? "Why Choose"}
+            subtitle={data?.whyChooseSubtitle?? " Our Platform"}
+            description={data?.whyChooseDescription?? "Healthcare designed around your life, delivered with compassion and expertise."}
             align="center"
           />
         </div>
 
         <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {features.map((f) => {
-            const Icon = f.icon;
+          {(data?.whyChooseCards??[]).map((f:any) => {
             return (
               <div key={f.id} className="rounded-2xl bg-[#F9FAFB] p-5">
                 <div className="w-11 h-11 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
-                  <Icon className="w-5 h-5" />
+                  {f.icon}
                 </div>
 
                 <h3 className=" text-slate-900">{f.title}</h3>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  {f.desc}
+                  {f.description}
                 </p>
               </div>
             );

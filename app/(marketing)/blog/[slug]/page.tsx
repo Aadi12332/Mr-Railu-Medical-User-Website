@@ -1,3 +1,4 @@
+"use client"
 import KeyTakeaways from "@/components/blog/KeyTakeaways";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,9 @@ import {
 } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { publicPageApi } from "@/api/publicpage.api";
+import { useEffect, useState } from "react";
 
 interface PageProps {
   params: {
@@ -20,61 +24,93 @@ interface PageProps {
   };
 }
 
-// static data for the demo article shown in the image
-const staticArticle = {
-  title: "Clonidine For Anxiety: How It Works, Dosage & Safety",
-  date: "February 10, 2026",
-  authors: [
-    {
-      name: "Dr. Sarah Mitchell, MD",
-      role: "Written by",
-      title: "Board-Certified Psychiatrist",
-      bio: "Dr. Mitchell specializes in anxiety disorders with over 12 years of clinical experience in psychopharmacology.",
-      avatar: "/avatars/sarah.jpg",
-    },
-    {
-      name: "Dr. James Carter, PhD",
-      role: "Reviewed by",
-      title: "Clinical Psychologist",
-      bio: "Dr. Carter is a licensed clinical psychologist with expertise in evidence-based treatments for anxiety and mood disorders.",
-      avatar: "/avatars/james.jpg",
-    },
-  ],
-  aiSummary:
-    "Clonidine is a blood pressure medication used off-label to treat anxiety by calming the nervous system. It works by reducing norepinephrine levels, helping to decrease physical anxiety symptoms.",
-  takeaways: [
-    "Clonidine is a blood pressure medication used off-label to treat anxiety by calming the nervous system",
-    "It works by reducing norepinephrine levels, helping to decrease physical anxiety symptoms",
-    "Common side effects include drowsiness, dry mouth, and dizziness",
-    "Never stop clonidine abruptly – sudden discontinuation can cause dangerous blood pressure spikes",
-    "Consult a healthcare provider to determine if clonidine is appropriate for your anxiety symptoms",
-  ],
-  references: [
-    {
-      label: "National Institute of Mental Health - Anxiety Disorders",
-      url: "https://www.nimh.nih.gov/health/topics/anxiety-disorders",
-    },
-    {
-      label: "FDA Drug Information - Clonidine",
-      url: "https://www.fda.gov/drugs/",
-    },
-    {
-      label: "American Journal of Psychiatry - Off-Label Use of Clonidine",
-      url: "https://ajp.psychiatryonline.org/",
-    },
-    {
-      label: "Mayo Clinic - Anxiety Treatment Overview",
-      url: "https://www.mayoclinic.org/",
-    },
-  ],
-};
-
 export default function Page({ params }: PageProps) {
-  // const article = articles.find((a) => a.href === `/blog/${slug}`);
+  const slug = useParams().slug as string;
 
-  // const data = slug === "clonidine-for-anxiety" ? staticArticle : article!;
+  const [blog, setBlog] = useState<any>(null);
+  const [relatedPost, setRelatedPost] = useState<any>(null);
 
-  const data = staticArticle;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchBlogDetail = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await publicPageApi.getBlogDetail(slug);
+      const formatted = (res?.data?.relatedPosts ?? []).map((item: any) => ({
+        title: item.title,
+        href: `/blog/${item.slug}`,
+        category: item.category,
+        date: new Date(item.publishedAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        description: item.excerpt,
+        image: item.coverImageUrl || "",
+      }));
+      setRelatedPost(formatted)
+      setBlog(res?.data || null);
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (slug) {
+      fetchBlogDetail();
+    }
+  }, [slug]);
+
+  if (loading)
+    return (
+      <p className="text-center h-[300px] flex items-center justify-center">
+        Loading...
+      </p>
+    );
+
+  if (error)
+    return (
+      <p className="text-center h-[300px] flex items-center justify-center">
+        {error}
+      </p>
+    );
+
+  if (!blog)
+    return (
+      <p className="text-center h-[300px] flex items-center justify-center">
+        No blog found
+      </p>
+    );
+
+
+  const data = {
+    title: blog?.post?.title || "",
+    date: blog?.post?.publishedAt
+      ? new Date(blog.post.publishedAt).toDateString()
+      : "",
+    authors: [
+      {
+        name: blog?.post?.author || "",
+        role: "Written by",
+        title: "",
+        bio: blog?.post?.authorBio || "",
+        avatar: blog?.post?.authorImageUrl || "",
+      },
+    ],
+    aiSummary: blog?.post?.excerpt || "",
+    takeaways: [blog?.post?.excerpt || ""],
+    references: [],
+    ctaTitle: blog?.post?.ctaTitle || "",
+    ctaSubtitle: blog?.post?.ctaSubtitle || "",
+    ctaButtonLabel: blog?.post?.ctaButtonLabel || "",
+    ctaButtonUrl: blog?.post?.ctaButtonUrl || "/patient-register",
+    ctaButtonTarget: blog?.post?.ctaButtonTarget || "",
+  };
   const [mainTitle, subTitle] = data.title.split(": ");
   const tocItems: TocItem[] = [
     { id: "what-is-clonidine", label: "What Is Clonidine?" },
@@ -93,19 +129,12 @@ export default function Page({ params }: PageProps) {
     { id: "faq", label: "FAQ" },
   ];
 
-  // FAQ placeholder list (content added later)
-  const faqItems = [
-    { question: "Is clonidine similar to Xanax?", answer: "" },
-    { question: "Does clonidine help you relax?", answer: "" },
-    { question: "Can clonidine be taken daily for anxiety?", answer: "" },
-    { question: "How quickly does clonidine work for anxiety?", answer: "" },
-    {
-      question: "What is the maximum dose of clonidine for anxiety?",
-      answer: "",
-    },
-  ];
+  const faqItems =
+    blog?.post?.faqs?.map((f: any) => ({
+      question: f.question,
+      answer: f.answer,
+    })) || [];
 
-  // sections are rendered directly below with custom styling
   return (
     <div className="">
       <Container className="py-16">
@@ -123,7 +152,7 @@ export default function Page({ params }: PageProps) {
                   data.authors.map((a, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-3 border border-slate-200 rounded-full py-2 px-4 bg-white shadow-sm"
+                      className="flex items-center gap-3 border border-slate-200 rounded-full py-2 px-2 bg-white shadow-sm"
                     >
                       <Avatar className="h-10 w-10">
                         <AvatarImage
@@ -136,7 +165,7 @@ export default function Page({ params }: PageProps) {
                           {a.name
                             .split(" ")
                             .slice(0, 2)
-                            .map((p) => p[0])
+                            .map((p: any) => p[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
@@ -170,10 +199,14 @@ export default function Page({ params }: PageProps) {
 
             <div>
               <KeyTakeaways items={data.takeaways} />
-
+              <div className="blog-content"
+                dangerouslySetInnerHTML={{
+                  __html: blog?.post?.content || "",
+                }}
+              />
               <div className="prose prose-slate max-w-none mt-12">
                 <section id="what-is-clonidine" className="mt-12 not-prose">
-                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+                  {/* <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
                     What Is Clonidine?
                   </h2>
                   <p className="text-slate-600 leading-relaxed mb-4">
@@ -190,14 +223,14 @@ export default function Page({ params }: PageProps) {
                     therapeutic approaches. It’s available in several forms
                     including tablets, patches, and extended-release
                     formulations.
-                  </p>
+                  </p> */}
                 </section>
 
                 <section
                   id="how-it-works-for-anxiety"
                   className="mt-12 not-prose"
                 >
-                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+                  {/* <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
                     <span className="text-teal-600">How Clonidine Works</span>{" "}
                     For Anxiety
                   </h2>
@@ -215,7 +248,7 @@ export default function Page({ params }: PageProps) {
                     mechanism makes it particularly useful for anxiety that
                     manifests with physical symptoms like rapid heartbeat or
                     sweating.
-                  </p>
+                  </p> */}
                   <div className="mt-8 bg-teal-50 rounded-2xl p-6 relative">
                     <Quote className="w-8 h-8 text-teal-500 mb-4 rotate-180 fill-teal-500" />
                     <p className="italic text-slate-700 text-lg mb-6">
@@ -255,7 +288,7 @@ export default function Page({ params }: PageProps) {
                   </p>
                   <ul className="mt-6 space-y-4">
                     <li className="flex items-start gap-3">
-                      <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center">
+                      <div className="mt-1 shrink-0 w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
                       </div>
                       <p className="text-slate-700 m-0">
@@ -266,7 +299,7 @@ export default function Page({ params }: PageProps) {
                       </p>
                     </li>
                     <li className="flex items-start gap-3">
-                      <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center">
+                      <div className="mt-1 shrink-0 w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
                       </div>
                       <p className="text-slate-700 m-0">
@@ -278,7 +311,7 @@ export default function Page({ params }: PageProps) {
                       </p>
                     </li>
                     <li className="flex items-start gap-3">
-                      <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center">
+                      <div className="mt-1 shrink-0 w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
                       </div>
                       <p className="text-slate-700 m-0">
@@ -306,7 +339,7 @@ export default function Page({ params }: PageProps) {
                       <li className="flex items-start gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1"
+                          className="w-5 h-5 text-teal-600 shrink-0 mt-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -326,7 +359,7 @@ export default function Page({ params }: PageProps) {
                       <li className="flex items-start gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1"
+                          className="w-5 h-5 text-teal-600 shrink-0 mt-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -345,7 +378,7 @@ export default function Page({ params }: PageProps) {
                       <li className="flex items-start gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1"
+                          className="w-5 h-5 text-teal-600 shrink-0 mt-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -365,7 +398,7 @@ export default function Page({ params }: PageProps) {
                       <li className="flex items-start gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1"
+                          className="w-5 h-5 text-teal-600 shrink-0 mt-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -385,7 +418,7 @@ export default function Page({ params }: PageProps) {
                       <li className="flex items-start gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1"
+                          className="w-5 h-5 text-teal-600 shrink-0 mt-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -407,17 +440,16 @@ export default function Page({ params }: PageProps) {
                 </section>
 
                 {/* call to action banner */}
-                <div className="mt-8 bg-gradient-to-r from-teal-600 to-teal-400 text-white rounded-2xl p-8 text-center">
+                <div className="mt-8 bg-linear-to-r from-teal-600 to-teal-400 text-white rounded-2xl p-8 text-center">
                   <h3 className="text-xl font-semibold mb-2">
-                    Feeling overwhelmed by anxiety?
+                    {data?.ctaTitle}
                   </h3>
                   <p className="mb-4">
-                    Get personalized care from licensed mental health
-                    providers—100% online.
+                    {data?.ctaSubtitle}
                   </p>
-                  <Link href="/dashboard/appointments/new">
+                  <Link href={data?.ctaButtonUrl}>
                     <Button className="bg-white text-teal-600 hover:bg-gray-100">
-                      Book an Appointment ➔
+                      {data?.ctaButtonLabel} ➔
                     </Button>
                   </Link>
                 </div>
@@ -492,7 +524,7 @@ export default function Page({ params }: PageProps) {
                     <div className="flex items-start gap-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="w-6 h-6 flex-shrink-0"
+                        className="w-6 h-6 shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -627,8 +659,7 @@ export default function Page({ params }: PageProps) {
                   <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
                     Frequently Asked Questions
                   </h2>
-                  {/** dynamic faq items filled later */}
-                  {faqItems.map((item, idx) => (
+                  {faqItems.map((item: any, idx: any) => (
                     <Accordion
                       key={idx}
                       type="single"
@@ -647,12 +678,15 @@ export default function Page({ params }: PageProps) {
                   ))}
                 </section>
 
-                {/* about and reference section  */}
                 <Card id="about-authors" className="mt-12 not-prose p-6 gap-0">
                   <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-6">
                     About the Authors
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 pb-6 border-b">
+                  <div
+  className={`grid grid-cols-1 ${
+    data.authors.length > 1 ? "md:grid-cols-2" : ""
+  } gap-8 mb-6 pb-6 border-b`}
+>
                     {data.authors.map((a, idx) => (
                       <div key={idx} className="flex items-start gap-4">
                         <Avatar className="h-16 w-16">
@@ -665,7 +699,7 @@ export default function Page({ params }: PageProps) {
                           <AvatarFallback>
                             {a.name
                               .split(" ")
-                              .map((p) => p[0])
+                              .map((p: any) => p[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
@@ -690,7 +724,7 @@ export default function Page({ params }: PageProps) {
                     Medical Sources &amp; References
                   </h3>
                   <ul className="">
-                    {data.references.map((ref, idx) => (
+                    {data.references.map((ref: any, idx: any) => (
                       <li key={idx}>
                         <Link
                           href={ref.url}
@@ -709,14 +743,12 @@ export default function Page({ params }: PageProps) {
               </div>
             </div>
           </div>
-          {/* sidebar table of contents */}
           <aside className="shrink-0">
             <SidebarTOC items={tocItems} />
           </aside>
         </div>
 
-        {/* recommended article */}
-        <RecommendedArticles />
+        <RecommendedArticles relatedPost={relatedPost ?? []} />
       </Container>
     </div>
   );

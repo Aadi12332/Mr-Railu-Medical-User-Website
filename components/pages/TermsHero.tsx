@@ -1,7 +1,23 @@
 import Image from "next/image";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
 
-export default function TermsHero() {
+export default function TermsHero({data,loading,error}:any) {
+  if (loading) {
+    return (
+      <section className="py-16 bg-[#F3FEFB] flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 bg-[#F3FEFB] flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-[#F6FFFC] relative overflow-hidden">
       {/* background decorations */}

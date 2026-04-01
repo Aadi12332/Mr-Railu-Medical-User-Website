@@ -54,236 +54,24 @@ import ArbitrationSection from "./privacy-sections/ArbitrationSection";
 import NoThirdPartyBeneficiaries from "./privacy-sections/NoThirdPartyBeneficiaries";
 import AmendmentsAndModifications from "./privacy-sections/AmendmentsAndModifications";
 
-const sections = [
-  {
-    id: "acceptance-and-agreement",
-    title: "Acceptance And Agreement",
-    subtitle: " To Be Bound",
-    shortTitle: "Acceptance And Agreement",
-    Icon: FilePenLine,
-    content: <AcceptanceAndAgreement />,
-  },
-  {
-    id: "sites-not-for-children",
-    title: "Sites Not Intended",
-    subtitle: "For Children",
-    shortTitle: "Not Intended For Children",
-    Icon: UserX,
-    content: <SitesNotForChildren />,
-  },
-  {
-    id: "creating-an-account",
-    title: "Creating",
-    subtitle: "An Account",
-    shortTitle: "Creating An Account",
-    Icon: Users,
-    content: <CreatingAnAccount />,
-  },
-  {
-    id: "account-registration-and-security",
-    title: "Account Registration And",
-    subtitle: "Security",
-    shortTitle: "Account Registration And Security",
-    Icon: Lock,
-    content: <AccountRegistrationAndSecurity />,
-  },
-  {
-    id: "hipaa-notice",
-    title: "HIPAA Notice",
-    subtitle: "(Privacy & Health Information)",
-    shortTitle: "HIPAA Notice",
-    Icon: ShieldIcon,
-    content: <HIPAANotice />,
-  },
-  {
-    id: "prohibited-countries",
-    title: "Prohibited",
-    subtitle: "Countries",
-    shortTitle: "Prohibited Countries",
-    Icon: Globe,
-    content: <ProhibitedCountries />,
-  },
-  {
-    id: "therapy-services",
-    title: "Therapy",
-    subtitle: "Services",
-    shortTitle: "Therapy Services",
-    Icon: Activity,
-    content: <TherapyServices />,
-  },
-  {
-    id: "independence-of-practitioners",
-    title: "Independence Of",
-    subtitle: "Practitioners",
-    shortTitle: "Independence Of Practitioners",
-    Icon: User,
-    content: <IndependenceOfPractitioners />,
-  },
-  {
-    id: "licensed-practitioners",
-    title: "Only Licensed Practitioners",
-    subtitle: "Provide Medical Advice",
-    shortTitle: "Licensed Practitioners",
-    Icon: UserCheck,
-    content: <LicensedPractitioners />,
-  },
-  {
-    id: "user-conduct",
-    title: "User",
-    subtitle: "Conduct",
-    shortTitle: "User Conduct",
-    Icon: ShieldIcon,
-    content: <UserConduct />,
-  },
-  {
-    id: "license-grant",
-    title: "License Grant And",
-    subtitle: "Permitted Use",
-    shortTitle: "License Grant",
-    Icon: Globe,
-    content: <LicenseGrant />,
-  },
-  {
-    id: "acceptable-use",
-    title: "Acceptable",
-    subtitle: "Use",
-    shortTitle: "Acceptable Use",
-    Icon: Activity,
-    content: <AcceptableUse />,
-  },
-  {
-    id: "consent-electronic",
-    title: "Consent To Electronic",
-    subtitle: "Communications",
-    shortTitle: "Electronic Communications",
-    Icon: Globe,
-    content: <ConsentElectronic />,
-  },
-  {
-    id: "security-privacy",
-    title: "Security And",
-    subtitle: "Privacy",
-    shortTitle: "Security & Privacy",
-    Icon: Lock,
-    content: <SecurityPrivacy />,
-  },
-  {
-    id: "information-provide",
-    title: "Information You",
-    subtitle: "Provide",
-    shortTitle: "Information You Provide",
-    Icon: Users,
-    content: <InformationYouProvide />,
-  },
-  {
-    id: "submissions-information",
-    title: "Submissions Of",
-    subtitle: "Information",
-    shortTitle: "Submissions Of Information",
-    Icon: FileText,
-    content: <SubmissionsOfInformation />,
-  },
-  {
-    id: "intellectual-property",
-    title: "Intellectual",
-    subtitle: "Property",
-    shortTitle: "Intellectual Property",
-    Icon: Copyright,
-    content: <IntellectualProperty />,
-  },
-  {
-    id: "operation-of-the-site",
-    title: "Operation Of The",
-    subtitle: "Site",
-    shortTitle: "Operation Of The Site",
-    Icon: Server,
-    content: <OperationOfTheSite />,
-  },
-  {
-    id: "limitation-of-liability",
-    title: "Limitation Of",
-    subtitle: "Liability",
-    shortTitle: "Limitation Of Liability",
-    Icon: AlertTriangle,
-    content: <LimitationOfLiability />,
-  },
-  {
-    id: "no-warranty",
-    title: "No Warranty Or",
-    subtitle: "Guarantee Of Outcome",
-    shortTitle: "No Warranty Or Guarantee Of Outcome",
-    Icon: AlertTriangle,
-    content: <NoWarranty />,
-  },
-  {
-    id: "indemnification",
-    title: "Indemnification",
-    subtitle: "",
-    shortTitle: "Indemnification",
-    Icon: ShieldIcon,
-    content: <Indemnification />,
-  },
-  {
-    id: "links-to-third-party-websites",
-    title: "Links To",
-    subtitle: "Third-Party Websites",
-    shortTitle: "Third-Party Websites",
-    Icon: ExternalLink,
-    content: <LinksToThirdPartyWebsites />,
-  },
-  {
-    id: "affiliate-disclaimer",
-    title: "Affiliate",
-    subtitle: "Disclaimer",
-    shortTitle: "Affiliate Disclaimer",
-    Icon: Briefcase,
-    content: <AffiliateDisclaimer />,
-  },
-  {
-    id: "no-assignment",
-    title: "No",
-    subtitle: "Assignment",
-    shortTitle: "No Assignment",
-    Icon: FileText,
-    content: <NoAssignment />,
-  },
-  {
-    id: "applicable-law-enforcement",
-    title: "Applicable Law &",
-    subtitle: "Enforcement",
-    shortTitle: "Applicable Law",
-    Icon: Scale,
-    content: <ApplicableLawEnforcement />,
-  },
-  {
-    id: "arbitration",
-    title: "Arbitration",
-    subtitle: "",
-    shortTitle: "Arbitration",
-    Icon: Gavel,
-    content: <ArbitrationSection />,
-  },
-  {
-    id: "no-third-party-beneficiaries",
-    title: "No Third-Party",
-    subtitle: "Beneficiaries",
-    shortTitle: "No Third-Party Beneficiaries",
-    Icon: UserX,
-    content: <NoThirdPartyBeneficiaries />,
-  },
-  {
-    id: "amendments-and-modifications",
-    title: "Amendments And",
-    subtitle: "Modifications",
-    shortTitle: "Amendments And Modifications",
-    Icon: FileText,
-    content: <AmendmentsAndModifications />,
-  },
-];
 
-export default function PrivacyPolicyContent() {
+export default function PrivacyPolicyContent({data,loading,error}:any) {
   const [activeId, setActiveId] = useState<string | null>(null);
-
+const sections =
+  data?.sections
+    ?.sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+    .map((item: any, idx: number) => ({
+      id: `section-${idx}`,
+      title: item.heading,
+      subtitle: "",
+      shortTitle: item.heading,
+      Icon: FileText,
+      content: (
+        <p className="text-base leading-relaxed text-muted-foreground">
+          {item.body}
+        </p>
+      ),
+    })) || [];
   React.useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -296,7 +84,7 @@ export default function PrivacyPolicyContent() {
       { rootMargin: "-50% 0px -50% 0px" },
     );
 
-    sections.forEach((s) => {
+    sections.forEach((s:any) => {
       const el = document.getElementById(s.id);
       if (el) observer.observe(el);
     });
@@ -310,7 +98,7 @@ export default function PrivacyPolicyContent() {
         <Card className="p-5 gap-0 shadow-sm">
           <h3 className="font-semibold mb-4 text-lg">Table of Contents</h3>
           <ul className="space-y-1">
-            {sections.map((s) => (
+            {sections.map((s :any) => (
               <li key={s.id}>
                 <a
                   href={`#${s.id}`}
@@ -330,7 +118,7 @@ export default function PrivacyPolicyContent() {
         </Card>
       </aside>
       <div className="flex-1 space-y-6">
-        {sections.map((s) => (
+        {sections.map((s:any) => (
           <section key={s.id} id={s.id} className="scroll-mt-24">
             <Card className="p-6 md:p-8 gap-0 shadow-md">
               <div className="flex items-center space-x-4 mb-4">

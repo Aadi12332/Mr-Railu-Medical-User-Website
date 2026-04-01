@@ -28,7 +28,7 @@ export default function KeyTakeaways({ items }: KeyTakeawaysProps) {
             return (
               <div key={idx} className="flex items-start gap-3">
                 <div
-                  className={`mt-0.5 flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full ${isWarning ? "bg-orange-100" : "bg-teal-100"}`}
+                  className={`mt-0.5 shrink-0 flex items-center justify-center w-5 h-5 rounded-full ${isWarning ? "bg-orange-100" : "bg-teal-100"}`}
                 >
                   {isWarning ? (
                     <TriangleAlert className="h-3 w-3 text-orange-600" />

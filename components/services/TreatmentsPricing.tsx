@@ -49,10 +49,12 @@ export default function TreatmentsPricing({
   title,
   subtitle,
   description,
+  data
 }: {
   title?: string;
   subtitle?: string;
   description?: string;
+  data?:any
 }) {
   return (
     <section className="py-16 md:py-20 bg-[#f3faf8]">
@@ -65,11 +67,11 @@ export default function TreatmentsPricing({
         />
 
         <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-2 items-start">
-          {plans.map((p) => (
-            <Card key={p.id} className="border border-primary p-0 rounded-md">
+          {(data?.pricingTiers??[]).map((p:any) => (
+            <Card key={p.displayOrder} className="border border-primary p-0 rounded-md">
               <CardHeader className="bg-[#eaf7f3] rounded-t-lg border-b border-primary px-6 py-4">
                 <CardTitle className="text-xl font-semibold text-slate-900">
-                  {p.title}
+                  {p.name}
                 </CardTitle>
 
                 <div className="text-primary font-semibold text-lg md:text-xl">
@@ -81,7 +83,7 @@ export default function TreatmentsPricing({
                 <span className="text-sm font-medium">{p.subtitle}</span>
 
                 <ul className="space-y-3 mt-5 divide-y border-b">
-                  {p.bullets.map((b) => (
+                  {(p.features??[]).map((b:any) => (
                     <li key={b} className="flex items-start gap-3">
                       <div className="size-6 rounded-full bg-gradient-primary/10 text-primary flex items-center justify-center mt-1">
                         <Image
@@ -91,7 +93,7 @@ export default function TreatmentsPricing({
                         />
                       </div>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {b}
+                        {b?.text??""}
                       </p>
                     </li>
                   ))}
@@ -99,9 +101,9 @@ export default function TreatmentsPricing({
               </CardContent>
 
               <CardFooter className="bg-transparent border-t-0">
-                <Link href={p.href}>
+                <Link href={p.ctaUrl}>
                   <Button size="lg" className="bg-gradient-primary">
-                    {p.cta}
+                    {p.ctaLabel??""}
                     <ArrowRight />
                   </Button>
                 </Link>
