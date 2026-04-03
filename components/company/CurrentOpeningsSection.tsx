@@ -55,7 +55,8 @@ const openings = [
   },
 ];
 
-export default function CurrentOpeningsSection() {
+export default function CurrentOpeningsSection({loading,error,careers}: {loading: boolean; error: string | null; careers: any}) {
+  console.log({careers})
   return (
     <section id="openings" className="py-16 bg-white">
       <Container>
@@ -67,8 +68,8 @@ export default function CurrentOpeningsSection() {
         />
 
         <div className="mt-10 max-w-3xl mx-auto space-y-4">
-          {openings.map((job) => (
-            <Link key={job.id} href={job.href} className="group block">
+          {(careers??[]).map((job:any) => (
+            <Link key={job._id} href={job?.applyUrl} className="group block">
               <Card className="flex flex-row justify-between items-center p-4">
                 <div>
                   <h4 className="text-lg font-semibold text-slate-900">

@@ -6,11 +6,14 @@ import Link from "next/link";
 import careersImg from "@/assets/company/careers.png";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
 
-export default function CareersHero() {
+export default function CareersHero({ loading, error, careers }: { loading: boolean; error: string | null, careers: any }) {
+
+
+  if (loading) return <p className="h-[300px] flex justify-center items-center">Loading...</p>;
+  if (error) return <p className="h-[300px] flex justify-center items-center">{error}</p>;
   return (
     <section className="py-10 relative">
       <Container className="relative">
-        {/* background patterns */}
         <div className="absolute top-10 -scale-x-100 z-0 opacity-50 max-w-xs">
           <Image
             src={bgPattern}

@@ -19,8 +19,9 @@ export interface RegisterPayload {
 
 export interface AppointmentPayload {
   providerId: string
-  date: string
-  time: string
+  date: any
+  time: any
   type: string
   notes?: string
+  
 }

@@ -63,7 +63,7 @@ const [role, setRole] = useState("");
 const [specialty, setSpecialty] = useState("all");
 const [rating, setRating] = useState("any");
 const [priceRange, setPriceRange] = useState("any");
-
+const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const handleMyProviders=async()=>{
     setLoading(true);
     try {
@@ -71,7 +71,7 @@ const [priceRange, setPriceRange] = useState("any");
       const data = response.data;
       setProviders(data?.providers || []);
     } catch (error) {
-      console.error("Error fetching providers:", error);
+      console.log("Error fetching providers:", error);
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ const ratingValue = Number(p.rating || 0);
 
   return matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange;
 });
-console.log({providers})
+console.log({filteredProviders})
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">

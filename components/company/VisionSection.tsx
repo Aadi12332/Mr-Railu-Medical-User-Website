@@ -16,11 +16,19 @@ interface TimelineEvent {
 interface TimelineEventCardProps {
   event: TimelineEvent;
   direction: "left" | "right";
+  idx: number;
+}
+const timeLineIcon = {
+  "0": <Calendar className="text-white"/>,
+  "1": <Rocket className="text-white"/>,
+  "2": <BarChart2 className="text-white"/>,
+  "3": <Users className="text-white"/>,
+  "4": <Star className="text-white"/>,
+  "5": <Target className="text-white"/>,
 }
 
-function TimelineEventCard({ event, direction }: TimelineEventCardProps) {
+function TimelineEventCard({ event, direction,idx }: TimelineEventCardProps) {
   const isLeft = direction === "left";
-
   return (
     <div
       className={`w-full md:w-1/2 ${isLeft ? "md:pr-8" : "md:pl-8"} ${isLeft ? "md:text-right" : "md:text-left"}`}
@@ -43,14 +51,15 @@ function TimelineEventCard({ event, direction }: TimelineEventCardProps) {
           </div>
         </div>
         <div className="order-1 md:order-2 size-12 shadow-md rounded-full bg-gradient-primary flex shrink-0 justify-center items-center">
-          <event.icon className="size-5 text-white" />
+          {/* @ts-ignore */}
+          {timeLineIcon[idx]}
         </div>
       </div>
     </div>
   );
 }
 
-export default function VisionSection() {
+export default function VisionSection({data,loading,error}:any) {
   return (
     <>
       <section className="py-16 md:py-20 bg-gray-50">
@@ -63,14 +72,11 @@ export default function VisionSection() {
           <div className="mt-10 max-w-3xl mx-auto">
             <div className="bg-white rounded-xl shadow-lg p-8 text-center">
               <p className="text-lg text-slate-700 leading-relaxed">
-                We envision a world where mental health receives the same
-                priority as physical health where people feel heard, supported,
-                and empowered to live their best lives.
+                {data?.visionQuoteTitle || "We envision a world where mental health receives the same priority as physical health where people feel heard, supported, and empowered to live their best lives."}
               </p>
 
               <p className="mt-4 text-sm text-muted-foreground">
-                Together, we are shaping the future of mental healthcare with
-                empathy and innovation.
+               {data?.visionQuote?? "Together, we are shaping the future of mental healthcare with empathy and innovation."}
               </p>
             </div>
           </div>
@@ -83,7 +89,7 @@ export default function VisionSection() {
           <SectionHeader
             title="Our"
             subtitle="Vision"
-            description="A journey of innovation and compassionate care"
+            description={data?.timelineSubtitle??""}
           />
 
           {/* timeline section */}
@@ -91,43 +97,7 @@ export default function VisionSection() {
             <div className="absolute md:left-1/2 left-4 md:transform md:-translate-x-1/2 h-full w-1 bg-primary" />
 
             <div className="space-y-12">
-              {[
-                {
-                  year: "2019",
-                  title: "Foundation",
-                  description:
-                    "Founded with a mission to bring quality mental healthcare online after years of running physical clinics.",
-                  icon: Calendar,
-                },
-                {
-                  year: "2020–2021",
-                  title: "Platform Launch",
-                  description:
-                    "Launch of a custom telehealth platform enabling secure video consultations and digital care management.",
-                  icon: Rocket,
-                },
-                {
-                  year: "2022",
-                  title: "Rapid Expansion",
-                  description:
-                    "Expanded to multiple states with thousands of successful consultations and rapid growth.",
-                  icon: BarChart2,
-                },
-                {
-                  year: "2023",
-                  title: "Strategic Partnerships",
-                  description:
-                    "Partnered with leading clinics and doubled healthcare providers on the platform.",
-                  icon: Users,
-                },
-                {
-                  year: "Future Goal",
-                  title: "Complete Ecosystem",
-                  description:
-                    "To become a complete mental wellness ecosystem supporting millions across the country.",
-                  icon: Star,
-                },
-              ].map((event, idx) => (
+              {(data?.timeline??[]).map((event:any, idx:number) => (
                 <div
                   key={idx}
                   className={`flex w-full relative flex-col md:flex-row items-center ${
@@ -137,6 +107,7 @@ export default function VisionSection() {
                   <TimelineEventCard
                     event={event}
                     direction={idx % 2 !== 0 ? "left" : "right"}
+                    idx={idx}
                   />
                 </div>
               ))}

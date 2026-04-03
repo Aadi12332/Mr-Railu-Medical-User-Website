@@ -57,17 +57,18 @@ interface MeetProvidersSectionProps {
 }
 
 export default function MeetProvidersSection({
+  data,loading,error,
   title = "Meet our",
   subtitle = "providers",
   description = "Quality care shouldn't come with surprise costs. Here's exactly what you'll pay.",
   layout = "carousel",
   rows = 1,
-}: MeetProvidersSectionProps) {
-  const renderCard = (p: (typeof providers)[0]) => (
+}: any) {
+  const renderCard = (p: any) => (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 hover:shadow-md transition-shadow">
       <div className="overflow-hidden rounded-xl aspect-square mb-3 bg-gray-50">
         <Image
-          src={p.image}
+          src={p.imageUrl}
           alt={p.name}
           width={640}
           height={520}
@@ -76,9 +77,11 @@ export default function MeetProvidersSection({
       </div>
 
       <div className="text-sm font-semibold text-slate-900">{p.name}</div>
+      <div className="text-sm font-normal text-slate-900">{p.role}</div>
+
 
       <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
-        {p.description}
+        {p.bio}
       </p>
     </div>
   );
@@ -87,9 +90,9 @@ export default function MeetProvidersSection({
     <section className="py-16 bg-transparent">
       <Container>
         <SectionHeader
-          title={title}
-          subtitle={subtitle}
-          description={description}
+          title={data?.teamTitle??''}
+          subtitle={data?.teamSubtitle??""}
+          description={data?.teamDescription??""}
         />
 
         <div className="mt-8 space-y-6">
@@ -108,7 +111,7 @@ export default function MeetProvidersSection({
                 ]}
               >
                 <CarouselContent className="-ml-4">
-                  {[...providers, ...providers].map((p, index) => (
+                  {(data?.teamMembers??[])?.map((p:any, index:number) => (
                     <CarouselItem
                       key={`${p.id}-${index}`}
                       className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/4"

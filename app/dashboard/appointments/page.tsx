@@ -17,6 +17,7 @@ export default function AppointmentsPage() {
     try {
       setLoading(true);
       const res = await dashboardApi.getAppointments("patient");
+      console.log({res},"==========res")
       setAppointments(res?.data?.appointments || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -28,7 +29,11 @@ export default function AppointmentsPage() {
   useEffect(() => {
     fetchAppointments();
   }, []);
-
+const handleCancelApp=  () => {
+  setAppointments([]);
+  
+ fetchAppointments();
+};
   const mappedAppointments = appointments.map((item) => {
     const provider = item?.providerId;
 
@@ -125,7 +130,7 @@ export default function AppointmentsPage() {
 
         {!loading &&
           filtered.map((app) => (
-            <AppointmentCard key={app.id} appointment={app} />
+            <AppointmentCard key={app.id} appointment={app} handleCancelApp={handleCancelApp}/>
           ))}
       </div>
     </div>

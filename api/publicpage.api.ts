@@ -22,6 +22,18 @@ export const publicPageApi = {
    getConditionsBySlug: (slug: string) => {
     return axios.get(`/v1/public/conditions/${slug}`);
   },
+  getAbout: () => {
+    return axios.get(`/v1/public/pages/about-us`);
+  },
+  getCareer: () => {
+    return axios.get(`/v1/public/careers`);
+  },
+  getReview: (p0: { limit: number; offset: number; }) => {
+    return axios.get(`/v1/public/reviews/?skip=${p0.offset}&limit=${p0.limit}`);
+  },
+   getProviders: () => {
+    return axios.get(`/v1/public/providers/`);
+  },
   sendContact: (data: {
     name: string;
     email: string;

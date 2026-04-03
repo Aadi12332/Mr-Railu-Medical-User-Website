@@ -35,5 +35,8 @@ export const patientApi = {
     axios.get("/v1/patient/providers", { params }),
 
   getProviderById: (id: string) =>
-    axios.get(`/v1/patient/providers/${id}`)
+    axios.get(`/v1/patient/providers/${id}`),
+  getRescheduleById: (id: string, data: { date: string; time: string }) =>
+    axios.post(`/v1/patient/appointments/${id}/reschedule`, data),
+  
 }

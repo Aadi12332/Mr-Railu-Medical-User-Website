@@ -107,6 +107,26 @@ export default function page() {
       }));
     }
   };
+  const handleMoodChange = async (value: string) => {
+  try {
+    const role =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem("role")?.toLowerCase()
+        : "";
+
+    const payload = {
+      mood: value,
+        "moodScore": 8
+    };
+
+    const res = await dashboardApi.postMoodApi(role || "", payload);
+
+    console.log("Mood Response:", res);
+
+  } catch (error: any) {
+    console.error("Mood API Error:", error);
+  }
+};
   useEffect(() => {
     handleDashboard()
   }, []);
@@ -339,7 +359,7 @@ export default function page() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Select>
+            <Select onValueChange={handleMoodChange}>
               <SelectTrigger className="w-full bg-accent mt-5">
                 <SelectValue placeholder="Select your mood" />
               </SelectTrigger>

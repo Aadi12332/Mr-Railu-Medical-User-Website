@@ -6,9 +6,11 @@ import { Calendar } from "@/components/ui/calendar";
 export default function DateStep({
   date,
   setDate,
+  provider
 }: {
   date: Date | undefined;
   setDate: (d: Date | undefined) => void;
+  provider: any;
 }) {
   return (
     <div className="flex flex-col items-center w-full">

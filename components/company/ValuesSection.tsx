@@ -3,7 +3,7 @@ import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/ui/section-header";
 
-export default function ValuesSection() {
+export default function ValuesSection({data,loading,error}:any) {
   const values = [
     {
       id: 1,
@@ -32,19 +32,19 @@ export default function ValuesSection() {
     <section className="py-16 md:py-20">
       <Container>
         <SectionHeader
-          title="Our"
+          title={data?.valuesTitle||"Our Values"}
           subtitle="Values"
-          description="These core principles guide everything we do"
+          description={data?.valuesDescription||"These core principles guide everything we do"}
         />
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {values.map((v) => (
+          {(data?.values || []).map((v:any, index:number) => (
             <Card
-              key={v.id}
+              key={index}
               className="p-6 gap-0 flex flex-col items-start shadow-lg text-center md:text-left"
             >
               <div className="mb-4 flex items-center justify-center rounded-xl bg-gradient-primary p-3">
-                <v.icon className="h-6 w-6 text-white" />
+                {v.icon}
               </div>
 
               <CardTitle className="text-lg font-semibold">{v.title}</CardTitle>

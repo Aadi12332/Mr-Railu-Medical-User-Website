@@ -15,12 +15,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trash2, SquarePen } from "lucide-react";
 import type { Appointment } from "./AppointmentCard";
+import { patientApi } from "@/api/patient.api";
 
 interface Slot {
   id: string;
   date: string;
+  rawDate: string;
   start: string;
   end: string;
+  time24: string;
 }
 
 interface RescheduleAppointmentDialogProps {
@@ -33,17 +36,82 @@ export default function RescheduleAppointmentDialog({
   trigger,
 }: RescheduleAppointmentDialogProps) {
   const router = useRouter();
-  const initialSlots: Slot[] = [
-    { id: "1", date: "Today", start: "10:00 AM", end: "12:00 PM" },
-    { id: "2", date: "Sep 19", start: "11:30 AM", end: "1:30 PM" },
-    { id: "3", date: "Sep 20", start: "10:30 AM", end: "4:30 PM" },
-    { id: "4", date: "Sep 25", start: "9:30 AM", end: "12:30 PM" },
-  ];
+const handleCancel = async () => {
+  try {
+    const res = await patientApi.cancelAppointment(appointment.id);
 
-  const [slots, setSlots] = useState<Slot[]>(initialSlots);
+    router.refresh();
+  } catch (error) {
+    console.error(error);
+  }
+};
+  const generateSlots = () => {
+    const slots: Slot[] = [];
+    const today = new Date();
+
+    for (let d = 0; d < 5; d++) {
+      const date = new Date();
+      date.setDate(today.getDate() + d);
+
+      const rawDate = date.toISOString().split("T")[0];
+
+      for (let h = 9; h < 17; h++) {
+        for (let m = 0; m < 60; m += 20) {
+          const startDate = new Date(date);
+          startDate.setHours(h, m);
+
+          const endDate = new Date(startDate);
+          endDate.setMinutes(startDate.getMinutes() + 20);
+
+          const format12 = (dt: Date) =>
+            dt.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+          const format24 = (dt: Date) =>
+            dt.toTimeString().slice(0, 5);
+
+          slots.push({
+            id: `${rawDate}-${h}-${m}`,
+            date: date.toDateString().slice(0, 10),
+            rawDate,
+            start: format12(startDate),
+            end: format12(endDate),
+            time24: format24(startDate),
+          });
+        }
+      }
+    }
+
+    return slots;
+  };
+
+  const [slots, setSlots] = useState<Slot[]>(generateSlots());
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
 
   const removeSlot = (id: string) =>
     setSlots((s) => s.filter((x) => x.id !== id));
+
+  const handleSchedule = async () => {
+    if (!selectedSlot) return;
+
+    const payload = {
+      date: selectedSlot.rawDate,
+      time: selectedSlot.time24,
+    };
+
+    try {
+      const res = await patientApi.getRescheduleById(
+        appointment.id,
+        payload
+      );
+      console.log("Reschedule Payload:", payload);
+      console.log("API Response:", res);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <Dialog>
@@ -70,7 +138,6 @@ export default function RescheduleAppointmentDialog({
         </DialogHeader>
 
         <div className="mt-4 space-y-6">
-          {/* current appointment */}
           <div className="p-4 bg-slate-50 rounded-md">
             <div className="text-xs font-medium text-muted-foreground">
               Current Appointment
@@ -80,12 +147,16 @@ export default function RescheduleAppointmentDialog({
             </div>
           </div>
 
-          {/* slot list */}
           <div className="space-y-3">
             {slots.map((slot) => (
               <div
                 key={slot.id}
-                className="flex flex-col md:flex-row md:items-center items-center gap-4"
+                onClick={() => setSelectedSlot(slot)}
+                className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${
+                  selectedSlot?.id === slot.id
+                    ? "border border-emerald-500 rounded-md"
+                    : ""
+                }`}
               >
                 <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-28 text-left">
                   {slot.date}
@@ -106,7 +177,10 @@ export default function RescheduleAppointmentDialog({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeSlot(slot.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSlot(slot.id);
+                  }}
                   className="bg-slate-50 py-3!"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -129,9 +203,7 @@ export default function RescheduleAppointmentDialog({
           </DialogClose>
           <Button
             className="bg-gradient-dash"
-            onClick={() => {
-              router.push("/appointment");
-            }}
+            onClick={handleSchedule}
           >
             Done
           </Button>

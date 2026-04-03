@@ -26,7 +26,13 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
-export default function ContactSection() {
+export default function ContactSection({data,loading,error}:any) {
+  const socialMap: any = {
+  LinkedIn: { Icon: Linkedin, variant: "text" },
+  Twitter: { Icon: Twitter, variant: "text" },
+  Facebook: { Icon: Facebook, variant: "boxed" },
+  Instagram: { Icon: Instagram, variant: "boxed" },
+};
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -40,20 +46,18 @@ export default function ContactSection() {
       Icon: MapPin,
       title: "Address",
       lines: [
-        "123 Wellness Street",
-        "San Francisco, CA 94102",
-        "United States",
+       data?.contactAddress
       ],
     },
     {
       Icon: Mail,
       title: "Email",
-      lines: ["hello@mindcare.com", "support@mindcare.com"],
+      lines: [data?.contactEmail, data?.contactSupportEmail],
     },
     {
       Icon: Phone,
       title: "Phone",
-      lines: ["+1 (555) 123-4567", "Mon-Fri 9am-6pm PST"],
+      lines: [data?.contactPhone, data?.contactHours],
     },
   ];
 
@@ -77,9 +81,9 @@ export default function ContactSection() {
     <section className="py-16 bg-slate-50">
       <Container>
         <SectionHeader
-          title="Get in"
-          subtitle="Touch"
-          description="We'd love to hear from you"
+          title={data?.contactTitle??""}
+          subtitle={""}
+          description={data?.contactSubtitle??""}
         />
 
         <div className="mt-10 bg-white rounded-2xl p-10 shadow-lg">
@@ -115,30 +119,32 @@ export default function ContactSection() {
                   Connect With Us
                 </p>
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  {socials.map((s, i) => {
-                    const Icon = s.Icon;
-                    const variant = useFirstStyle
-                      ? socials[0].variant
-                      : s.variant;
-                    return (
-                      <Link
-                        key={s.name}
-                        href={s.href}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 shadow-sm hover:shadow-md"
-                      >
-                        {variant === "boxed" ? (
-                          <div className="w-8 h-8 rounded-md bg-gradient-primary flex items-center justify-center text-white">
-                            <Icon className="w-4 h-4" />
-                          </div>
-                        ) : (
-                          <Icon className="w-4 h-4 text-primary" />
-                        )}
+  {(data?.contactSocialLinks ?? []).map((s: any) => {
+    const config = socialMap[s.platform] || {};
+    const Icon = config.Icon;
+    const variant = config.variant;
 
-                        <span className="text-sm text-slate-700">{s.name}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
+    return (
+      <Link
+        key={s.platform}
+        href={s.url}
+        className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 shadow-sm hover:shadow-md"
+      >
+        {Icon &&
+          (variant === "boxed" ? (
+            <div className="w-8 h-8 rounded-md bg-gradient-primary flex items-center justify-center text-white">
+              <Icon className="w-4 h-4" />
+            </div>
+          ) : (
+            <Icon className="w-4 h-4 text-primary" />
+          ))}
+
+        <span className="text-sm text-slate-700">{s.platform}</span>
+      </Link>
+    );
+  })}
+</div>
+
               </div>
 
               <div className="mt-6 p-6 rounded-lg bg-linear-to-br from-[#F0FDFA] to-[#ECFDF5] shadow-inner">

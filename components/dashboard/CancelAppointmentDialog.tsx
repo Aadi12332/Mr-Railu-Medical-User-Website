@@ -14,11 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import type { Appointment } from "./AppointmentCard";
+import { patientApi } from "@/api/patient.api";
+import { toast } from "react-toastify";
 
 interface CancelAppointmentDialogProps {
   appointment: Appointment;
   trigger?: React.ReactNode;
-  onConfirm?: () => void;
+  onConfirm?: (id:any) => void;
 }
 
 export default function CancelAppointmentDialog({
@@ -27,6 +29,7 @@ export default function CancelAppointmentDialog({
   onConfirm,
 }: CancelAppointmentDialogProps) {
   const router = useRouter();
+
 
   return (
     <Dialog>
@@ -78,7 +81,7 @@ export default function CancelAppointmentDialog({
             className="bg-red-500 hover:bg-red-600"
             onClick={() => {
               if (onConfirm) {
-                onConfirm();
+                onConfirm(appointment);
               }
               // default action: navigate back to dashboard or refresh
               router.refresh();

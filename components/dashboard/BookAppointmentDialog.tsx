@@ -19,11 +19,12 @@ import DetailsStep from "@/components/dashboard/steps/DetailsStep";
 import ConfirmStep from "@/components/dashboard/steps/ConfirmStep";
 import PaymentDialog from "@/components/dashboard/PaymentDialog";
 import { Provider } from "@/components/dashboard/types";
+import { patientApi } from "@/api/patient.api";
 
 export default function BookAppointmentDialog({
   provider,
 }: {
-  provider: Provider;
+  provider: any;
 }) {
   const [step, setStep] = useState<number>(1);
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -31,17 +32,26 @@ export default function BookAppointmentDialog({
   const [sessionType, setSessionType] = useState<string>("video");
   const [reason, setReason] = useState<string>("");
   const stepLabels = ["Therapist", "Date", "Time", "Details", "Confirm"];
-
   useEffect(() => {
     setSelectedTime(null);
   }, [date]);
-
+  console.log({provider})
+const handleBooking=async()=>{
+ const res=await patientApi.bookAppointment({
+  providerId: provider._id,
+  date: date?.toISOString(),
+  time: selectedTime,
+  type:sessionType,
+  // reason,
+ })
+}
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button className="bg-gradient-dash w-full">
           <Video className="size-4 mr-2" /> Book Now
         </Button>
+        
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg">
@@ -89,7 +99,7 @@ export default function BookAppointmentDialog({
 
         <div className="mt-4">
           {step === 1 && <TherapistStep provider={provider} />}
-          {step === 2 && <DateStep date={date} setDate={setDate} />}
+          {step === 2 && <DateStep date={date} setDate={setDate} provider={provider}/>}
           {step === 3 && (
             <TimeStep
               date={date}
@@ -130,7 +140,7 @@ export default function BookAppointmentDialog({
 
             {step === 5 ? (
               <PaymentDialog>
-                <Button size="lg" className="flex-1 bg-gradient-dash">
+                <Button size="lg" className="flex-1 bg-gradient-dash" onClick={()=>handleBooking()}>
                   confirm
                 </Button>
               </PaymentDialog>

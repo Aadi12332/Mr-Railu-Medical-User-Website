@@ -7,6 +7,8 @@ import { Calendar, Clock, Video, Phone, X, SquarePen } from "lucide-react";
 import CancelAppointmentDialog from "./CancelAppointmentDialog";
 import { cn } from "@/lib/utils";
 import RescheduleAppointmentDialog from "./RescheduleAppointmentDialog";
+import { patientApi } from "@/api/patient.api";
+import { toast } from "react-toastify";
 
 export interface Appointment {
   id: string;
@@ -37,9 +39,25 @@ export function statusVariants(status: Appointment["status"]) {
 
 interface AppointmentCardProps {
   appointment: Appointment;
+  handleCancelApp:any
 }
 
-export function AppointmentCard({ appointment: app }: AppointmentCardProps) {
+export function AppointmentCard({ appointment: app,handleCancelApp }: AppointmentCardProps) {
+  const handleCancel = async (id:any) => {
+  try {
+    const res: any = await patientApi.cancelAppointment(id);
+console.log({res},"=====res")
+    if (res?.status) {
+      handleCancelApp();
+      toast.success(res?.message || "Appointment cancelled successfully");
+    } else {
+      throw new Error(res?.message || "Cancel failed");
+    }
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error?.message || "Something went wrong");
+  }
+};
   return (
     <Card className="p-4">
       <div className="flex items-start gap-4">
@@ -83,7 +101,6 @@ export function AppointmentCard({ appointment: app }: AppointmentCardProps) {
         </div>
       </div>
 
-      {/* actions */}
       {(app.status === "Confirmed" ||
         app.status === "Pending" ||
         app.status === "Past") && (
@@ -120,9 +137,10 @@ export function AppointmentCard({ appointment: app }: AppointmentCardProps) {
                       <X className="size-4 mr-1" /> Cancel
                     </Button>
                   }
-                  onConfirm={() => {
+                  onConfirm={(app:any) => {
                     // TODO: implement cancellation logic (API call)
                     console.log("cancelled", app.id);
+                    handleCancel(app.id??"")
                   }}
                 />
               </>

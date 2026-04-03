@@ -8,7 +8,7 @@ export default function ConfirmStep({
   date,
   selectedTime,
 }: {
-  provider: Provider;
+  provider: any;
   date: Date | undefined;
   selectedTime: string | null;
 }) {
@@ -22,7 +22,7 @@ export default function ConfirmStep({
         <div className="grid grid-cols-2 gap-y-3 text-sm text-muted-foreground">
           <div>Provider:</div>
           <div className="text-right font-medium text-foreground">
-            {provider.name}
+            {provider.firstName} {provider.lastName}
           </div>
 
           <div>Date:</div>
@@ -37,7 +37,7 @@ export default function ConfirmStep({
 
           <div>Session Fee:</div>
           <div className="text-right font-medium text-foreground">
-            {provider.fee}
+            {provider.fee??0}
           </div>
         </div>
       </div>

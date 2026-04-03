@@ -28,6 +28,9 @@ export const dashboardApi = {
    getPayments: (role: string) => {
     return axios.get(`/v1/${role}/payments`);
   },
+  postMoodApi: (role: string, payload: any) => {
+    return axios.post(`/v1/${role}/mood`, payload);
+  },
   getPaymentById: (role: string, paymentId: string) => {
     return axios.get(`/v1/${role}/payments/${paymentId}`);
   },
