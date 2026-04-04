@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface PaymentMethod {
@@ -10,26 +10,30 @@ export interface PaymentMethod {
   last4: string;
   expiry: string;
   isDefault: boolean;
+  cardholderName?: string;
 }
 
 interface PaymentMethodCardProps {
   method: PaymentMethod;
   onSetDefault?: () => void;
+  onDelete?: () => void;
 }
 
 export function PaymentMethodCard({
   method,
   onSetDefault,
+  onDelete,
 }: PaymentMethodCardProps) {
   return (
     <Card
       className={cn(
-        "p-4 flex items-center justify-between",
+        "p-4 flex items-center justify-between relative",
         // Card already has a ring-1 border. change ring color when default
         method.isDefault ? "ring-1 ring-emerald-500" : "ring-1 ring-border",
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 ">
+        <Trash2 onClick={onDelete} className="size-5 text-red-500 absolute top-2 right-2" />
         <CreditCard className="size-6 text-muted-foreground" />
         <div className="flex flex-col">
           <span className="text-sm font-medium">

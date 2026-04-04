@@ -69,62 +69,35 @@ const PAYMENT_METHODS_INITIAL: PaymentMethod[] = [
   },
 ];
 
-const PAYMENT_ITEMS: PaymentItem[] = [
-  // upcoming sessions
-  {
-    id: "pay-1",
-    description: "Session with Dr. Emily Chen",
-    date: "Jan 13, 2026",
-    amount: 120,
-    status: "Scheduled",
-  },
-  {
-    id: "pay-2",
-    description: "Session with Dr. Michael Ross",
-    date: "Jan 15, 2026",
-    amount: 150,
-    status: "Scheduled",
-  },
-  // history / completed payments
-  {
-    id: "pay-3",
-    description: "Session with Dr. Sarah Miller",
-    date: "Jan 05, 2026",
-    amount: 100,
-    status: "Paid",
-    invoice: "INV-2026-003",
-    method: "Mastercard **** 5555",
-    invoiceDate: "Jan 05, 2026",
-    paidDate: "Jan 06, 2026",
-    billToName: "Sarah Johnson",
-    billToEmail: "sarah.j@email.com",
-  },
-  {
-    id: "pay-4",
-    description: "Initial Assessment",
-    date: "Nov 20, 2025",
-    amount: 200,
-    status: "Paid",
-    invoice: "INV-2025-045",
-    method: "Visa **** 4242",
-    invoiceDate: "Nov 20, 2025",
-    paidDate: "Nov 21, 2025",
-    billToName: "Sarah Johnson",
-    billToEmail: "sarah.j@email.com",
-  },
-];
+
 
 type Tab = "upcoming" | "history";
 
 export default function PaymentsPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>(
-    PAYMENT_METHODS_INITIAL,
-  );
+[]  );
 
   const [tab, setTab] = useState<Tab>("upcoming");
 const [payments, setPayments] = useState<any[]>([]);
 const [loading, setLoading] = useState(true);
 const [error, setError] = useState("");
+ const handleCards=async()=>{
+    try{
+        const res=await dashboardApi.getCardsApi("patient");
+        const data=res?.data?.paymentMethods?.map((i:any)=>{
+          return {
+            id: i._id,
+            brand: i.brand,
+            last4: i.last4,
+            expiry: `${i.expMonth}/${i.expYear}`,
+            isDefault: i.isDefault,
+          }
+        })
+        setMethods(data || []);
+    }catch(error){
+        console.error(error);
+    }
+  }
 
 const fetchPayments = async () => {
   try {
@@ -141,8 +114,35 @@ const fetchPayments = async () => {
     setLoading(false);
   }
 };
+const handleDefaultCard=async(cardId:string)=>{
+  try{
+    const res=await dashboardApi.defaultCardApi("patient", cardId);
+    console.log({res});
+    handleCards();
+  }catch(error){
+    console.error(error);
+  }
+}
+const addCard=async(payload:any)=>{
+  try{
+    const dataPayload={
+      cardNumber: payload.last4,
+      expMonth: payload.expiry.split("/")[0],
+      expYear: payload.expiry.split("/")[1],
+      cvv: payload.cvv,
+      cardholderName: payload.cardholderName,
+    }
+    const res=await dashboardApi.postAddCardApi("patient", dataPayload);
+    console.log({res});
+    setMethods((prev) => [...prev, res?.data?.paymentMethod]);
+    handleCards();
+  }catch(error){
+    console.error(error);
+  }
+} 
 
 useEffect(() => {
+  handleCards();  
   fetchPayments();
 }, []);
 const mappedPayments = payments.map((item) => {
@@ -154,7 +154,7 @@ const mappedPayments = payments.map((item) => {
       item?.description ||
       `Session with Dr. ${provider?.firstName || ""} ${provider?.lastName || ""}`,
     date: new Date(item?.createdAt).toDateString(),
-    amount: item?.amount / 100,
+    amount: item?.amount ,
     status: item?.status === "pending" ? "Scheduled" : "Paid",
     method: item?.cardBrand
       ? `${item?.cardBrand} **** ${item?.cardLast4}`
@@ -166,12 +166,17 @@ const filteredPayments = mappedPayments.filter((p) => {
   if (tab === "upcoming") return p.status === "Scheduled";
   return p.status === "Paid";
 });
-  
-
-  function setAsDefault(id: string) {
-    setMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === id })));
+ 
+ 
+ const handleDeleteCardApi=async(cardId:string)=>{
+  try{
+    const res=await dashboardApi.deleteCardApi("patient", cardId);
+    console.log({res});
+    handleCards();
+  }catch(error){
+    console.error(error);
   }
-
+}
   return (
     <div className="space-y-6 h-full">
       {/* header */}
@@ -216,7 +221,9 @@ const filteredPayments = mappedPayments.filter((p) => {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Payment Methods</h2>
           <AddPaymentMethodDialog
-            onAdd={(method) => setMethods((prev) => [...prev, method])}
+            onAdd={(method) => {
+              console.log({method});addCard(method)
+              }}
           />
         </div>
         <div className="mt-2 gap-5 grid grid-cols-1 md:grid-cols-2">
@@ -224,7 +231,8 @@ const filteredPayments = mappedPayments.filter((p) => {
             <PaymentMethodCard
               key={m.id}
               method={m}
-              onSetDefault={() => setAsDefault(m.id)}
+              onDelete={() => handleDeleteCardApi(m.id)}
+              onSetDefault={() => handleDefaultCard(m.id)}
             />
           ))}
         </div>

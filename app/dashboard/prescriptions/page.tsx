@@ -23,18 +23,15 @@ interface PrescriptionSummaryCard {
 
 export default function PrescriptionsPage() {
   const [tab, setTab] = useState<PrescriptionTab>("active");
-const [prescriptionsData, setPrescriptionsData] = useState<any[]>([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState("");
- 
-useEffect(() => {
+  const [prescriptionsData, setPrescriptionsData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const fetchPrescriptions = async () => {
     try {
       setLoading(true);
       setError("");
 
       const res = await dashboardApi.getActivePrescriptions("patient"); // apni API call
-     console.log({res})
       setPrescriptionsData(res?.data?.prescriptions || []);
     } catch (err) {
       console.error(err);
@@ -44,59 +41,77 @@ useEffect(() => {
     }
   };
 
-  fetchPrescriptions();
-}, []);
-const mappedPrescriptions: PrescriptionItem[] = useMemo(() => {
-  return prescriptionsData.map((item: any) => {
-    const med = item.medications?.[0];
+  useEffect(() => {
 
-    return {
-      id: item._id,
-      medication: med?.name || "",
-      dosage: med?.dosage || "",
-      schedule: med?.frequency || "",
-      instructions: item?.instructions || "",
-      provider: `${item?.providerId?.firstName} ${item?.providerId?.lastName}`,
-      prescribedDate: dayjs(item?.date).format("MMM DD, YYYY"),
-      nextRefillDate: item?.nextRefillDate
-        ? dayjs(item?.nextRefillDate).format("MMM DD, YYYY")
-        : "",
-      refillsLeft: item?.refillsRemaining || 0,
-      status: item?.status === "active" ? "active" : "history",
-    };
-  });
-}, [prescriptionsData]);
-const summaryCards = useMemo(() => {
-  const active = mappedPrescriptions.filter((p) => p.status === "active");
-  const refills = active.reduce((sum, p) => sum + p.refillsLeft, 0);
+    fetchPrescriptions();
+  }, []);
+  const mappedPrescriptions: PrescriptionItem[] = useMemo(() => {
+    return prescriptionsData.map((item: any) => {
+      const med = item.medications?.[0];
 
-  return [
-    {
-      id: "active",
-      label: "Active Medications",
-      value: active.length,
-      icon: Pill,
-      iconClassName: "bg-blue-100 text-blue-600",
-    },
-    {
-      id: "refills",
-      label: "Refills Available",
-      value: refills,
-      icon: RefreshCcw,
-      iconClassName: "bg-emerald-100 text-emerald-600",
-    },
-    {
-      id: "expiring",
-      label: "Expiring Soon",
-      value: 0,
-      icon: AlertCircle,
-      iconClassName: "bg-amber-100 text-amber-600",
-    },
-  ];
-}, [mappedPrescriptions]);
-const filteredPrescriptions = useMemo(() => {
-  return mappedPrescriptions.filter((item) => item.status === tab);
-}, [tab, mappedPrescriptions]);
+      return {
+        id: item._id,
+        medication: med?.name || "",
+        dosage: med?.dosage || "",
+        schedule: med?.frequency || "",
+        instructions: item?.instructions || "",
+        provider: `${item?.providerId?.firstName} ${item?.providerId?.lastName}`,
+        prescribedDate: dayjs(item?.date).format("MMM DD, YYYY"),
+        nextRefillDate: item?.nextRefillDate
+          ? dayjs(item?.nextRefillDate).format("MMM DD, YYYY")
+          : "",
+        endDate: item?.endDate
+          ? dayjs(item?.endDate).format("MMM DD, YYYY")
+          : "",
+        refillsLeft: item?.refillsRemaining || 0,
+        status: item?.status === "active" ? "active" : "history",
+      };
+    });
+  }, [prescriptionsData]);
+  const [count, setCount] = useState<any>({})
+  const handlePrescriptionCount = async () => {
+    try {
+      const res = await dashboardApi.getPrefillCount("patient");
+      setCount(res?.data ?? {})
+    }
+    catch (err) {
+      console.error(err);
+    }
+  }
+  useEffect(() => {
+    handlePrescriptionCount()
+  }, [])
+  const summaryCards = useMemo(() => {
+    const active = mappedPrescriptions.filter((p) => p.status === "active");
+    const refills = active.reduce((sum, p) => sum + p.refillsLeft, 0);
+
+    return [
+      {
+        id: "active",
+        label: "Active Medications",
+        value: count?.active ?? 0,
+        icon: Pill,
+        iconClassName: "bg-blue-100 text-blue-600",
+      },
+      {
+        id: "refills",
+        label: "Refills Available",
+        value: count?.refillRequested ?? 0,
+        icon: RefreshCcw,
+        iconClassName: "bg-emerald-100 text-emerald-600",
+      },
+      {
+        id: "expiring",
+        label: "Expiring Soon",
+        value: count?.expired ?? 0,
+        icon: AlertCircle,
+        iconClassName: "bg-amber-100 text-amber-600",
+      },
+    ];
+  }, [mappedPrescriptions]);
+  const filteredPrescriptions = useMemo(() => {
+    return mappedPrescriptions.filter((item) => item.status === tab);
+  }, [tab, mappedPrescriptions]);
   return (
     <div className="space-y-5">
       <div>
@@ -150,26 +165,26 @@ const filteredPrescriptions = useMemo(() => {
         ))}
       </div>
 
-    
+
       <div className="space-y-3">
-  {loading ? (
-    <Card className="px-4 py-8 text-center text-sm text-muted-foreground animate-pulse">
-      Loading prescriptions...
-    </Card>
-  ) : error ? (
-    <Card className="px-4 py-8 text-center text-sm text-red-500">
-      {error}
-    </Card>
-  ) : filteredPrescriptions.length === 0 ? (
-    <Card className="px-4 py-8 text-center text-sm text-muted-foreground">
-      No prescriptions available in this tab.
-    </Card>
-  ) : (
-    filteredPrescriptions.map((item) => (
-      <PrescriptionCard key={item.id} item={item} />
-    ))
-  )}
-</div>
+        {loading ? (
+          <Card className="px-4 py-8 text-center text-sm text-muted-foreground animate-pulse">
+            Loading prescriptions...
+          </Card>
+        ) : error ? (
+          <Card className="px-4 py-8 text-center text-sm text-red-500">
+            {error}
+          </Card>
+        ) : filteredPrescriptions.length === 0 ? (
+          <Card className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No prescriptions available in this tab.
+          </Card>
+        ) : (
+          filteredPrescriptions.map((item) => (
+            <PrescriptionCard key={item.id} item={item} fetchPrescriptions={fetchPrescriptions} />
+          ))
+        )}
+      </div>
     </div>
   );
 }

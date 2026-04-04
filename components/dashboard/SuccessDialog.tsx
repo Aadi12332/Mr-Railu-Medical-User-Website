@@ -4,12 +4,14 @@ import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 
 import checkCircleImg from "@/assets/check-circle.png";
+import { useRouter } from "next/navigation";
 
 export default function SuccessDialog({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const navigate=useRouter()
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -48,7 +50,7 @@ export default function SuccessDialog({
             Successfully Scheduled.
           </p>
 
-          <Button size="lg" className="w-full bg-gradient-dash">
+          <Button size="lg" className="w-full bg-gradient-dash" onClick={()=>navigate.push('/dashboard/appointments')}>
             View Your Appointment
           </Button>
         </div>

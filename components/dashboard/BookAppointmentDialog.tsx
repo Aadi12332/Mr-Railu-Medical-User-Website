@@ -20,6 +20,7 @@ import ConfirmStep from "@/components/dashboard/steps/ConfirmStep";
 import PaymentDialog from "@/components/dashboard/PaymentDialog";
 import { Provider } from "@/components/dashboard/types";
 import { patientApi } from "@/api/patient.api";
+import { toast } from "react-toastify";
 
 export default function BookAppointmentDialog({
   provider,
@@ -35,15 +36,20 @@ export default function BookAppointmentDialog({
   useEffect(() => {
     setSelectedTime(null);
   }, [date]);
-  console.log({provider})
-const handleBooking=async()=>{
- const res=await patientApi.bookAppointment({
+  const handleBooking=async()=>{
+  try{
+const res=await patientApi.bookAppointment({
   providerId: provider._id,
   date: date?.toISOString(),
   time: selectedTime,
   type:sessionType,
   // reason,
  })
+ toast.success(res?.data?.message || "Appointment booked successfully")
+  }catch(error:any){
+    toast.error(error?.response?.data?.message || "Failed to book appointment")
+  }
+ 
 }
   return (
     <Dialog>

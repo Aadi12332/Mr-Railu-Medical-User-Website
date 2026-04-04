@@ -32,8 +32,8 @@ export default function DetailsStep({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="video">Video Call</SelectItem>
-            <SelectItem value="inperson">In-person</SelectItem>
-            <SelectItem value="phone">Phone</SelectItem>
+            <SelectItem value="chat">Chat</SelectItem>
+            <SelectItem value="call">Phone</SelectItem>
           </SelectContent>
         </Select>
       </div>

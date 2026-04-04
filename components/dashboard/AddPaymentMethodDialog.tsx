@@ -67,9 +67,10 @@ export default function AddPaymentMethodDialog({
     const newMethod: PaymentMethod = {
       id: crypto.randomUUID(),
       brand: detectBrand(digits),
-      last4: digits.slice(-4),
+      last4: digits,
       expiry: values.expiry,
       isDefault: false,
+      cardholderName: values.cardholderName,
     };
 
     onAdd(newMethod);

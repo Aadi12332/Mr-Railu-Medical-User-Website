@@ -49,7 +49,6 @@ export default function RequestRefillDialog({
   });
 
   const onSubmit = (values: RefillFormValues) => {
-    console.log("refill request", prescription.id, values);
     if (handleRefill) {
       handleRefill(prescription.id, values);
     }

@@ -32,7 +32,7 @@ function getRefillBadgeClassName(refillsLeft: number) {
   return refillBadgeColorMap.medium;
 }
 
-export function PrescriptionCard({ item }: { item: PrescriptionItem }) {
+export function PrescriptionCard({ item,fetchPrescriptions }: { item: PrescriptionItem,fetchPrescriptions:any }) {
   const isHistory = item.status === "history";
 const handleRefill = async (id:any,values:any) => {
   try {
@@ -42,15 +42,15 @@ const handleRefill = async (id:any,values:any) => {
       role?.toLocaleLowerCase(),
       id,
       {
-        message: values.notes || "Need refill", // ya form se lo
+        message: values.notes || "Need refill",
       }
     );
 
     toast.success("Refill requested successfully");
+    fetchPrescriptions();
     // onClose();
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to request refill");
+  } catch (err:any) {
+    toast.error(err?.message || "Failed to request refill");
   }
 };
 const handleDownload = async (id: any) => {

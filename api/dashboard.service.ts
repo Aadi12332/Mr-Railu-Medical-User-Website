@@ -4,6 +4,9 @@ export const dashboardApi = {
   getDashboardData: (role: string) => {
     return axios.get(`/v1/${role}/dashboard`);
   },
+  getHomepageData: () => {
+    return axios.get(`/v1/public/homepage`);
+  },
   getSessionData: (role: string) => {
     return axios.get(`/v1/${role}/sessions`);
   },
@@ -19,6 +22,12 @@ export const dashboardApi = {
   getMyProviders: (role: string) => {
     return axios.get(`/v1/${role}/providers/my-providers`);
   },
+  getMoodOptions: (role: string) => {
+    return axios.get(`/v1/${role}/mood/options`);
+  },  
+  getMoodHistory: (role: string) => {
+    return axios.get(`/v1/${role}/mood/`);
+  },  
   postRequestRefill: (role: string, prescriptionId: string, payload: any) => {
     return axios.post(
       `/v1/${role}/prescriptions/${prescriptionId}/request-refill`,
@@ -33,6 +42,21 @@ export const dashboardApi = {
   },
   getPaymentById: (role: string, paymentId: string) => {
     return axios.get(`/v1/${role}/payments/${paymentId}`);
+  },
+  getPrefillCount: (role: string) => {
+    return axios.get(`/v1/${role}/prescriptions/counts`);
+  },
+   getCardsApi: (role: string) => {
+    return axios.get(`/v1/${role}/payment-methods`);
+  },
+  postAddCardApi: (role: string, payload: any) => {
+    return axios.post(`/v1/${role}/payment-methods`, payload);
+  },
+  defaultCardApi: (role: string, cardId: string) => {
+    return axios.put(`/v1/${role}/payment-methods/${cardId}/default`);
+  },
+  deleteCardApi: (role: string, cardId: string) => {
+    return axios.delete(`/v1/${role}/payment-methods/${cardId}`);
   },
   downloadPrescription: (role: string, prescriptionId: string) => {
     return axios.get(`/v1/${role}/prescriptions/${prescriptionId}/download`, {

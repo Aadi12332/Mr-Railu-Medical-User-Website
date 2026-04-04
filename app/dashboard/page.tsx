@@ -22,16 +22,67 @@ import {
   ArrowLeft,
   Download,
   RefreshCw,
+  RefreshCcw,
 } from "lucide-react";
 import { useAuth } from "@/components/context/auth.context";
 import { useEffect, useState } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
 import dayjs from "dayjs";
 import { RatingStars } from "@/components/ui/rating";
+import { toast } from "react-toastify";
+import RequestRefillDialog from "@/components/dashboard/RequestRefillDialog";
 
 export default function page() {
   const { user } = useAuth();
+  const [moodOptions, setMoodOptions] = useState<any>([]);
+  const [moodHistory, setMoodHistory] = useState<any>(0);
   const [dashboardData, setDashboardData] = useState<any>({ nextAppointmentLoading: false, nextAppointment: null });
+  const handleRefill = async (id: any, values: any) => {
+    try {
+      const role = localStorage.getItem("role") || "";
+
+      await dashboardApi.postRequestRefill(
+        role?.toLocaleLowerCase(),
+        id,
+        {
+          message: values.notes || "Need refill",
+        }
+      );
+
+      toast.success("Refill requested successfully");
+      // onClose();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to request refill");
+    }
+  };
+  const handleDownload = async (id: any) => {
+    try {
+      const role = localStorage.getItem("role") || "";
+
+      const res: any = await dashboardApi.downloadPrescription(
+        role.toLowerCase(),
+        id
+      );
+      const blob = new Blob([res], { type: "application/pdf" });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `prescription-${id}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Prescription downloaded successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to download prescription");
+    }
+  };
   const handleDashboard = async () => {
     const role =
       typeof localStorage !== "undefined"
@@ -108,26 +159,55 @@ export default function page() {
     }
   };
   const handleMoodChange = async (value: string) => {
-  try {
-    const role =
-      typeof localStorage !== "undefined"
-        ? localStorage.getItem("role")?.toLowerCase()
-        : "";
+    try {
+      const role =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("role")?.toLowerCase()
+          : "";
 
-    const payload = {
-      mood: value,
-        "moodScore": 8
-    };
+      const payload = {
+        "moodScore": value
+      };
 
-    const res = await dashboardApi.postMoodApi(role || "", payload);
+      const res = await dashboardApi.postMoodApi(role || "", payload);
 
-    console.log("Mood Response:", res);
+      handleMoodHistory();
+    } catch (error: any) {
+      console.error("Mood API Error:", error);
+    }
+  };
+  const handleMoodOption = async () => {
+    try {
+      const role =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("role")?.toLowerCase()
+          : "";
 
-  } catch (error: any) {
-    console.error("Mood API Error:", error);
+      const res = await dashboardApi.getMoodOptions(role || "");
+      setMoodOptions(res?.data?.options ?? []);
+
+
+    } catch (error: any) {
+      console.error("Mood Options API Error:", error);
+    }
   }
-};
+  const handleMoodHistory = async () => {
+    try {
+      const role =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("role")?.toLowerCase()
+          : "";
+
+      const res = await dashboardApi.getMoodHistory(role || "");
+      const selected = res?.data?.moodLogs?.[0]?.moodScore;
+      setMoodHistory(selected ?? 0);
+    } catch (error: any) {
+      console.error("Mood History API Error:", error);
+    }
+  }
   useEffect(() => {
+    handleMoodOption();
+    handleMoodHistory();
     handleDashboard()
   }, []);
   return (
@@ -359,16 +439,17 @@ export default function page() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Select onValueChange={handleMoodChange}>
+            <Select onValueChange={handleMoodChange} value={moodHistory}>
               <SelectTrigger className="w-full bg-accent mt-5">
                 <SelectValue placeholder="Select your mood" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="happy">Happy</SelectItem>
-                <SelectItem value="anxious">Anxious</SelectItem>
-                <SelectItem value="sad">Sad</SelectItem>
-                <SelectItem value="neutral">Neutral</SelectItem>
+                {(moodOptions ?? []).map((option: any) => (
+                  <SelectItem key={option.score} value={option.score}>
+                    {option.emoji} - {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -395,7 +476,7 @@ export default function page() {
             <CardTitle>Recent Appointments</CardTitle>
           </CardHeader>
 
-          <CardContent className="overflow-x-auto p-0">
+          <CardContent className="overflow-x-auto max-h-[450px] overflow-y-auto p-0">
             <table className="w-full">
               <thead className="text-sm text-muted-foreground">
                 <tr className="border-b">
@@ -484,7 +565,7 @@ export default function page() {
               ))}
             </CardContent>
           ) :
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 max-h-[450px] overflow-y-auto">
               {dashboardData?.prescriptions?.map((prescription: any) =>
                 prescription?.medications?.map((med: any) => (
                   <div key={med._id} className="rounded-lg bg-muted p-4">
@@ -505,14 +586,21 @@ export default function page() {
                     </div>
 
                     <div className="mt-4 flex items-center gap-3">
-                      <Button variant="outline" className="flex-1">
+                      <RequestRefillDialog
+                        prescription={prescription}
+                        handleRefill={handleRefill}
+                        trigger={
+                          <Button className="bg-gradient-dash text-white flex-1 hover:opacity-90" >
+                            <RefreshCcw className="mr-1.5 size-3.5" />
+                            Refill
+                          </Button>
+                        }
+                      />
+                       <Button variant="outline" className="flex-1" onClick={() => handleDownload(prescription._id)} disabled={dashboardData?.nextAppointmentLoading}>
                         <Download className="mr-2 size-4" /> Download
                       </Button>
-
-                      <Button className="bg-gradient-dash flex-1">
-                        <RefreshCw className="mr-2 size-4" /> Refill
-                      </Button>
                     </div>
+
                   </div>
                 ))
               )}

@@ -126,9 +126,9 @@ export default function TrustedProvidersSection() {
             ]}
           >
             <CarouselContent className="-ml-4">
-              {[...providers, ...providers].map((p) => (
+              {[...providers, ...providers].map((p, index) => (
                 <CarouselItem
-                  key={p.id}
+                  key={index}
                   className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/4"
                 >
                   {renderCard(p)}
