@@ -7,6 +7,24 @@ export const dashboardApi = {
   getHomepageData: () => {
     return axios.get(`/v1/public/homepage`);
   },
+  getNotification: (params?: { filter?: string; page?: number; limit?: number }) => {
+    return axios.get(`/v1/patient/notifications`, {
+      params: {
+        filter: params?.filter || "all",
+        page: params?.page || 1,
+        limit: params?.limit || 20,
+      },
+    });
+  },
+  getNotificationRead: (notificationId: string) => {
+    return axios.put(`/v1/patient/notifications/${notificationId}/read`);
+  },
+  getNotificationDelete: (notificationId: string) => {
+    return axios.delete(`/v1/patient/notifications/${notificationId}`);
+  },
+  getNotificationReadAll: () => {
+    return axios.put(`/v1/patient/notifications/read-all`);
+  },
   getSessionData: (role: string) => {
     return axios.get(`/v1/${role}/sessions`);
   },

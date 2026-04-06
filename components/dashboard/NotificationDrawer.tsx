@@ -1,114 +1,112 @@
-import { useState } from "react"
-import { Bell, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Bell, Trash2, X } from "lucide-react"
+import { dashboardApi } from "@/api/dashboard.service"
 
 type Notification = {
-  id: number
+  id: string
   title: string
   description: string
   time: string
   read: boolean
 }
 
-const initialData: Notification[] = [
-  {
-    id: 1,
-    title: "Appointment Confirmed",
-    description: "Your session with Dr. Emily Chen is confirmed for today at 2 PM",
-    time: "2 min ago",
-    read: false,
-  },
-  {
-    id: 2,
-    title: "Prescription Updated",
-    description: "Your prescription has been updated by Dr. Michael Ross",
-    time: "10 min ago",
-    read: false,
-  },
-  {
-    id: 3,
-    title: "Session Completed",
-    description: "Your therapy session was successfully completed",
-    time: "1 hour ago",
-    read: true,
-  },
-  {
-    id: 4,
-    title: "New Message",
-    description: "You have received a message from your therapist",
-    time: "2 hours ago",
-    read: false,
-  },
-  {
-    id: 5,
-    title: "Payment Successful",
-    description: "Your payment of $50 has been successfully processed",
-    time: "3 hours ago",
-    read: true,
-  },
-  {
-    id: 6,
-    title: "Upcoming Reminder",
-    description: "Reminder: You have an appointment tomorrow at 10 AM",
-    time: "5 hours ago",
-    read: false,
-  },
-  {
-    id: 7,
-    title: "Therapy Plan Updated",
-    description: "Your mental health plan has been updated",
-    time: "Yesterday",
-    read: true,
-  },
-  {
-    id: 8,
-    title: "Video Session Link Ready",
-    description: "Your video session link is now available",
-    time: "Yesterday",
-    read: false,
-  },
-  {
-    id: 9,
-    title: "Profile Updated",
-    description: "Your profile information has been successfully updated",
-    time: "2 days ago",
-    read: true,
-  },
-  {
-    id: 10,
-    title: "New Provider Available",
-    description: "A new specialist is available based on your preferences",
-    time: "2 days ago",
-    read: false,
-  },
-  {
-    id: 11,
-    title: "Session Rescheduled",
-    description: "Your session has been moved to a new time slot",
-    time: "3 days ago",
-    read: true,
-  },
-]
-
 export default function NotificationDrawer() {
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all")
-  const [notifications, setNotifications] = useState(initialData)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications((prev) =>
-      prev.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      )
-    )
-  }
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true)
+      setError(null)
 
-  const handleMarkAllAsRead = () => {
+      try {
+        const res = await dashboardApi.getNotification({
+          filter: "all",
+          page: 1,
+          limit: 20,
+        })
+
+        const apiData = res?.data?.notifications || []
+
+        const formattedData: Notification[] = apiData.map((item: any) => ({
+          id: item._id,
+          title: item.title,
+          description: item.message,
+          time: item.timeAgo,
+          read: item.isRead,
+        }))
+
+        setNotifications(formattedData)
+      } catch (err: any) {
+        setError(err?.message || "Something went wrong")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNotifications()
+  }, [])
+
+
+  const [markAllLoading, setMarkAllLoading] = useState(false);
+
+  const handleMarkAllAsRead = async () => {
+    setMarkAllLoading(true);
+
+    try {
+      await dashboardApi.getNotificationReadAll();
+
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true }))
+      );
+    } catch (err: any) {
+      console.error(err?.message || "Failed to mark all as read");
+    } finally {
+      setMarkAllLoading(false);
+    }
+  };
+
+  const [markLoadingId, setMarkLoadingId] = useState<string | null>(null);
+
+  const handleMarkAsRead = async (id: string) => {
+    setMarkLoadingId(id);
+
+    try {
+      await dashboardApi.getNotificationRead(id);
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id ? { ...n, read: true } : n
+        )
+      );
+    } catch (err: any) {
+      console.error(err?.message || "Failed to mark as read");
+    } finally {
+      setMarkLoadingId(null);
+    }
+  };
+
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+  const handleDeleteNotification = async (id: string) => {
+  setDeleteLoadingId(id);
+
+  try {
+    await dashboardApi.getNotificationDelete(id);
+
     setNotifications((prev) =>
-      prev.map((n) => ({ ...n, read: true }))
-    )
+      prev.filter((n) => n.id !== id)
+    );
+  } catch (err: any) {
+    console.error(err?.message || "Failed to delete notification");
+  } finally {
+    setDeleteLoadingId(null);
   }
+};
 
   const filtered =
     activeTab === "unread"
@@ -143,8 +141,6 @@ export default function NotificationDrawer() {
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
 
-
-
           <button
             onClick={() => setOpen(false)}
             className="p-2 rounded-md hover:bg-gray-100"
@@ -158,8 +154,8 @@ export default function NotificationDrawer() {
             <button
               onClick={() => setActiveTab("all")}
               className={`px-3 py-1 text-xs rounded-md ${activeTab === "all"
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-600"
+                ? "bg-black text-white"
+                : "bg-gray-100 text-gray-600"
                 }`}
             >
               All
@@ -168,16 +164,19 @@ export default function NotificationDrawer() {
             <button
               onClick={() => setActiveTab("unread")}
               className={`px-3 py-1 text-xs rounded-md ${activeTab === "unread"
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-600"
+                ? "bg-black text-white"
+                : "bg-gray-100 text-gray-600"
                 }`}
             >
               Unread
             </button>
           </div>
+
           {unreadCount > 0 && (
             <button
-              onClick={handleMarkAllAsRead}
+              onClick={() => {
+                if (!markAllLoading) handleMarkAllAsRead();
+              }}
               className="text-xs font-medium text-blue-600 hover:underline"
             >
               Mark all as read
@@ -186,29 +185,60 @@ export default function NotificationDrawer() {
         </div>
 
         <div className="p-4 pt-0 space-y-3 overflow-y-auto h-[calc(100%-100px)]">
-          {filtered.length === 0 && (
-            <p className="text-sm text-gray-500 text-center">
+          {loading && (
+            <p className="text-sm text-gray-500 text-center min-h-[200px] flex items-center justify-center">
+              Loading...
+            </p>
+          )}
+
+          {error && (
+            <p className="text-sm text-red-500 text-center min-h-[200px] flex items-center justify-center">
+              {error}
+            </p>
+          )}
+
+          {!loading && !error && filtered.length === 0 && (
+            <p className="text-sm text-gray-500 text-center min-h-[200px] flex items-center justify-center">
               No notifications
             </p>
           )}
 
-          {filtered.map((item) => (
+          {!loading && !error && filtered.map((item) => (
             <div
               key={item.id}
-              onClick={() => !item.read && handleMarkAsRead(item.id)}
-              className={`p-3 rounded-lg border cursor-pointer transition ${item.read
-                  ? "bg-gray-50 border-gray-200"
-                  : "bg-green-50 border-green-200"
+              onClick={() => {
+                if (!item.read && markLoadingId !== item.id) {
+                  handleMarkAsRead(item.id)
+                }
+              }}
+              className={`p-3 rounded-lg border cursor-pointer group transition ${item.read
+                ? "bg-gray-50 border-gray-200"
+                : "bg-green-50 border-green-200"
                 }`}
             >
-              <div className="flex justify-between">
+              <div className="flex justify-between min-h-6">
                 <h4 className="text-sm font-medium">{item.title}</h4>
 
-                {!item.read && (
-                  <span className="text-[10px] px-2 py-0.5 bg-green-600 text-white rounded-full">
-                    New
-                  </span>
-                )}
+                <div className="flex items-center gap-3">
+                  {!item.read && (
+                    <span className="text-[10px] px-2 py-0.5 bg-green-600 text-white rounded-full">
+                      New
+                    </span>
+                  )}
+                  {deleteLoadingId === item.id ? (
+  <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+) : (
+  <Trash2
+    onClick={(e) => {
+      e.stopPropagation();
+      if (deleteLoadingId !== item.id) {
+        handleDeleteNotification(item.id);
+      }
+    }}
+    className="w-0 text-red-400 hover:text-red-600 cursor-pointer group-hover:w-4 group-hover:h-4 transition-all"
+  />
+)}
+                </div>
               </div>
 
               <p className="text-xs text-gray-600 mt-1">
