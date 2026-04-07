@@ -36,25 +36,42 @@ export function ChatWindow({
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-const fetchMessages = async () => {
-  if (!chatId) return;
+  const [conversationData, setConversationData] = useState<any>({});
+  const fetchMessages = async () => {
+    if (!chatId) return;
 
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-    const res = await settingApi.getChatMessage("patient", chatId);
+      const res = await settingApi.getChatMessage("patient", chatId);
 
-    const messagesData = res?.data?.data?.chat?.messages || [];
-setMessages(messagesData);
-    console.log({messages})
-  } catch (err: any) {
-    console.error("Get messages error:", err);
-    setError("Failed to load messages");
-  } finally {
-    setLoading(false);
-  }
-};
+      const messagesData = res?.data?.chat?.messages || [];
+
+      const formattedMessages = messagesData.map((msg: any) => ({
+        id: msg._id,
+        text: msg.content,
+        sender: msg.senderType,
+        time: msg.createdAt,
+        isOwn: msg.senderType === "patient"
+      }));
+      const chat = res?.data?.chat;
+
+      setConversationData({
+        ...activeConversation,
+        providerName: `${chat.providerId.firstName} ${chat.providerId.lastName}`,
+        specialty: chat.providerId.specialty,
+        image: chat.providerId.profileImageUrl,
+        avatarInitials: `${chat.providerId.firstName[0]}${chat.providerId.lastName[0]}`
+      });
+      setMessages(formattedMessages);
+    } catch (err: any) {
+      console.error("Get messages error:", err);
+      setError("Failed to load messages");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (chatId) {
@@ -62,15 +79,14 @@ setMessages(messagesData);
     }
   }, [chatId]);
 
-
   return (
     <section className="w-full flex h-full min-h-[620px] flex-col rounded-xl border bg-card">
       <ChatHeader
-        conversation={activeConversation}
+        conversation={conversationData}
         onClose={onCloseConversation}
       />
       <ChatMessages messages={messages} />
-      <MessageComposer chatId={activeConversation.id} />
+      <MessageComposer chatId={activeConversation.id} fetchMessages={fetchMessages} />
     </section>
   );
 }

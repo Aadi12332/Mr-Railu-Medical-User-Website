@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Paperclip, Send } from "lucide-react";
 
-export function MessageComposer({ chatId }: { chatId: string }) {
+export function MessageComposer({ chatId, fetchMessages }: { chatId: string; fetchMessages: () => void }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,12 +19,13 @@ export function MessageComposer({ chatId }: { chatId: string }) {
       setError("");
 
       await settingApi.sendMessage(
-        { message },
+        { content:message },
         "patient",
         chatId
       );
 
       setMessage("");
+      fetchMessages();
 
     } catch (err: any) {
       console.error("Send message error:", err);

@@ -28,6 +28,9 @@ export const dashboardApi = {
   getSessionData: (role: string) => {
     return axios.get(`/v1/${role}/sessions`);
   },
+  postSessionData: (role: string, payload: any) => {
+    return axios.post(`/v1/${role}/sessions/${payload.sessionId}/join`, payload);
+  },
   getAppointments: (role: string) => {
     return axios.get(`/v1/${role}/appointments`);
   },

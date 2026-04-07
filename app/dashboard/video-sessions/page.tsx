@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, Clock3, Video } from "lucide-react";
 import { useEffect, useState } from "react";
+import VideoCall from "./video";
 
 export default function page() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+const [isVideoSession, setIsVideoSession] = useState(false);
+const [connection,setConnection] = useState<any>(null);
 
   const fetchSession = async () => {
     try {
@@ -63,8 +66,18 @@ export default function page() {
       setChecking(false);
     }
   };
-
-
+  const handleStartSession = async (id: string) => {
+    try {
+      const res = await dashboardApi.postSessionData("patient", { sessionId: id });
+      setIsVideoSession(true);
+      setConnection(res?.data?.connection || null);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+if(isVideoSession) {
+  return <VideoCall connection={connection} />;
+}
   return (
     <div className="space-y-6 h-full">
       <div>
@@ -84,6 +97,7 @@ export default function page() {
             <Button
               variant="secondary"
               className="mt-4 bg-white text-primary hover:bg-white/90"
+            
             >
               <Video className="size-4 mr-2" /> Join Session Now
             </Button>
@@ -160,6 +174,7 @@ export default function page() {
 
                         <Button
                           variant="outline"
+                          onClick={() => handleStartSession(item?._id)}
                           className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
                         >
                           <Video className="size-4 mr-2" /> Join Session

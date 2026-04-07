@@ -18,14 +18,16 @@ export const settingApi = {
   getSupport: (role: string) => {
     return axios.get(`/v1/${role}/support`);
   },
-  getChatList: (role: string) => {
-    return axios.get(`/v1/${role}/chat`);
+  getChatList: (role: string, search: string = "") => {
+    const endPoint = `/v1/${role}/chat`;
+    const params = search ? `/search?q=${search}` : "";
+    return axios.get(`${endPoint}${params}`);
   },
   getChatMessage: (role: string, chatId: string) => {
     return axios.get(`/v1/${role}/chat/${chatId}`);
   },
   sendMessage: (payload: any, role: string, chatId: string) => {
-    return axios.put(`/v1/${role}/chat/${chatId}/message`, payload);
+    return axios.post(`/v1/${role}/chat/${chatId}/message`, payload);
   },
   getRoleProfile: (role: string) => axios.get(`/v1/${role}/profile`),
 };

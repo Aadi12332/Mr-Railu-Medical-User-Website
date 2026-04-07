@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
 type ChatHeaderProps = {
-  conversation: Conversation;
+  conversation: any;
   onClose: () => void;
 };
 
@@ -13,7 +13,17 @@ export function ChatHeader({ conversation, onClose }: ChatHeaderProps) {
     <div className="flex items-center justify-between border-b px-4 py-3">
       <div className="flex items-center gap-3">
         <Avatar className="size-10">
-          <AvatarFallback>{conversation.avatarInitials}</AvatarFallback>
+          <AvatarFallback>
+            {conversation.image ? (
+              <img
+                src={conversation.image}
+                alt={conversation.providerName}
+                className="size-full object-cover rounded-full"
+              />
+            ) : (
+              conversation.avatarInitials
+            )}
+          </AvatarFallback>
         </Avatar>
 
         <div>

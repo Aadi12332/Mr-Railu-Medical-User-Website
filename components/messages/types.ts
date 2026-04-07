@@ -19,4 +19,5 @@ export type Conversation = {
   previewTime: string;
   unreadCount?: number;
   messages: MessageItem[];
+  image?: string;
 };

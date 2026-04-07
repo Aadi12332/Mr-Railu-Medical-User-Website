@@ -11,6 +11,9 @@ type MessagesSidebarProps = {
   onConversationSelect: (conversationId: string) => void;
   loading: boolean;
   error: string;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  
 };
 
 export function MessagesSidebar({
@@ -19,7 +22,9 @@ export function MessagesSidebar({
   onConversationSelect,
   loading,
   error,
-}: MessagesSidebarProps & { loading: boolean; error: string }) {
+  searchQuery,
+  setSearchQuery,
+}: MessagesSidebarProps) {
 
   return (
     <aside className="h-full rounded-xl border bg-card">
@@ -29,6 +34,8 @@ export function MessagesSidebar({
           <Input
             placeholder="Search conversations..."
             className="h-9 bg-muted pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
