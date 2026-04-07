@@ -16,7 +16,6 @@ export const useFetch = (apiCall: any, params?: any) => {
       const result = res?.data?.data || res?.data?.jobs || res?.data?.reviews || [];
       setData(result);
 
-      console.log("Final Data:", result);
     } catch (err) {
       console.error("API Error:", err);
 

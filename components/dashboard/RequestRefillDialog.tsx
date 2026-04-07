@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CheckCircle } from "lucide-react";
 import type { PrescriptionItem } from "./types";
+import PaymentDialog from "@/components/dashboard/PaymentDialog";
 
 const refillSchema = z.object({
   pharmacy: z.string().optional(),
@@ -47,6 +48,8 @@ export default function RequestRefillDialog({
       notes: "",
     },
   });
+
+  console.log({prescription})
 
   const onSubmit = (values: RefillFormValues) => {
     if (handleRefill) {
@@ -78,17 +81,15 @@ export default function RequestRefillDialog({
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            {/* medication summary */}
             <div className="p-4 bg-slate-50 rounded-md">
               <div className="text-sm font-medium">
-                {prescription.medication} {prescription.dosage}
+                {prescription?.medication || prescription?.name} {prescription?.dosage}
               </div>
               <div className="text-xs text-muted-foreground">
-                {prescription.schedule}
+                {prescription?.schedule  || prescription?.frequency}
               </div>
             </div>
 
-            {/* refill info banner */}
             <div className="rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800 flex items-center">
               <CheckCircle className="size-5 mr-2" />
               <div>
@@ -103,7 +104,6 @@ export default function RequestRefillDialog({
               </div>
             </div>
 
-            {/* form fields */}
             <div className="space-y-4">
               <div className="flex flex-col">
                 <Label className="mb-2">Preferred Pharmacy (Optional)</Label>
@@ -140,9 +140,12 @@ export default function RequestRefillDialog({
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" className="bg-gradient-dash">
+            
+            <PaymentDialog>
+              <Button className="bg-gradient-dash">
               Submit Refill Request
             </Button>
+            </PaymentDialog>
           </DialogFooter>
         </form>
       </DialogContent>

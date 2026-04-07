@@ -6,7 +6,6 @@ import { Star } from "lucide-react";
 import { Provider } from "@/components/dashboard/types";
 
 export default function TherapistStep({ provider }: { provider: any }) {
- console.log({provider})
   return (
     <div className="">
       <div className="flex items-center gap-4 bg-accent rounded-lg p-2">

@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 export default function DashHeader() {
   const { user } = useAuth();
   const router=useRouter()
-  console.log({user})
   return (
     <header className="w-full">
       <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">

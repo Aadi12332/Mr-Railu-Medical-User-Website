@@ -210,6 +210,8 @@ export default function page() {
     handleMoodHistory();
     handleDashboard()
   }, []);
+
+
   return (
     <div className="space-y-4 ">
       <div className="flex items-start justify-between gap-4">
@@ -329,7 +331,7 @@ export default function page() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-sm text-muted-foreground">Provider</div>
-                <div className="font-medium">Dr. {dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
+                <div className="font-medium">{dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
               </div>
 
               <div className="flex flex-col items-end">
@@ -361,7 +363,7 @@ export default function page() {
             </Avatar>
 
             <div className="text-center">
-              <div className="font-medium">{dashboardData?.nextAppointmentLoading ? "" : "Dr."} {dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
+              <div className="font-medium">{dashboardData?.nextAppointmentLoading ? "" : ""} {dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
               <div className="text-xs text-muted-foreground">
                 {dashboardData.nextAppointment?.providerId?.specialty ?? ""}
               </div>
@@ -587,7 +589,7 @@ export default function page() {
 
                     <div className="mt-4 flex items-center gap-3">
                       <RequestRefillDialog
-                        prescription={prescription}
+                        prescription={med}
                         handleRefill={handleRefill}
                         trigger={
                           <Button className="bg-gradient-dash text-white flex-1 hover:opacity-90" >

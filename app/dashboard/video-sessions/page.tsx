@@ -7,12 +7,16 @@ import { Card } from "@/components/ui/card";
 import { Calendar, Clock3, Video } from "lucide-react";
 import { useEffect, useState } from "react";
 import VideoCall from "./video";
+import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 
 export default function page() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 const [isVideoSession, setIsVideoSession] = useState(false);
 const [connection,setConnection] = useState<any>(null);
+  const [sessionTab, setSessionTab] = useState<"upcoming" | "completed">("upcoming");
 
   const fetchSession = async () => {
     try {
@@ -29,6 +33,16 @@ const [connection,setConnection] = useState<any>(null);
   useEffect(() => {
     fetchSession();
   }, []);
+
+  const filteredSessions = useMemo(() => {
+  if (!sessions) return [];
+
+  if (sessionTab === "completed") {
+    return sessions.filter((item: any) => item?.status === "completed");
+  }
+
+  return sessions.filter((item: any) => item?.status !== "completed");
+}, [sessions, sessionTab]);
 
   const [checking, setChecking] = useState(false);
   const [status, setStatus] = useState<{
@@ -66,15 +80,19 @@ const [connection,setConnection] = useState<any>(null);
       setChecking(false);
     }
   };
-  const handleStartSession = async (id: string) => {
-    try {
-      const res = await dashboardApi.postSessionData("patient", { sessionId: id });
-      setIsVideoSession(true);
-      setConnection(res?.data?.connection || null);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+const handleStartSession = async (id: string) => {
+  try {
+    const res = await dashboardApi.postSessionData("patient", { sessionId: id });
+
+    setIsVideoSession(true);
+    setConnection(res?.data?.connection || null);
+    toast.success("Session started successfully");
+  } catch (error: any) {
+    toast.error(
+      error?.message || "Failed to start session"
+    );
+  }
+};
 if(isVideoSession) {
   return <VideoCall connection={connection} />;
 }
@@ -113,7 +131,27 @@ if(isVideoSession) {
       </Card>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-medium">Upcoming Sessions</h2>
+        <h2 className="text-lg font-medium">Sessions</h2>
+
+
+<div className="inline-flex rounded-full bg-muted p-1">
+  {(["upcoming", "completed"] as const).map((tabItem) => (
+    <button
+      key={tabItem}
+      onClick={() => setSessionTab(tabItem)}
+      className={cn(
+        "rounded-full px-5 py-1.5 text-sm capitalize transition-all",
+        tabItem === sessionTab
+          ? "bg-gradient-dash text-white"
+          : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {tabItem}
+    </button>
+  ))}
+</div>
+
+
 
         <div className="space-y-3">
           {loading
@@ -137,7 +175,7 @@ if(isVideoSession) {
                   </div>
                 </Card>
               ))
-            : sessions?.map((item: any) => {
+            : filteredSessions?.map((item: any) => {
               const provider = item?.appointmentId?.providerId;
 
               return (

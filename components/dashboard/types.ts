@@ -12,6 +12,8 @@ export type Provider = {
 };
 
 export interface PrescriptionItem {
+  frequency?: string;
+  name?: string;
   id: string;
   medication: string;
   dosage: string;

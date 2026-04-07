@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,17 +13,19 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle2, Lock, ArrowRight } from "lucide-react";
 import SuccessDialog from "./SuccessDialog";
+import { cn } from "@/lib/utils";
 
 export default function PaymentDialog({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [paymentTab, setPaymentTab] = useState<"debit" | "credit">("debit");
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        {/* Header */}
         <DialogHeader className="flex items-center relative">
           <Button
             variant="ghost"
@@ -36,17 +41,31 @@ export default function PaymentDialog({
 
         {/* Payment Form Container */}
         <div className="border border-[#2a9d8f] rounded-2xl p-6 bg-[#f8fbfb]">
+          
           {/* Tabs */}
           <div className="flex gap-3 mb-6">
             <Button
+              onClick={() => setPaymentTab("debit")}
               variant="outline"
-              className="border-[#2a9d8f] text-[#2a9d8f] bg-white hover:bg-[#eef7f6] rounded-lg px-6 font-medium"
+              className={cn(
+                "rounded-lg px-6 font-medium",
+                paymentTab === "debit"
+                  ? "border-[#2a9d8f] text-[#2a9d8f] bg-white"
+                  : "text-slate-500 bg-white hover:bg-[#eef7f6]"
+              )}
             >
               Debit Card
             </Button>
+
             <Button
+              onClick={() => setPaymentTab("credit")}
               variant="ghost"
-              className="text-slate-500 bg-white hover:bg-slate-50 rounded-lg px-6 font-medium"
+              className={cn(
+                "rounded-lg px-6 font-medium",
+                paymentTab === "credit"
+                  ? "border-[#2a9d8f] text-[#2a9d8f] bg-white"
+                  : "text-slate-500 bg-white hover:bg-slate-50"
+              )}
             >
               Credit Card
             </Button>
@@ -54,23 +73,24 @@ export default function PaymentDialog({
 
           {/* Radio and Logos */}
           <div className="flex items-center justify-between mb-6">
-            <RadioGroup defaultValue="credit" className="flex items-center">
+            <RadioGroup defaultValue={paymentTab} className="flex items-center">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem
-                  value="credit"
-                  id="credit"
+                  value={paymentTab}
+                  id={paymentTab}
+                  checked
                   className="text-[#2a9d8f] border-[#2a9d8f] fill-[#2a9d8f]"
                 />
                 <Label
-                  htmlFor="credit"
+                  htmlFor={paymentTab}
                   className="font-semibold text-base text-slate-900"
                 >
-                  Pay with Credit Card
+                  Pay with {paymentTab === "credit" ? "Credit" : "Debit"} Card
                 </Label>
               </div>
             </RadioGroup>
+
             <div className="flex gap-1.5">
-              {/* Card Logos */}
               <div className="h-7 w-11 bg-white border border-slate-200 rounded flex items-center justify-center text-[9px] font-bold text-blue-900">
                 VISA
               </div>
@@ -108,6 +128,7 @@ export default function PaymentDialog({
                   <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2a9d8f]" />
                 </div>
               </div>
+
               <div className="col-span-2 sm:col-span-1 space-y-2">
                 <Label className="text-slate-600 font-medium">
                   Expiration Date

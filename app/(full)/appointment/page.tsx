@@ -15,10 +15,10 @@ export default function AppointmentPage() {
   const [mode, setMode] = useState<"any" | "range">("any");
 
   const initialSlots = [
-    { id: 1, date: "Today", start: "10:00 AM", end: "12:00 PM" },
-    { id: 2, date: "Sep 19", start: "11:30 AM", end: "1:30 PM" },
-    { id: 3, date: "Sep 20", start: "10:30 AM", end: "4:30 PM" },
-    { id: 4, date: "Sep 25", start: "9:30 AM", end: "12:30 PM" },
+    { id: 1, date: "Today", start: "10:00 AM", end: "10:20 AM" },
+    { id: 2, date: "Sep 19", start: "11:30 AM", end: "11:50 AM" },
+    { id: 3, date: "Sep 20", start: "01:30 PM", end: "01:50 PM" },
+    { id: 4, date: "Sep 25", start: "03:30 PM", end: "03:50 PM" },
   ];
 
   const [slots, setSlots] = useState(initialSlots);

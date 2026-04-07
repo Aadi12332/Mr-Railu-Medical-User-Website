@@ -466,7 +466,26 @@ export default function MedicalIntakePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {/* dynamic fields */}
+
+              <Field>
+                <FieldLabel>Concern in brief</FieldLabel>
+
+                <div className="mt-1">
+                  <textarea
+                    // value={newMedicalHistory}
+                    // onChange={(e) => setNewMedicalHistory(e.target.value)}
+                    rows={4}
+                    className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 placeholder:text-muted-foreground"
+                  />
+                </div>
+
+                <div className="mt-2 space-y-1 text-sm text-slate-600">
+                  {(form.getValues("medicalHistory") || []).map((item, i) => (
+                    <div key={i}>{item}</div>
+                  ))}
+                </div>
+              </Field>
+
               <Field>
                 <FieldLabel>List Your Past Medical History</FieldLabel>
                 <div className="flex gap-2 mt-1">
@@ -635,8 +654,8 @@ export default function MedicalIntakePage() {
                     const key = `phq.${index + 1}` as const;
                     const phqError = (
                       form.formState.errors.phq as
-                        | Record<string, { message?: string } | undefined>
-                        | undefined
+                      | Record<string, { message?: string } | undefined>
+                      | undefined
                     )?.[String(index + 1)];
                     return (
                       <Fragment key={index}>

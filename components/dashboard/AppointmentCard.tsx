@@ -46,7 +46,6 @@ export function AppointmentCard({ appointment: app,handleCancelApp }: Appointmen
   const handleCancel = async (id:any) => {
   try {
     const res: any = await patientApi.cancelAppointment(id);
-console.log({res},"=====res")
     if (res?.status) {
       handleCancelApp();
       toast.success(res?.message || "Appointment cancelled successfully");

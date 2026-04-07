@@ -169,7 +169,6 @@ const handleDownload = async (id: any) => {
 
       {!isHistory && (
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {/* open refill dialog using same button as trigger */}
           <RequestRefillDialog
             prescription={item}
             handleRefill={handleRefill}
@@ -180,6 +179,7 @@ const handleDownload = async (id: any) => {
               </Button>
             }
           />
+          
           <Button 
           disabled={!item?.id}
           variant="outline" onClick={()=>handleDownload(item?.id || "")}>

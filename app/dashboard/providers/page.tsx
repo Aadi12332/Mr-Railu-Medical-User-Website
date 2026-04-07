@@ -102,7 +102,6 @@ const ratingValue = Number(p.rating || 0);
 
   return matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange;
 });
-console.log({filteredProviders})
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">

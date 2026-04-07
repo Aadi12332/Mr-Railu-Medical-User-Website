@@ -56,7 +56,6 @@ const openings = [
 ];
 
 export default function CurrentOpeningsSection({loading,error,careers}: {loading: boolean; error: string | null; careers: any}) {
-  console.log({careers})
   return (
     <section id="openings" className="py-16 bg-white">
       <Container>

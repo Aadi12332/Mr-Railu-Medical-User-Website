@@ -63,7 +63,6 @@ export function NotificationsSettingsForm({
   }, [form]);
 
   async function handleSubmit(values: NotificationsFormValues) {
-    console.log("notifications saved", values?.emailNotifications);
     try{
        await settingApi.updateNotifications({
           email: values?.emailNotifications ,
