@@ -8,6 +8,9 @@ export type MessageItem = {
 };
 
 export type Conversation = {
+  lastMessage: string;
+  lastMessageAt: string | number | Date;
+  providerId: any;
   id: string;
   providerName: string;
   specialty: string;

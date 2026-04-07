@@ -1,19 +1,52 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ChatWindow } from "@/components/messages/ChatWindow";
 import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
 import { conversations } from "@/components/messages/messages-data";
+import { settingApi } from "@/api/setting.api";
 
 export default function MessagesPage() {
   const [activeConversationId, setActiveConversationId] = useState<
     string | undefined
   >(undefined);
 
-  const activeConversation = useMemo(
-    () => conversations.find((item) => item.id === activeConversationId),
-    [activeConversationId],
-  );
+  
+  const [chatList, setChatList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+const activeConversation = useMemo(
+  () =>
+    chatList.find(
+      (item) => String(item.id || item._id) === String(activeConversationId)
+    ),
+  [activeConversationId, chatList],
+);
+
+const fetchChatList = async () => {
+  try {
+    setLoading(true);
+    setError("");
+
+    const res = await settingApi.getChatList("patient");
+
+    const normalizedChats = (res?.data?.chats || []).map((chat: any) => ({
+      ...chat,
+      id: chat.id || chat._id,
+    }));
+
+    setChatList(normalizedChats);
+  } catch (err: any) {
+    console.error("Chat list error:", err);
+    setError("Failed to load chats");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
+    fetchChatList();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -25,25 +58,26 @@ export default function MessagesPage() {
       </header>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-        {/* sidebar should be hidden on small screens when a convo is active */}
         <div
           className={`${activeConversationId ? "hidden" : "block"} xl:block`}
         >
           <MessagesSidebar
-            conversations={conversations}
+            chatList={chatList}
+            loading={loading}
+            error={error}
             activeConversationId={activeConversationId}
             onConversationSelect={setActiveConversationId}
           />
         </div>
 
-        {/* chat window takes full width on mobile when open, otherwise hide until a convo is selected */}
         <div
           className={`${activeConversationId ? "block" : "hidden"} xl:block`}
         >
           <ChatWindow
-            activeConversation={activeConversation}
-            onCloseConversation={() => setActiveConversationId(undefined)}
-          />
+  activeConversation={activeConversation}
+  chatId={activeConversation?.id}
+  onCloseConversation={() => setActiveConversationId(undefined)}
+/>
         </div>
       </div>
     </div>

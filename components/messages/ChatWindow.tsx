@@ -36,25 +36,30 @@ export function ChatWindow({
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+const fetchMessages = async () => {
+  if (!chatId) return;
 
-  const fetchMessages = async () => {
-    if (!chatId) return;
+  try {
+    setLoading(true);
+    setError("");
 
-    try {
-      setLoading(true);
-      setError("");
-      const res = await settingApi.getChatMessage("patient", chatId);
-      setMessages(res?.data?.data?.messages || []);
-    } catch (err: any) {
-      console.error("Get messages error:", err);
-      setError("Failed to load messages");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await settingApi.getChatMessage("patient", chatId);
+
+    const messagesData = res?.data?.data?.chat?.messages || [];
+setMessages(messagesData);
+    console.log({messages})
+  } catch (err: any) {
+    console.error("Get messages error:", err);
+    setError("Failed to load messages");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
-    fetchMessages();
+    if (chatId) {
+      fetchMessages();
+    }
   }, [chatId]);
 
 
@@ -64,7 +69,7 @@ export function ChatWindow({
         conversation={activeConversation}
         onClose={onCloseConversation}
       />
-      <ChatMessages messages={activeConversation.messages} />
+      <ChatMessages messages={messages} />
       <MessageComposer chatId={activeConversation.id} />
     </section>
   );
