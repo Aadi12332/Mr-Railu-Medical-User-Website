@@ -14,6 +14,9 @@ import { settingApi } from "@/api/setting.api";
 import { patientApi } from "@/api/patient.api";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { dashboardApi } from "@/api/dashboard.service";
+import { Badge, Loader2, Trash2 } from "lucide-react";
+import AddPaymentMethodDialog from "../AddPaymentMethodDialog";
 
 interface PaymentMethod {
   id: string;
@@ -43,19 +46,92 @@ export function PaymentSettingsForm({
   onSubmit,
 }: PaymentSettingsFormProps) {
   const [methods, setMethods] = useState<PaymentMethod[]>(
-    paymentMethods.length
-      ? paymentMethods
-      : [
-          {
-            id: "pm_1",
-            brand: "Visa",
-            last4: "4242",
-            expMonth: 12,
-            expYear: 2027,
-            isDefault: true,
-          },
-        ],
-  );
+    []);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const handleCards = async () => {
+    try {
+      const res = await dashboardApi.getCardsApi("patient");
+      const data = res?.data?.paymentMethods?.map((i: any) => {
+        return {
+          id: i._id,
+          brand: i.brand,
+          last4: i.last4,
+          expiry: `${i.expMonth}/${i.expYear}`,
+          isDefault: i.isDefault,
+        }
+      })
+      console.log({ data });
+      setMethods(data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await dashboardApi.getPayments("patient");
+      setPayments(res?.data?.payments || []);
+
+    } catch (err) {
+      console.error("Payment error:", err);
+      setError("Failed to load payments");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleDeleteCardApi = async (cardId: string) => {
+    if (deletingId === cardId) return;
+
+    try {
+      setDeletingId(cardId);
+
+      const res = await dashboardApi.deleteCardApi("patient", cardId);
+      console.log({ res });
+
+      handleCards();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+  console.log({ methods })
+  const handleDefaultCard = async (cardId: string) => {
+    try {
+      const res = await dashboardApi.defaultCardApi("patient", cardId);
+      console.log({ res });
+      handleCards();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  const addCard = async (payload: any) => {
+    try {
+      const dataPayload = {
+        cardNumber: payload.last4,
+        expMonth: payload.expiry.split("/")[0],
+        expYear: payload.expiry.split("/")[1],
+        cvv: payload.cvv,
+        cardholderName: payload.cardholderName,
+      }
+      const res = await dashboardApi.postAddCardApi("patient", dataPayload);
+      setMethods((prev) => [...prev, res?.data?.paymentMethod]);
+      handleCards();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    handleCards();
+    fetchPayments();
+  }, []);
 
   const form = useForm<BillingFormValues>({
     resolver: zodResolver(billingSchema),
@@ -68,30 +144,30 @@ export function PaymentSettingsForm({
 
   async function handleSubmit(values: BillingFormValues) {
     console.log("billing info saved", values);
-    const role = localStorage.getItem("role")||"";
-try{
-   await settingApi.updateSettings({
-              billingAddress: values?.address ,
-              autoPay: values?.autoPay ,
-    
-          },role); 
-              onSubmit?.(values);
+    const role = localStorage.getItem("role") || "";
+    try {
+      await settingApi.updateSettings({
+        billingAddress: values?.address,
+        autoPay: values?.autoPay,
 
-          toast.success("Billing information saved successfully");
-}catch(e){
-  console.log(e);
-  toast.error("Failed to save billing information");
-}
-   
+      }, role);
+      onSubmit?.(values);
+
+      toast.success("Billing information saved successfully");
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to save billing information");
+    }
+
   }
-useEffect(() => {
+  useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await patientApi.getProfile();
         const data = res?.data?.billing;
         form.reset({
-          address: data?.billingAddress ,
-          autoPay: data?.autoPay ,
+          address: data?.billingAddress,
+          autoPay: data?.autoPay,
         });
       } catch { }
     };
@@ -119,34 +195,61 @@ useEffect(() => {
           <CardTitle className="text-base">Payment Methods</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {methods.map((m) => (
+          {methods.map((m: any, idx) => (
             <div
               key={m.id}
-              className={`flex items-center justify-between border rounded-lg p-4 
+              className={`relative flex items-center justify-between border rounded-lg p-4 
                 ${m.isDefault ? "border-primary" : "border-gray-200"}`}
             >
-              <div>
+              <div
+                onClick={() => {
+                  if (deletingId !== m.id) handleDeleteCardApi(m.id);
+                }}
+                className={`absolute top-2 right-2 ${deletingId === m.id
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                  }`}
+              >
+                {deletingId === m.id ? (
+                  <Loader2 className="animate-spin text-red-500" />
+                ) : (
+                  <Trash2 className="size-5 text-red-500" />
+                )}
+              </div>              <div>
                 <p className="font-medium">
                   {m.brand} •••• {m.last4}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Expires {m.expMonth}/{m.expYear}
+                  Expires {m.expiry}
                 </p>
               </div>
-              {m.isDefault && (
-                <span className="text-xs font-semibold text-primary">
-                  Default
-                </span>
-              )}
+
+              <div className="flex items-center gap-2">
+                {m.isDefault ? (
+                  <Badge className="rounded-full px-3 py-1 text-xs">Default</Badge>
+                ) : (
+                  <button
+                    onClick={() => handleDefaultCard(m.id)}
+                    className="text-sm text-emerald-600 hover:underline"
+                  >
+                    Set as Default
+                  </button>
+                )}
+              </div>
             </div>
           ))}
-          <Button
+          {/* <Button
             variant="outline"
             className="w-full border-primary text-primary"
             onClick={handleAddMethod}
           >
             Add New Payment Method
-          </Button>
+          </Button> */}
+          <AddPaymentMethodDialog
+            onAdd={(method) => {
+              console.log({ method }); addCard(method)
+            }}
+          />
         </CardContent>
       </Card>
 

@@ -133,7 +133,6 @@ const addCard=async(payload:any)=>{
       cardholderName: payload.cardholderName,
     }
     const res=await dashboardApi.postAddCardApi("patient", dataPayload);
-    console.log({res});
     setMethods((prev) => [...prev, res?.data?.paymentMethod]);
     handleCards();
   }catch(error){

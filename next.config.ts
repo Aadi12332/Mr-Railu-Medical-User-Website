@@ -12,7 +12,8 @@ const nextConfig: any = {
   },
   experimental: {
     turbo: false
-  }
+  },
+  reactStrictMode: false
 
 };
 

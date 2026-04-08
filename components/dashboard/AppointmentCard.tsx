@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import RescheduleAppointmentDialog from "./RescheduleAppointmentDialog";
 import { patientApi } from "@/api/patient.api";
 import { toast } from "react-toastify";
+import { dashboardApi } from "@/api/dashboard.service";
 
 export interface Appointment {
   id: string;
@@ -39,10 +40,12 @@ export function statusVariants(status: Appointment["status"]) {
 
 interface AppointmentCardProps {
   appointment: Appointment;
-  handleCancelApp:any
+  handleCancelApp:any;
+  handleStartSession:any;
 }
 
-export function AppointmentCard({ appointment: app,handleCancelApp }: AppointmentCardProps) {
+export function AppointmentCard({ appointment: app,handleCancelApp,handleStartSession }: AppointmentCardProps) {
+ 
   const handleCancel = async (id:any) => {
   try {
     const res: any = await patientApi.cancelAppointment(id);
@@ -105,7 +108,7 @@ export function AppointmentCard({ appointment: app,handleCancelApp }: Appointmen
         app.status === "Past") && (
         <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
           {app.status === "Confirmed" && app.type === "Video Call" && (
-            <Button className="w-full flex-1 bg-gradient-dash">
+            <Button className="w-full flex-1 bg-gradient-dash" onClick={() => handleStartSession(app.id)}>
               <Video className="size-4 mr-2" /> Join Session
             </Button>
           )}

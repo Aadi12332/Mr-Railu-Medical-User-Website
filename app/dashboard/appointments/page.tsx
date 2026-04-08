@@ -7,11 +7,15 @@ import {
 } from "@/components/dashboard/AppointmentCard";
 import { Calendar } from "lucide-react";
 import { dashboardApi } from "@/api/dashboard.service";
+import { toast } from "react-toastify";
+import VideoCall from "../video-sessions/video";
 
 export default function AppointmentsPage() {
   const [tab, setTab] = useState<"upcoming" | "past" | "cancelled">("upcoming");
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+const [isVideoSession, setIsVideoSession] = useState(false);
+const [connection,setConnection] = useState<any>(null);
 
   const fetchAppointments = async () => {
     try {
@@ -76,7 +80,22 @@ const handleCancelApp=  () => {
     if (diff === 24 * 60 * 60 * 1000) return "tomorrow";
     return `on ${app.date}`;
   }
+const handleStartSession = async (id: string) => {
+  try {
+    const res = await dashboardApi.postSessionData("patient", { sessionId: id });
 
+    setIsVideoSession(true);
+    setConnection(res?.data?.connection || null);
+    toast.success("Session started successfully");
+  } catch (error: any) {
+    toast.error(
+      error?.message || "Failed to start session"
+    );
+  }
+};
+if(isVideoSession) {
+  return <VideoCall connection={connection} />;
+}
   return (
     <div className="space-y-6 h-full">
       
@@ -130,7 +149,9 @@ const handleCancelApp=  () => {
 
         {!loading &&
           filtered.map((app) => (
-            <AppointmentCard key={app.id} appointment={app} handleCancelApp={handleCancelApp}/>
+            <AppointmentCard 
+            handleStartSession={handleStartSession}
+            key={app.id} appointment={app} handleCancelApp={handleCancelApp}/>
           ))}
       </div>
     </div>

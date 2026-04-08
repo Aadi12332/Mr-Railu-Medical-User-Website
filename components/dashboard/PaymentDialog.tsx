@@ -7,6 +7,8 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useStripe, useElements, Elements, CardElement, CardNumberElement, CardExpiryElement, CardCvcElement } from "@stripe/react-stripe-js";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -14,14 +16,90 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle2, Lock, ArrowRight } from "lucide-react";
 import SuccessDialog from "./SuccessDialog";
 import { cn } from "@/lib/utils";
+import { stripeApi } from "@/api/stripe.api";
+import { stripePromise } from "@/lib/stripe";
 
-export default function PaymentDialog({
+function PaymentDialogWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [paymentTab, setPaymentTab] = useState<"debit" | "credit">("debit");
+  const stripe = useStripe();
+  const elements = useElements();
 
+  const [paymentTab, setPaymentTab] = useState<"debit" | "credit">("debit");
+  const handlePayment = async () => {
+  if (!stripe || !elements) return;
+
+  const card = elements.getElement(CardNumberElement);
+
+  if (!card) {
+    console.error("Card not found");
+    return;
+  }
+
+  const { error, paymentMethod } = await stripe.createPaymentMethod({
+    type: "card",
+    card,
+  });
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+try {
+      const res = await stripeApi.stripeWebhook({
+        type: "payment_intent.succeeded",
+        data: {
+          object: {
+            id: paymentMethod.id,
+            amount: 19900,
+            currency: "usd",
+            status: "succeeded",
+          },
+        },
+      });
+
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+    }
+  console.log(paymentMethod);
+};
+  const handlePayments = async () => {
+    if (!stripe || !elements) return;
+
+    const card = elements.getElement(CardElement);
+
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: "card",
+      card: card!,
+    });
+
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+
+    try {
+      // 👉 fake success simulate kar rahe (jab tak BE ready nahi)
+      const res = await stripeApi.stripeWebhook({
+        type: "payment_intent.succeeded",
+        data: {
+          object: {
+            id: paymentMethod.id,
+            amount: 19900,
+            currency: "usd",
+            status: "succeeded",
+          },
+        },
+      });
+
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -41,7 +119,7 @@ export default function PaymentDialog({
 
         {/* Payment Form Container */}
         <div className="border border-[#2a9d8f] rounded-2xl p-6 bg-[#f8fbfb]">
-          
+
           {/* Tabs */}
           <div className="flex gap-3 mb-6">
             <Button
@@ -120,11 +198,19 @@ export default function PaymentDialog({
                   Card Number
                 </Label>
                 <div className="relative">
-                  <Input
-                    placeholder="1234 5678 9101 3456"
-                    className="bg-white border-slate-200 pr-10 h-11 rounded-xl shadow-sm"
-                    defaultValue="1234 5678 9101 3456"
-                  />
+                  <div className="bg-white border border-slate-200 h-11 rounded-xl shadow-sm px-3 flex items-center">
+                    <CardNumberElement
+                      options={{
+                        style: {
+                          base: {
+                            fontSize: "16px",
+                            color: "#1f2937",
+                          },
+                        },
+                      }}
+                      className="w-full"
+                    />
+                  </div>
                   <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2a9d8f]" />
                 </div>
               </div>
@@ -133,11 +219,17 @@ export default function PaymentDialog({
                 <Label className="text-slate-600 font-medium">
                   Expiration Date
                 </Label>
-                <Input
-                  placeholder="MM/YY"
-                  className="bg-white border-slate-200 h-11 rounded-xl shadow-sm"
-                  defaultValue="MM/YY"
-                />
+                <div className="bg-white border border-slate-200 h-11 rounded-xl shadow-sm px-3 flex items-center">
+                  <CardExpiryElement options={{
+                        style: {
+                          base: {
+                            fontSize: "16px",
+                            color: "#1f2937",
+                          },
+                        },
+                      }}
+                      className="w-full"/>
+                </div>
               </div>
             </div>
 
@@ -146,12 +238,9 @@ export default function PaymentDialog({
                 Card Security Code
               </Label>
               <div className="flex items-center gap-4">
-                <Input
-                  type="password"
-                  placeholder="***"
-                  className="bg-white border-slate-200 w-full max-w-[200px] h-11 rounded-xl shadow-sm"
-                  defaultValue="***"
-                />
+             <div className="bg-white border border-slate-200 h-11 rounded-xl shadow-sm px-3 flex items-center w-full">
+  <CardCvcElement className="w-full" />
+</div>
                 <button className="text-sm text-[#2a9d8f] hover:underline font-medium">
                   What is this?
                 </button>
@@ -173,13 +262,23 @@ export default function PaymentDialog({
 
         {/* Footer */}
         <div className="flex justify-end mt-2">
-          <SuccessDialog>
-            <Button size="lg" className="bg-gradient-dash">
+          {/* <SuccessDialog> */}
+            <Button size="lg" className="bg-gradient-dash" onClick={handlePayment}>
               Submit <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-          </SuccessDialog>
+          {/* </SuccessDialog> */}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+const PaymentDialog = ({ children }: { children: any }) => {
+  return (
+    <Elements stripe={stripePromise}>
+      <PaymentDialogWrapper>
+        {children}
+      </PaymentDialogWrapper>
+    </Elements>
+  );
+};
+export default PaymentDialog;

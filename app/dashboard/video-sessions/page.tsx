@@ -114,8 +114,9 @@ if(isVideoSession) {
             </p>
             <Button
               variant="secondary"
+              disabled={!filteredSessions[0]?._id}
               className="mt-4 bg-white text-primary hover:bg-white/90"
-            
+              onClick={()=>handleStartSession(filteredSessions[0]?._id??"")}
             >
               <Video className="size-4 mr-2" /> Join Session Now
             </Button>

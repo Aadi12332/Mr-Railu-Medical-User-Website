@@ -31,8 +31,12 @@ import dayjs from "dayjs";
 import { RatingStars } from "@/components/ui/rating";
 import { toast } from "react-toastify";
 import RequestRefillDialog from "@/components/dashboard/RequestRefillDialog";
+import VideoCall from "./video-sessions/video";
 
 export default function page() {
+  const [isVideoSession, setIsVideoSession] = useState(false);
+const [connection,setConnection] = useState<any>(null);
+
   const { user } = useAuth();
   const [moodOptions, setMoodOptions] = useState<any>([]);
   const [moodHistory, setMoodHistory] = useState<any>(0);
@@ -211,7 +215,22 @@ export default function page() {
     handleDashboard()
   }, []);
 
+const handleStartSession = async (id: string) => {
+  try {
+    const res = await dashboardApi.postSessionData("patient", { sessionId: id });
 
+    setIsVideoSession(true);
+    setConnection(res?.data?.connection || null);
+    toast.success("Session started successfully");
+  } catch (error: any) {
+    toast.error(
+      error?.message || "Failed to start session"
+    );
+  }
+};
+if(isVideoSession) {
+  return <VideoCall connection={connection} />;
+}
   return (
     <div className="space-y-4 ">
       <div className="flex items-start justify-between gap-4">
@@ -312,6 +331,7 @@ export default function page() {
                 <Button
                   disabled={item?.status === "completed"}
                   className="bg-gradient-dash"
+                  onClick={() => handleStartSession(item?._id)}
                 >
                   <Video className="size-4 mr-2" /> Join Call
                 </Button>

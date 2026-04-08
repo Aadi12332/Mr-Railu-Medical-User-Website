@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, SquarePen } from "lucide-react";
 import type { Appointment } from "./AppointmentCard";
 import { patientApi } from "@/api/patient.api";
+import { toast } from "react-toastify";
 
 interface Slot {
   id: string;
@@ -106,10 +107,13 @@ const handleCancel = async () => {
         appointment.id,
         payload
       );
+            toast.success(res?.message || "Failed to reschedule appointment");
+
       console.log("Reschedule Payload:", payload);
       console.log("API Response:", res);
-    } catch (error) {
+    } catch (error:any) {
       console.error(error);
+      toast.error(error?.message || "Failed to reschedule appointment");
     }
   };
 
