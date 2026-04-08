@@ -31,7 +31,12 @@ import dayjs from "dayjs";
 import { RatingStars } from "@/components/ui/rating";
 import { toast } from "react-toastify";
 import RequestRefillDialog from "@/components/dashboard/RequestRefillDialog";
-import VideoCall from "./video-sessions/video";
+import dynamic from "next/dynamic";
+
+const VideoCall = dynamic(() => import("./video-sessions/video"), {
+  ssr: false,
+  loading: () => <div>Loading video session...</div>
+});
 
 export default function page() {
   const [isVideoSession, setIsVideoSession] = useState(false);
@@ -61,6 +66,7 @@ const [connection,setConnection] = useState<any>(null);
   };
   const handleDownload = async (id: any) => {
     try {
+      if (typeof window === 'undefined') return;
       const role = localStorage.getItem("role") || "";
 
       const res: any = await dashboardApi.downloadPrescription(

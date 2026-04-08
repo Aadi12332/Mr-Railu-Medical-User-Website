@@ -33,7 +33,7 @@ export default function AppointmentPage() {
           variant="ghost"
           size="icon-sm"
           className="-ml-2"
-          onClick={() => window.history.back()}
+          onClick={() => typeof window !== 'undefined' && window.history.back()}
         >
           <ArrowLeft className="h-4 w-4 text-[#4A7C7E]" />
         </Button>

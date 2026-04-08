@@ -102,7 +102,7 @@ export default function OnboardingPage() {
               setStep((step - 1) as 1 | 2 | 3 | 4);
               return;
             }
-            window.history.back();
+            typeof window !== 'undefined' && window.history.back();
           }}
         >
           <ArrowLeft className="h-4 w-4 text-[#4A7C7E]" />

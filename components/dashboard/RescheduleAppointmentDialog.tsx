@@ -103,7 +103,7 @@ const handleCancel = async () => {
     };
 
     try {
-      const res = await patientApi.getRescheduleById(
+      const res:any = await patientApi.getRescheduleById(
         appointment.id,
         payload
       );

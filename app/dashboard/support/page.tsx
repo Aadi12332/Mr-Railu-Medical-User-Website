@@ -37,6 +37,7 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<Ticket[]>([])
 const [loading, setLoading] = useState(false);
 const fetchTickets = async () => {
+  if (typeof window === 'undefined') return;
   const token = window.localStorage.getItem("patientToken")
   if (!token) return
   setLoading(true);

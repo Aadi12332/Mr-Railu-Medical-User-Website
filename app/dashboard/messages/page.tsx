@@ -3,7 +3,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { ChatWindow } from "@/components/messages/ChatWindow";
 import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
-import { conversations } from "@/components/messages/messages-data";
 import { settingApi } from "@/api/setting.api";
 import { useDebounce } from "@/hooks/useDebounce";
 

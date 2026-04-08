@@ -5,7 +5,7 @@ import { Container } from "./ui/container";
 import { SectionHeader } from "./ui/section-header";
 import { publicPageApi } from "@/api/publicpage.api";
 
-export default function SuccessStoriesSection() {
+export default function SuccessStoriesSection(props:any) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

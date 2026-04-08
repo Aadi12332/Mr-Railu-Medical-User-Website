@@ -8,7 +8,12 @@ import {
 import { Calendar } from "lucide-react";
 import { dashboardApi } from "@/api/dashboard.service";
 import { toast } from "react-toastify";
-import VideoCall from "../video-sessions/video";
+import dynamic from "next/dynamic";
+
+const VideoCall = dynamic(() => import("../video-sessions/video"), {
+  ssr: false,
+  loading: () => <div>Loading video session...</div>
+});
 
 export default function AppointmentsPage() {
   const [tab, setTab] = useState<"upcoming" | "past" | "cancelled">("upcoming");

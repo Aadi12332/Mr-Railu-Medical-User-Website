@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, Clock3, Video } from "lucide-react";
 import { useEffect, useState } from "react";
-import VideoCall from "./video";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
+import dynamic from "next/dynamic";
+
+const VideoCall = dynamic(() => import("./video"), {
+  ssr: false,
+  loading: () => <div>Loading video session...</div>
+});
 
 export default function page() {
   const [sessions, setSessions] = useState<any[]>([]);

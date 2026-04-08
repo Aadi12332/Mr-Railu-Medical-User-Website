@@ -6,11 +6,6 @@ import AgoraRTC, {
 } from "agora-rtc-sdk-ng";
 import { useEffect, useRef, useState } from "react";
 
-const client: IAgoraRTCClient = AgoraRTC.createClient({
-  mode: "rtc",
-  codec: "vp8",
-});
-
 type Props = {
   connection: {
     appId: string;
@@ -24,6 +19,7 @@ export default function VideoCall({ connection }: Props) {
   const localRef = useRef<HTMLDivElement | null>(null);
   const remoteRef = useRef<HTMLDivElement | null>(null);
   const initialized = useRef(false);
+  const clientRef = useRef<IAgoraRTCClient | null>(null);
 
   const [localVideoTrack, setLocalVideoTrack] =
     useState<ICameraVideoTrack | null>(null);
@@ -36,7 +32,7 @@ export default function VideoCall({ connection }: Props) {
   const [isCameraOff, setIsCameraOff] = useState(false);
 
   useEffect(() => {
-    if (initialized.current) return;
+    if (initialized.current || typeof window === 'undefined') return;
     initialized.current = true;
 
     let videoTrack: ICameraVideoTrack;
@@ -45,6 +41,13 @@ export default function VideoCall({ connection }: Props) {
     const init = async () => {
       try {
         const { appId, channelName, token, uid } = connection;
+
+        // Initialize client only on client side
+        const client = AgoraRTC.createClient({
+          mode: "rtc",
+          codec: "vp8",
+        });
+        clientRef.current = client;
 
         await client.join(appId, channelName, token, uid);
 
@@ -58,7 +61,7 @@ export default function VideoCall({ connection }: Props) {
 
         videoTrack.play(localRef.current!);
 
-        client.on("user-published", async (user, mediaType) => {
+        client.on("user-published", async (user: any, mediaType: any) => {
           await client.subscribe(user, mediaType);
           setRemoteUser(user);
 
@@ -86,8 +89,10 @@ export default function VideoCall({ connection }: Props) {
     return () => {
       videoTrack?.close();
       audioTrack?.close();
-      client.removeAllListeners();
-      client.leave();
+      if (clientRef.current) {
+        clientRef.current.removeAllListeners();
+        clientRef.current.leave();
+      }
     };
   }, [connection]);
 
@@ -106,8 +111,13 @@ export default function VideoCall({ connection }: Props) {
   const leaveCall = async () => {
     localAudioTrack?.close();
     localVideoTrack?.close();
-    await client.leave();
-    window.location.reload();
+    if (clientRef.current) {
+      await clientRef.current.leave();
+    }
+    
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   };
 
   return (

@@ -51,7 +51,7 @@ export default function AppointmentPaymentPage() {
             variant="ghost"
             size="icon"
             className="absolute  h-10 w-10 rounded-full bg-[#eef7f6] text-primary hover:bg-[#e0f0ef]"
-            onClick={() => window.history.back()}
+            onClick={() => typeof window !== 'undefined' && window.history.back()}
             aria-label="Go back"
           >
             <ArrowLeft className="h-5 w-5" />

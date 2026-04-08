@@ -11,6 +11,8 @@
   "dependencies": {
     "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
+    "@stripe/react-stripe-js": "^6.1.0",
+    "@stripe/stripe-js": "^9.1.0",
     "agora-rtc-sdk-ng": "^4.24.3",
     "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",
