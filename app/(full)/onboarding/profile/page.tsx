@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft, Info } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,7 +24,7 @@ import export3Img from "@/assets/landing/expert-3.png";
 import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
 
-export default function PatientProfilePage() {
+function PatientProfileContent() {
   const { data: bookingFlow, loading: bookingFlowLoading, error: bookingFlowError } = useFetch(publicPageApi.getBookingFlow) as any;
   const [providerData, setProviderData] = useState<any>(null);
   const [providerLoading, setProviderLoading] = useState(false);
@@ -317,5 +317,27 @@ export default function PatientProfilePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PatientProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-lg mx-auto py-8 px-4 w-full">
+          <Card className="shadow-lg gap-0 p-6 space-y-6">
+            <Skeleton className="h-8 w-1/2 mx-auto" />
+            <div className="space-y-4">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+            <Skeleton className="h-12 w-full mt-4" />
+          </Card>
+        </div>
+      }
+    >
+      <PatientProfileContent />
+    </Suspense>
   );
 }
