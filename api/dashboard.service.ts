@@ -45,17 +45,17 @@ export const dashboardApi = {
   },
   getMoodOptions: (role: string) => {
     return axios.get(`/v1/${role}/mood/options`);
-  },  
+  },
   getMoodHistory: (role: string) => {
     return axios.get(`/v1/${role}/mood/`);
-  },  
+  },
   postRequestRefill: (role: string, prescriptionId: string, payload: any) => {
     return axios.post(
       `/v1/${role}/prescriptions/${prescriptionId}/request-refill`,
       payload,
     );
   },
-   getPayments: (role: string) => {
+  getPayments: (role: string) => {
     return axios.get(`/v1/${role}/payments`);
   },
   postMoodApi: (role: string, payload: any) => {
@@ -67,7 +67,7 @@ export const dashboardApi = {
   getPrefillCount: (role: string) => {
     return axios.get(`/v1/${role}/prescriptions/counts`);
   },
-   getCardsApi: (role: string) => {
+  getCardsApi: (role: string) => {
     return axios.get(`/v1/${role}/payment-methods`);
   },
   postAddCardApi: (role: string, payload: any) => {
@@ -83,5 +83,8 @@ export const dashboardApi = {
     return axios.get(`/v1/${role}/prescriptions/${prescriptionId}/download`, {
       responseType: "arraybuffer",
     });
+  },
+  getAiConsent: () => {
+    return axios.get(`/v1/public/legal/ai-usage-consent`);
   },
 };

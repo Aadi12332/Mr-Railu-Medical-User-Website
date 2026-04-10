@@ -40,7 +40,7 @@ const VideoCall = dynamic(() => import("./video-sessions/video"), {
 
 export default function page() {
   const [isVideoSession, setIsVideoSession] = useState(false);
-const [connection,setConnection] = useState<any>(null);
+  const [connection, setConnection] = useState<any>(null);
 
   const { user } = useAuth();
   const [moodOptions, setMoodOptions] = useState<any>([]);
@@ -221,22 +221,22 @@ const [connection,setConnection] = useState<any>(null);
     handleDashboard()
   }, []);
 
-const handleStartSession = async (id: string) => {
-  try {
-    const res = await dashboardApi.postSessionData("patient", { sessionId: id });
+  const handleStartSession = async (id: string) => {
+    try {
+      const res = await dashboardApi.postSessionData("patient", { sessionId: id });
 
-    setIsVideoSession(true);
-    setConnection(res?.data?.connection || null);
-    toast.success("Session started successfully");
-  } catch (error: any) {
-    toast.error(
-      error?.message || "Failed to start session"
-    );
+      setIsVideoSession(true);
+      setConnection(res?.data?.connection || null);
+      toast.success("Session started successfully");
+    } catch (error: any) {
+      toast.error(
+        error?.message || "Failed to start session"
+      );
+    }
+  };
+  if (isVideoSession) {
+    return <VideoCall connection={connection} />;
   }
-};
-if(isVideoSession) {
-  return <VideoCall connection={connection} />;
-}
   return (
     <div className="space-y-4 ">
       <div className="flex items-start justify-between gap-4">
@@ -370,9 +370,9 @@ if(isVideoSession) {
             <div>
               <div className="text-sm text-muted-foreground">Date & Time</div>
               <div className="font-medium mt-1">
-                {dashboardData.nextAppointment?.updatedAt ? dayjs(dashboardData.nextAppointment?.updatedAt).format("MMMM D, YYYY") : ""}
+                {dashboardData.nextAppointment?.date ? dayjs(dashboardData.nextAppointment?.date).format("MMMM D, YYYY") : ""}
                 <br />
-                {dashboardData.nextAppointment?.updatedAt ? dayjs(dashboardData.nextAppointment?.updatedAt).format("h:mm A") : ""}
+                {dashboardData.nextAppointment?.time ? dashboardData.nextAppointment?.time : ""}
               </div>
             </div>
           </CardContent>
@@ -624,7 +624,7 @@ if(isVideoSession) {
                           </Button>
                         }
                       />
-                       <Button variant="outline" className="flex-1" onClick={() => handleDownload(prescription._id)} disabled={dashboardData?.nextAppointmentLoading}>
+                      <Button variant="outline" className="flex-1" onClick={() => handleDownload(prescription._id)} disabled={dashboardData?.nextAppointmentLoading}>
                         <Download className="mr-2 size-4" /> Download
                       </Button>
                     </div>

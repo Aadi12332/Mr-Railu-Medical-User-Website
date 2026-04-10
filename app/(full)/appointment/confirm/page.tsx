@@ -9,7 +9,9 @@ import export1Img from "@/assets/landing/expert-1.png";
 
 export default function ConfirmAppointmentPage() {
   const router = useRouter();
-
+  const patiendDetail = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("patiendDetail") || "{}") : ""
+  const providerData = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("providerData") || "{}") : ""
+  const selectedPlan = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("selectedSlot") || "{}") : ""
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
       <CardHeader className="border-b-0">
@@ -42,26 +44,27 @@ export default function ConfirmAppointmentPage() {
           <div className="p-4">
             <div className="flex gap-4">
               <Avatar className="size-12 rounded-none">
-                <AvatarFallback>AS</AvatarFallback>
-                <AvatarImage src={export1Img.src} />
+                <AvatarFallback className="text-slate-700">{providerData?.firstName?.charAt(0) ?? ""}{providerData?.lastName?.charAt(0) ?? ""}</AvatarFallback>
+                <AvatarImage src={providerData?.profileImageUrl} />
+
               </Avatar>
 
               <div className="flex-1">
                 <div className="font-semibold text-lg text-slate-800">
-                  Dr. Arvind Shah
+                  {providerData?.firstName} {providerData?.specializations?.join(", ")}
                 </div>
-                <div className="text-sm text-slate-500">Cardiologist</div>
+                <div className="text-sm text-slate-500">{providerData?.specialty}</div>
               </div>
             </div>
 
             <div className="mt-3 flex items-center gap-4 text-sm text-slate-600">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-500" />
-                <div>28 Apr 2024</div>
+                <div>{selectedPlan?.date}</div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-slate-500" />
-                <div>11:00 AM</div>
+                <div>{selectedPlan?.start} - {selectedPlan?.end}</div>
               </div>
             </div>
           </div>
@@ -73,7 +76,7 @@ export default function ConfirmAppointmentPage() {
             Patient
           </div>
           <div className="border border-t-0 rounded-b-md p-4 text-slate-700">
-            Rajesh Patel
+            {patiendDetail?.firstName} {patiendDetail?.lastName}
           </div>
         </div>
 
@@ -92,7 +95,7 @@ export default function ConfirmAppointmentPage() {
                 <div className="text-sm text-slate-700">Consultation Fee</div>
               </div>
 
-              <div className="font-semibold">₹ 800</div>
+              <div className="font-semibold">₹ {selectedPlan?.date === "Today" ? providerData?.sessionTypes[0]?.fee : providerData?.suggestedProvider?.sessionTypes[1]?.fee}</div>
             </div>
           </div>
         </div>
@@ -108,7 +111,9 @@ export default function ConfirmAppointmentPage() {
           <Button
             size="lg"
             className="h-12 w-44 bg-gradient-primary text-white hover:opacity-95 ml-auto"
-            onClick={() => router.push("/appointment/payment")}
+            onClick={() => {
+              router.push("/appointment/payment")
+            }}
           >
             Confirm
           </Button>

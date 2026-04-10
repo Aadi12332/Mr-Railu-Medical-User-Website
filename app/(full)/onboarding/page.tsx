@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import StateSelectionStep from "@/components/onboarding/StateSelectionStep";
 import TreatmentsStep from "@/components/onboarding/TreatmentsStep";
 import PatientTypeStep from "@/components/onboarding/PatientTypeStep";
 import SummaryStep from "@/components/onboarding/SummaryStep";
+import { publicPageApi } from "@/api/publicpage.api";
+import { useFetch } from "@/hooks/useFetch";
 
 export default function OnboardingPage() {
+  const { data: bookingFlow, loading: bookingFlowLoading, error: bookingFlowError } = useFetch(publicPageApi.getBookingFlow) as any;
   const [selectedState, setSelectedState] = useState("");
+  const [providerData, setProviderData] = useState<any>(null);
   const [selectedTreatments, setSelectedTreatments] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<"new" | "continue" | null>(
     null,
@@ -38,7 +43,6 @@ export default function OnboardingPage() {
       return next;
     });
   };
-
   const handleContinue = () => {
     // Replace with real navigation / API call later
     console.log(
@@ -86,8 +90,39 @@ export default function OnboardingPage() {
     // step 4 -> final submit (booking)
     handleContinue();
     // route to the appointment booking page inside onboarding
-    router.push("/onboarding/profile");
+    router.push(`/onboarding/profile?providerId=${selectedTreatments[0]}`);
   };
+
+  useEffect(() => {
+    if (step === 3) {
+      publicPageApi.getProviderBySlug(selectedTreatments[0]).then((res) => {
+        console.log({ res })
+        setProviderData(res.data)
+      })
+    }
+  }, [step, selectedTreatments])
+
+  if (bookingFlowLoading) {
+    return (
+      <Card className="shadow-lg gap-0 max-w-lg mx-auto w-full p-6">
+        <Skeleton className="h-8 w-3/4 mx-auto mb-6" />
+        <div className="space-y-4">
+           <Skeleton className="h-16 w-full" />
+           <Skeleton className="h-16 w-full" />
+           <Skeleton className="h-16 w-full" />
+        </div>
+        <Skeleton className="h-12 w-full mt-8" />
+      </Card>
+    );
+  }
+
+  if (bookingFlowError) {
+    return (
+      <Card className="shadow-lg gap-0 max-w-lg mx-auto w-full p-8 text-center text-red-500">
+        <p>Something went wrong loading data. Please try again.</p>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
@@ -121,6 +156,7 @@ export default function OnboardingPage() {
           <TreatmentsStep
             selectedTreatments={selectedTreatments}
             onToggleTreatment={handleCheckboxChange}
+            bookingFlow={bookingFlow?.treatmentStep}
           />
         )}
 
@@ -128,7 +164,12 @@ export default function OnboardingPage() {
         {step === 3 && (
           <PatientTypeStep
             selectedPlan={selectedPlan}
-            onSelectPlan={(plan) => setSelectedPlan(plan)}
+            onSelectPlan={(plan) => {
+              sessionStorage.setItem("plan", plan)
+              setSelectedPlan(plan)
+            }}
+            bookingFlow={bookingFlow}
+            providerData={providerData}
           />
         )}
 
@@ -136,6 +177,9 @@ export default function OnboardingPage() {
           <SummaryStep
             selectedPlan={selectedPlan}
             selectedTreatments={selectedTreatments}
+            bookingFlow={bookingFlow}
+            providerData={providerData}
+
           />
         )}
 
@@ -151,7 +195,7 @@ export default function OnboardingPage() {
 
         <div className="text-center pt-4 text-sm text-gray-500">
           Already Have An Account?{" "}
-          <Link href="/signin" className="text-[#4A7C7E] hover:underline">
+          <Link href="/login" className="text-[#4A7C7E] hover:underline">
             Sign In
           </Link>
         </div>

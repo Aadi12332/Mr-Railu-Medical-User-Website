@@ -5,7 +5,7 @@ import { Container } from "./ui/container";
 import { SectionHeader } from "./ui/section-header";
 import { publicPageApi } from "@/api/publicpage.api";
 
-export default function SuccessStoriesSection(props:any) {
+export default function SuccessStoriesSection(props: any) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +21,19 @@ export default function SuccessStoriesSection(props:any) {
     setError(null);
 
     try {
+      if (props?.data) {
+        const reviewsData = props.data || [];
+        const normalized = reviewsData.map((r: any) => ({
+          authorName: r.authorFirstName,
+          authorCountry: r.providerSpecialty,
+          authorImageUrl: null,
+          rating: r.rating,
+          comment: r.quote,
+        }));
+        setReviews(normalized);
+        return
+
+      }
       const offset = page * itemsPerPage;
 
       const res: any = await publicPageApi.getReview({
@@ -29,6 +42,7 @@ export default function SuccessStoriesSection(props:any) {
       });
 
       const reviewsData = res?.data?.reviews || [];
+
       setReviews(reviewsData);
       setPages(res?.pages || 1);
       setTotalCount(res?.total || 0);
@@ -49,7 +63,6 @@ export default function SuccessStoriesSection(props:any) {
   }, [currentPage]);
 
   // const totalPages = Math.ceil(totalCount / itemsPerPage);
-
   const pagination = useMemo(() => {
     if (page <= 7) {
       return Array.from({ length: page }, (_, i) => i + 1);
@@ -140,7 +153,7 @@ export default function SuccessStoriesSection(props:any) {
           ))}
         </div>
 
-        <nav className="mt-12 flex justify-center items-center space-x-2">
+        {!props?.data && reviews.length >= itemsPerPage && <nav className="mt-12 flex justify-center items-center space-x-2">
           <button
             disabled={currentPage === 1}
             onClick={() => handleClick(currentPage - 1)}
@@ -154,11 +167,10 @@ export default function SuccessStoriesSection(props:any) {
               key={`${p}-${idx}`}
               onClick={() => typeof p === "number" && handleClick(p)}
               disabled={p === "..."}
-              className={`px-4 py-2 rounded-lg border text-sm ${
-                p === currentPage
-                  ? "bg-gradient-primary text-white"
-                  : "bg-white"
-              }`}
+              className={`px-4 py-2 rounded-lg border text-sm ${p === currentPage
+                ? "bg-gradient-primary text-white"
+                : "bg-white"
+                }`}
             >
               {p}
             </button>
@@ -171,7 +183,7 @@ export default function SuccessStoriesSection(props:any) {
           >
             <ChevronRight className="w-4 h-4" />
           </button>
-        </nav>
+        </nav>}
       </Container>
     </section>
   );

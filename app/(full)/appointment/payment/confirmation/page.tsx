@@ -11,7 +11,10 @@ import Image from "next/image";
 
 export default function PaymentConfirmationPage() {
   const router = useRouter();
+  const sessionData = typeof window !== "undefined" ? sessionStorage.getItem("providerData") ? JSON.parse(sessionStorage.getItem("providerData") ?? "") : "" : null;
+  const selectedPlan = typeof window !== "undefined" ? sessionStorage.getItem("selectedSlot") ? JSON.parse(sessionStorage.getItem("selectedSlot") ?? "") : "" : null;
 
+  console.log(sessionData);
   return (
     <div className="max-w-lg mx-auto space-y-5">
       {/* invoice summary */}
@@ -19,19 +22,19 @@ export default function PaymentConfirmationPage() {
         <CardContent className="space-y-2">
           <div className="flex justify-between text-sm text-slate-600">
             <span>Therapist:</span>
-            <span>Dr. Emily Chen</span>
+            <span>{sessionData?.firstName}</span>
           </div>
           <div className="flex justify-between text-sm text-slate-600">
             <span>Date:</span>
-            <span>1/16/2026</span>
+            <span>{selectedPlan?.date}</span>
           </div>
           <div className="flex justify-between text-sm text-slate-600">
             <span>Time:</span>
-            <span>10:00 AM</span>
+            <span>{selectedPlan?.time}</span>
           </div>
           <div className="flex justify-between font-medium">
             <span>Consultation Fee:</span>
-            <span>$120</span>
+            <span>${selectedPlan?.date === "Today" ? sessionData?.sessionTypes[0]?.fee : sessionData?.suggestedProvider?.sessionTypes[1]?.fee}</span>
           </div>
         </CardContent>
       </Card>

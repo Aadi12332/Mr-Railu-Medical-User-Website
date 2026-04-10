@@ -77,7 +77,7 @@ export default function PatientRegisterCard() {
   return (
     <div className="w-full max-w-[520px] mx-auto pb-10">
       <button
-        onClick={() => router.push("/signin")}
+        onClick={() => router.push("/login")}
         className="flex items-center gap-2 text-[#4A5565] mb-5"
       >
         <ArrowLeft size={18} />

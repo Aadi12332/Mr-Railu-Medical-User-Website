@@ -1,7 +1,8 @@
 import Image from "next/image";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
+import dayjs from "dayjs";
 
-export default function HIPAAHero() {
+export default function HIPAAHero({ data }: any) {
   return (
     <section className="py-20 bg-[#F6FFFC] relative overflow-hidden">
       {/* background decorations */}
@@ -22,21 +23,19 @@ export default function HIPAAHero() {
 
       <div className="text-center max-w-3xl mx-auto px-4">
         <div className="inline-block bg-[#CBFBF1] rounded-full px-4 py-1 text-xs font-semibold tracking-wide text-primary">
-          HIPAA Notice
+          {data?.heroBadge}
         </div>
 
         <h1 className="text-4xl md:text-5xl max-w-xl font-semibold tracking-tight mt-2 mx-auto">
-          <span className="text-primary">HIPAA Notice</span> Of Privacy
-          Practices
+          <span className="text-primary">{data?.title}</span>
         </h1>
 
         <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-          This notice explains how your medical information may be used and
-          shared and how you can access it. Please review it carefully.
+          {data?.heroSubtitle}
         </p>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          Effective Date: January 30, 2026
+          Effective Date: {data?.effectiveDate ? dayjs(data?.effectiveDate).format("MMMM DD, YYYY") : ""}
         </p>
       </div>
     </section>

@@ -1,17 +1,15 @@
+"use client"
 import RefundsHero from "@/components/pages/RefundsHero";
 import RefundsDetails from "@/components/pages/RefundsDetails";
-
-export const metadata = {
-  title: "Refunds & Fees Policy",
-  description: "Learn about our refund and fee policies for appointments.",
-};
+import { useFetch } from "@/hooks/useFetch";
+import { publicPageApi } from "@/api/publicpage.api";
 
 export default function RefundPolicyPage() {
+  const { data: refund, loading: refundLoading, error: refundError } = useFetch(publicPageApi.getRefundPolicy) as any;
   return (
     <>
-      <RefundsHero />
-
-      <RefundsDetails />
+      <RefundsHero data={refund?.page} loading={refundLoading} error={refundError} />
+      <RefundsDetails data={refund?.page?.sections} loading={refundLoading} error={refundError} />
     </>
   );
 }

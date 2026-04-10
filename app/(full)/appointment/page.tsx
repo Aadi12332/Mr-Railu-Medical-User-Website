@@ -1,19 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import dateRangeIcon from "@/assets/icons/date-range.svg";
 import dateTodayIcon from "@/assets/icons/date-today.svg";
 import Image from "next/image";
+import { useFetch } from "@/hooks/useFetch";
+import { publicPageApi } from "@/api/publicpage.api";
+import { generateTodaySlots, getRandomSlot } from "@/lib/utils";
 
 export default function AppointmentPage() {
+  const { data: bookingFlow, loading: bookingFlowLoading, error: bookingFlowError } = useFetch(publicPageApi.getBookingFlow) as any;
+  const data = bookingFlow?.appointmentStep ?? {}
+  const modes = data?.modes || [];
   const router = useRouter();
-  const [mode, setMode] = useState<"any" | "range">("any");
+  const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
 
+  const [mode, setMode] = useState<string>(
+    modes?.[0]?.key || ""
+  );
   const initialSlots = [
     { id: 1, date: "Today", start: "10:00 AM", end: "10:20 AM" },
     { id: 2, date: "Sep 19", start: "11:30 AM", end: "11:50 AM" },
@@ -25,6 +35,55 @@ export default function AppointmentPage() {
 
   const removeSlot = (id: number) =>
     setSlots((s) => s.filter((x) => x.id !== id));
+  useEffect(() => {
+    if (mode === "any_time_today") {
+      setSlots(generateTodaySlots());
+    }
+  }, [mode]);
+  const handleNext = () => {
+    let selectedSlot;
+
+    if (mode === "any_time_today") {
+      selectedSlot = getRandomSlot();
+    } else {
+      selectedSlot = slots.find((s) => s.id === selectedSlotId);
+    }
+
+    if (!selectedSlot) {
+      alert("Please select a slot");
+      return;
+    }
+
+    sessionStorage.setItem("selectedSlot", JSON.stringify(selectedSlot));
+
+    router.push("/appointment/confirm");
+  };
+
+  if (bookingFlowLoading) {
+    return (
+      <Card className="shadow-lg gap-0 max-w-lg mx-auto w-full p-6">
+        <Skeleton className="h-8 w-3/4 mx-auto mb-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+           <Skeleton className="h-24 w-full" />
+           <Skeleton className="h-24 w-full" />
+        </div>
+        <div className="space-y-4">
+           <Skeleton className="h-12 w-full" />
+           <Skeleton className="h-12 w-full" />
+           <Skeleton className="h-12 w-full" />
+        </div>
+        <Skeleton className="h-12 w-36 mt-8 ml-auto" />
+      </Card>
+    );
+  }
+
+  if (bookingFlowError) {
+    return (
+      <Card className="shadow-lg gap-0 max-w-lg mx-auto w-full p-8 text-center text-red-500">
+        <p>Something went wrong loading data. Please try again.</p>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
@@ -42,47 +101,43 @@ export default function AppointmentPage() {
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center text-center space-y-4">
           <h1 className="text-2xl font-semibold text-[#2F6F6A] text-center">
-            When Would You Like To Have An Appointment?
+            {data?.title ?? "When Would You Like To Have An Appointment"}
           </h1>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div
-            role="button"
-            onClick={() => setMode("any")}
-            className={`p-6 rounded-xl border transition-colors cursor-pointer text-center flex flex-col items-center ${
-              mode === "any"
+          {modes.map((m: any) => (
+            <div
+              key={m.key}
+              role="button"
+              onClick={() => setMode(m.key)}
+              className={`p-6 rounded-xl border transition-colors cursor-pointer text-center flex flex-col items-center ${mode === m.key
                 ? "border-[#4A7C7E] bg-white shadow-sm"
                 : "border-[#E6F3F1] bg-[#f7fbfa] hover:shadow-sm"
-            }`}
-          >
-            <Image src={dateTodayIcon} alt="Any Time Today" className="mb-3" />
-            <div className="font-semibold text-base text-primary">
-              Any Time Today
-            </div>
-          </div>
+                }`}
+            >
+              <Image
+                src={
+                  m.key === "any_time_today"
+                    ? dateTodayIcon
+                    : dateRangeIcon
+                }
+                alt={m.label}
+                className="mb-3"
+              />
 
-          <div
-            role="button"
-            onClick={() => setMode("range")}
-            className={`p-6 rounded-xl border transition-colors cursor-pointer text-center flex flex-col items-center ${
-              mode === "range"
-                ? "border-[#4A7C7E] bg-white shadow-sm"
-                : "border-[#E6F3F1] bg-[#f7fbfa] hover:shadow-sm"
-            }`}
-          >
-            <Image
-              src={dateRangeIcon}
-              alt="Pick A Time Range"
-              className="mb-3"
-            />
-            <div className="font-semibold text-base">Pick A Time Range</div>
-          </div>
+              <div className="font-semibold text-base text-primary">
+                {m.label}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-3">
           {slots.map((slot) => (
-            <div key={slot.id} className="flex items-center gap-4 ">
+            <div key={slot.id} onClick={() => setSelectedSlotId(slot.id)}
+              className={`flex items-center gap-4 cursor-pointer ${selectedSlotId === slot.id ? "ring-2 ring-[#4A7C7E]" : ""
+                }`}
+            >
               <div className="px-4 py-3 bg-[#F4F9F8] rounded-md text-sm text-slate-700 w-28 text-left">
                 {slot.date}
               </div>
@@ -113,7 +168,7 @@ export default function AppointmentPage() {
 
         <div className="flex justify-end">
           <Button
-            onClick={() => router.push("/appointment/confirm")}
+            onClick={handleNext}
             size="lg"
             className="h-12 w-36 bg-gradient-primary text-white hover:opacity-95"
           >

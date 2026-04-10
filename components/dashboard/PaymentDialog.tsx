@@ -26,63 +26,32 @@ function PaymentDialogWrapper({
 }) {
   const stripe = useStripe();
   const elements = useElements();
-
+  const [isSuccess, setIsSuccess] = useState(false)
   const [paymentTab, setPaymentTab] = useState<"debit" | "credit">("debit");
+
+  const [cardNumberError, setCardNumberError] = useState("");
+  const [cardExpiryError, setCardExpiryError] = useState("");
+  const [cardCvcError, setCardCvcError] = useState("");
   const handlePayment = async () => {
-  if (!stripe || !elements) return;
-
-  const card = elements.getElement(CardNumberElement);
-
-  if (!card) {
-    console.error("Card not found");
-    return;
-  }
-
-  const { error, paymentMethod } = await stripe.createPaymentMethod({
-    type: "card",
-    card,
-  });
-
-  if (error) {
-    console.error(error.message);
-    return;
-  }
-try {
-      const res = await stripeApi.stripeWebhook({
-        type: "payment_intent.succeeded",
-        data: {
-          object: {
-            id: paymentMethod.id,
-            amount: 19900,
-            currency: "usd",
-            status: "succeeded",
-          },
-        },
-      });
-
-      console.log(res);
-    } catch (err) {
-      console.error(err);
-    }
-  console.log(paymentMethod);
-};
-  const handlePayments = async () => {
     if (!stripe || !elements) return;
 
-    const card = elements.getElement(CardElement);
+    const card = elements.getElement(CardNumberElement);
+
+    if (!card) {
+      console.error("Card not found");
+      return;
+    }
 
     const { error, paymentMethod } = await stripe.createPaymentMethod({
       type: "card",
-      card: card!,
+      card,
     });
 
     if (error) {
       console.error(error.message);
       return;
     }
-
     try {
-      // 👉 fake success simulate kar rahe (jab tak BE ready nahi)
       const res = await stripeApi.stripeWebhook({
         type: "payment_intent.succeeded",
         data: {
@@ -94,12 +63,17 @@ try {
           },
         },
       });
+      setIsSuccess(true)
 
-      console.log(res);
+
     } catch (err) {
       console.error(err);
+      setIsSuccess(false)
+
     }
+    console.log(paymentMethod);
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -198,38 +172,50 @@ try {
                   Card Number
                 </Label>
                 <div className="relative">
-                  <div className="bg-white border border-slate-200 h-11 rounded-xl shadow-sm px-3 flex items-center">
+                  <div className={cn("bg-white border h-11 rounded-xl shadow-sm px-3 flex items-center", cardNumberError ? "border-red-500" : "border-slate-200")}>
                     <CardNumberElement
+                      onChange={(e) => setCardNumberError(e.error?.message || "")}
                       options={{
                         style: {
                           base: {
                             fontSize: "16px",
                             color: "#1f2937",
                           },
+                          invalid: {
+                            color: "#ef4444",
+                          }
                         },
                       }}
                       className="w-full"
                     />
                   </div>
-                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2a9d8f]" />
+                  {!cardNumberError && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2a9d8f]" />}
                 </div>
+                {cardNumberError && <p className="text-red-500 text-xs mt-1">{cardNumberError}</p>}
               </div>
 
               <div className="col-span-2 sm:col-span-1 space-y-2">
                 <Label className="text-slate-600 font-medium">
                   Expiration Date
                 </Label>
-                <div className="bg-white border border-slate-200 h-11 rounded-xl shadow-sm px-3 flex items-center">
-                  <CardExpiryElement options={{
-                        style: {
-                          base: {
-                            fontSize: "16px",
-                            color: "#1f2937",
-                          },
+                <div className={cn("bg-white border h-11 rounded-xl shadow-sm px-3 flex items-center", cardExpiryError ? "border-red-500" : "border-slate-200")}>
+                  <CardExpiryElement 
+                    onChange={(e) => setCardExpiryError(e.error?.message || "")}
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#1f2937",
                         },
-                      }}
-                      className="w-full"/>
+                        invalid: {
+                          color: "#ef4444",
+                        }
+                      },
+                    }}
+                    className="w-full" 
+                  />
                 </div>
+                {cardExpiryError && <p className="text-red-500 text-xs mt-1">{cardExpiryError}</p>}
               </div>
             </div>
 
@@ -237,11 +223,28 @@ try {
               <Label className="text-slate-600 font-medium">
                 Card Security Code
               </Label>
-              <div className="flex items-center gap-4">
-             <div className="bg-white border border-slate-200 h-11 rounded-xl shadow-sm px-3 flex items-center w-full">
-  <CardCvcElement className="w-full" />
-</div>
-                <button className="text-sm text-[#2a9d8f] hover:underline font-medium">
+              <div className="flex items-start gap-4">
+                <div className="w-full">
+                  <div className={cn("bg-white border h-11 rounded-xl shadow-sm px-3 flex items-center w-full", cardCvcError ? "border-red-500" : "border-slate-200")}>
+                    <CardCvcElement 
+                      onChange={(e) => setCardCvcError(e.error?.message || "")}
+                      options={{
+                        style: {
+                          base: {
+                            fontSize: "16px",
+                            color: "#1f2937",
+                          },
+                          invalid: {
+                            color: "#ef4444",
+                          }
+                        }
+                      }}
+                      className="w-full" 
+                    />
+                  </div>
+                  {cardCvcError && <p className="text-red-500 text-xs mt-1">{cardCvcError}</p>}
+                </div>
+                <button className="text-sm text-[#2a9d8f] hover:underline font-medium mt-3 shrink-0">
                   What is this?
                 </button>
               </div>
@@ -262,12 +265,14 @@ try {
 
         {/* Footer */}
         <div className="flex justify-end mt-2">
-          {/* <SuccessDialog> */}
-            <Button size="lg" className="bg-gradient-dash" onClick={handlePayment}>
-              Submit <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          {/* </SuccessDialog> */}
+          <Button size="lg" className="bg-gradient-dash" onClick={handlePayment}>
+            Submit <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
+        <SuccessDialog
+          open={isSuccess}
+          onOpenChange={setIsSuccess}
+        />
       </DialogContent>
     </Dialog>
   );

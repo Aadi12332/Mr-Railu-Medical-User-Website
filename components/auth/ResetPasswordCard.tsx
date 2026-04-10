@@ -10,7 +10,7 @@ type Props = {
 
 export default function ResetPasswordCard({
   role,
-  loginPath = "/signin",
+  loginPath = "/login",
 }: Props) {
   const router = useRouter();
   const [token, setToken] = useState("");

@@ -17,6 +17,7 @@ import { Trash2, SquarePen } from "lucide-react";
 import type { Appointment } from "./AppointmentCard";
 import { patientApi } from "@/api/patient.api";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 interface Slot {
   id: string;
@@ -37,24 +38,30 @@ export default function RescheduleAppointmentDialog({
   trigger,
 }: RescheduleAppointmentDialogProps) {
   const router = useRouter();
-const handleCancel = async () => {
-  try {
-    const res = await patientApi.cancelAppointment(appointment.id);
+  const handleCancel = async () => {
+    try {
+      const res = await patientApi.cancelAppointment(appointment.id);
 
-    router.refresh();
-  } catch (error) {
-    console.error(error);
-  }
-};
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const generateSlots = () => {
     const slots: Slot[] = [];
-    const today = new Date();
+    let baseDate = new Date();
+    if (appointment?.date) {
+      const parsed = dayjs(appointment.date);
+      if (parsed.isValid()) {
+        baseDate = parsed.toDate();
+      }
+    }
 
-    for (let d = 0; d < 5; d++) {
-      const date = new Date();
-      date.setDate(today.getDate() + d);
+    for (let d = 0; d < 1; d++) {
+      const date = new Date(baseDate);
+      date.setDate(baseDate.getDate() + d);
 
-      const rawDate = date.toISOString().split("T")[0];
+      const rawDate = dayjs(date).format("YYYY-MM-DD");
 
       for (let h = 9; h < 17; h++) {
         for (let m = 0; m < 60; m += 20) {
@@ -75,7 +82,7 @@ const handleCancel = async () => {
 
           slots.push({
             id: `${rawDate}-${h}-${m}`,
-            date: date.toDateString().slice(0, 10),
+            date: dayjs(date).format("DD MMM YYYY"),
             rawDate,
             start: format12(startDate),
             end: format12(endDate),
@@ -93,7 +100,6 @@ const handleCancel = async () => {
 
   const removeSlot = (id: string) =>
     setSlots((s) => s.filter((x) => x.id !== id));
-
   const handleSchedule = async () => {
     if (!selectedSlot) return;
 
@@ -103,15 +109,15 @@ const handleCancel = async () => {
     };
 
     try {
-      const res:any = await patientApi.getRescheduleById(
+      const res: any = await patientApi.getRescheduleById(
         appointment.id,
         payload
       );
-            toast.success(res?.message || "Failed to reschedule appointment");
+      toast.success(res?.message || "Failed to reschedule appointment");
 
       console.log("Reschedule Payload:", payload);
       console.log("API Response:", res);
-    } catch (error:any) {
+    } catch (error: any) {
       console.error(error);
       toast.error(error?.message || "Failed to reschedule appointment");
     }
@@ -156,11 +162,10 @@ const handleCancel = async () => {
               <div
                 key={slot.id}
                 onClick={() => setSelectedSlot(slot)}
-                className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${
-                  selectedSlot?.id === slot.id
-                    ? "border border-emerald-500 rounded-md"
-                    : ""
-                }`}
+                className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${selectedSlot?.id === slot.id
+                  ? "border border-emerald-500 rounded-md"
+                  : ""
+                  }`}
               >
                 <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-28 text-left">
                   {slot.date}

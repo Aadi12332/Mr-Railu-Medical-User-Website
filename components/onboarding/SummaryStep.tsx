@@ -11,22 +11,26 @@ import export1Img from "@/assets/landing/expert-1.png";
 type SummaryStepProps = {
   selectedPlan: "new" | "continue" | null;
   selectedTreatments: string[];
+  bookingFlow?: any
+  providerData?: any
 };
 
 export default function SummaryStep({
   selectedPlan,
   selectedTreatments,
+  bookingFlow,
+  providerData
 }: SummaryStepProps) {
   return (
     <div className="px-2">
       <div className="flex flex-col items-center text-center space-y-2">
         <Avatar className="size-28 border border-slate-100 bg-white">
-          <AvatarFallback className="text-slate-700">MC</AvatarFallback>
-          <AvatarImage src={export1Img.src} />
+          <AvatarFallback className="text-slate-700">{providerData?.suggestedProvider?.firstName?.charAt(0) ?? ""}{providerData?.suggestedProvider?.lastName?.charAt(0) ?? ""}</AvatarFallback>
+          <AvatarImage src={providerData?.suggestedProvider?.profileImageUrl} />
         </Avatar>
 
-        <div className="text-xl font-semibold">Dr. Michael Chichak, MD</div>
-        <div className="text-sm text-muted-foreground">Medical Director</div>
+        <div className="text-xl font-semibold">{providerData?.suggestedProvider?.firstName} {providerData?.suggestedProvider?.lastName}</div>
+        <div className="text-sm text-muted-foreground">{providerData?.suggestedProvider?.designation}</div>
 
         <div className="mt-2 text-sm text-slate-600">
           {selectedTreatments.length > 0 && (
@@ -40,7 +44,7 @@ export default function SummaryStep({
         </div>
 
         <p className="mt-3 text-lg max-w-sm">
-          We Are Here To Make The Transfer Of Your ADHD Treatment Seamless.
+          {providerData?.suggestedProvider?.bio}
         </p>
 
         <h3 className="mt-4 text-lg font-semibold text-slate-900">

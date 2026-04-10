@@ -1,3 +1,4 @@
+"use client"
 import { useEffect, useState } from "react";
 
 export const useFetch = (apiCall: any, params?: any) => {
@@ -13,7 +14,7 @@ export const useFetch = (apiCall: any, params?: any) => {
       const res = await apiCall(customParams || params);
       console.log("API Response:", res);
 
-      const result = res?.data?.data || res?.data?.jobs || res?.data?.reviews || [];
+      const result = res?.data?.data || res?.data?.jobs || res?.data?.reviews || res?.data || [];
       setData(result);
 
     } catch (err) {

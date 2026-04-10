@@ -21,74 +21,149 @@ import Image from "next/image";
 import userIcon from "@/assets/icons/user-icon.svg";
 import { useEffect, useState } from "react";
 import { publicPageApi } from "@/api/publicpage.api";
+import { useFetch } from "@/hooks/useFetch";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 
 export function Header() {
-  
-  const [navTeams,setNavTeams]=useState([])
-  const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    
-    const fetchPolicy = async () => {
-      setLoading(true);
-      setError(null);
-    
-      try {
-        const res = await publicPageApi.getConditions(); // 👈 API bana lena
-       const pages = res?.data?.pages || [];
+  const { data: headerData, loading: headerLoading, error: headerError } = useFetch(publicPageApi.getDashboardAPI) as any;
 
-const conditionItems = pages.map((item: any) => ({
-  label: item.name,
-  to: `/conditions/${item.slug}`,
-}));
 
-setNavTeams(conditionItems);
-      } catch (err: any) {
-        setError(err?.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    useEffect(() => {
-      fetchPolicy();
-    }, []);
- 
+
+  const navItems =
+    headerData?.header?.navItems
+      ?.slice()
+      ?.sort((a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+      ?.map((item: any) => {
+        const conditions =
+          headerData?.conditions?.map((cond: any) => ({
+            label: cond.label,
+            to: cond.destinationUrl,
+          })) || []
+
+        if (item.label === "Conditions") {
+          return {
+            label: item.label,
+            to: item.url,
+            items: conditions,
+          }
+        }
+
+        if (item.label === "Services") {
+          return {
+            label: item.label,
+            to: item.url,
+            items: [
+              { label: "Medication Refill", to: "/services/medication-refill" },
+              { label: "Treatments Management", to: "/services/treatments-management" },
+              { label: "Work Excuse Letter", to: "/services/work-excuse-letter" },
+            ],
+          }
+        }
+
+        if (item.label === "Blog") {
+          return {
+            label: item.label,
+            to: item.url,
+            items: [{ label: "Latest", to: "/blog" }],
+          }
+        }
+
+        if (item.label === "Company") {
+          return {
+            label: item.label,
+            to: item.url,
+            items: [
+              { label: "About Us", to: "/about" },
+              { label: "Careers", to: "/careers" },
+              { label: "Contact Us", to: "/contact" },
+              { label: "Providers", to: "/providers" },
+              { label: "Reviews", to: "/reviews" },
+            ],
+          }
+        }
+
+        if (item.label === "FAQs") {
+          return {
+            label: item.label,
+            to: item.url,
+            items: [{ label: "General", to: "/faqs" }],
+          }
+        }
+
+        return {
+          label: item.label,
+          to: item.url,
+          items: [],
+        }
+      }) || []
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
- const navItems = [
-    {
-      label: "Conditions",
-      to: "/conditions",
-         items: navTeams.length ? navTeams : [],
 
-    },
-    {
-      label: "Services",
-      to: "/services",
-      items: [
-        { label: "Medication Refill", to: "/services/medication-refill" },
-        {
-          label: "Treatments Management",
-          to: "/services/treatments-management",
-        },
-        { label: "Work Excuse Letter", to: "/services/work-excuse-letter" },
-      ],
-    },
-    { label: "Blog", to: "/blog", items: [{ label: "Latest", to: "/blog" }] },
-    {
-      label: "Company",
-      to: "/about",
-      items: [
-        { label: "About Us", to: "/about" },
-        { label: "Careers", to: "/careers" },
-        { label: "Contact Us", to: "/contact" },
-        { label: "Providers", to: "/providers" },
-        { label: "Reviews", to: "/reviews" },
-      ],
-    },
-    { label: "FAQs", to: "/faqs", items: [{ label: "General", to: "/faqs" }] },
-  ];
+  if (headerLoading) {
+    return (
+      <header>
+        <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">
+          <div className="md:hidden">
+            <Skeleton className="size-10 rounded-md" />
+          </div>
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src={logo}
+              alt="Mental Health Tele logo"
+              className="sm:h-9 h-6 w-auto"
+            />
+          </Link>
+          <nav className="hidden md:flex flex-1 items-center justify-center gap-4">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-16" />
+          </nav>
+          <div className="ml-auto hidden md:flex items-center gap-2">
+            <Skeleton className="h-10 w-28 rounded-md" />
+            <Skeleton className="h-10 w-36 rounded-md" />
+          </div>
+        </div>
+        <Separator />
+      </header>
+    );
+  }
+
+  if (headerError) {
+    return (
+      <header>
+        <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src={logo}
+              alt="Mental Health Tele logo"
+              className="sm:h-9 h-6 w-auto"
+            />
+          </Link>
+          <div className="hidden md:flex flex-1 items-center justify-center gap-2 text-sm text-destructive">
+            <AlertCircle className="size-4" />
+            <span>Failed to load navigation. Please refresh.</span>
+          </div>
+          <div className="ml-auto hidden md:flex items-center gap-2">
+            <Link href="/login">
+              <Button className="bg-accent ">
+                <Image src={userIcon} alt="User Icon" className="size-4" />
+                <span className="text-gradient bg-gradient-primary">Sign In</span>
+              </Button>
+            </Link>
+            <Link href="/onboarding">
+              <Button className="bg-gradient-primary">
+                Get Started
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <Separator />
+      </header>
+    );
+  }
 
   return (
     <header>
@@ -104,7 +179,7 @@ setNavTeams(conditionItems);
             </SheetTrigger>
             <SheetContent side="left" className="w-[75vw] p-4">
               <nav className="flex flex-col gap-3">
-                {navItems.map((nav) => {
+                {navItems.map((nav: any) => {
                   const itemActive = pathname?.startsWith(nav.to);
                   return (
                     <div key={nav.label}>
@@ -120,7 +195,7 @@ setNavTeams(conditionItems);
                       </Link>
                       {nav.items && nav.items.length > 0 && (
                         <div className="ml-4 mt-1 flex flex-col gap-1">
-                          {nav.items.map((sub) => (
+                          {nav.items.map((sub: any) => (
                             <Link
                               key={sub.to}
                               href={sub.to}
@@ -140,15 +215,15 @@ setNavTeams(conditionItems);
                 })}
               </nav>
               <div className="mt-6 flex flex-col gap-2">
-                <Link href="/signin" onClick={() => setMobileOpen(false)}>
+                <Link href={headerData?.header?.primaryCta?.url ?? "/login"} onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-accent text-primary">
                     <Image src={userIcon} alt="User Icon" className="size-4" />
-                    Sign In
+                    {headerData?.header?.primaryCta?.label ?? "Sign In"}
                   </Button>
                 </Link>
-                <Link href="/onboarding" onClick={() => setMobileOpen(false)}>
+                <Link href={headerData?.header?.secondaryCta?.url ?? "/onboarding"} onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-gradient-primary">
-                    Get Started
+                    {headerData?.header?.secondaryCta?.label ?? "Get Started"}
                   </Button>
                 </Link>
               </div>
@@ -165,7 +240,8 @@ setNavTeams(conditionItems);
         </Link>
 
         <nav className="hidden md:flex flex-1 items-center justify-center gap-4">
-          {navItems.map((nav) => {
+
+          {navItems.map((nav: any) => {
             const navActive = pathname?.startsWith(nav.to);
 
             return (
@@ -182,7 +258,7 @@ setNavTeams(conditionItems);
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="start" className="w-48">
-                  {nav.items.map((item) => {
+                  {nav.items.map((item: any) => {
                     const itemActive = pathname?.startsWith(item.to);
 
                     return (
@@ -202,17 +278,17 @@ setNavTeams(conditionItems);
         </nav>
 
         <div className="ml-auto hidden md:flex items-center gap-2">
-          <Link href="/signin">
+          <Link href={headerData?.header?.secondaryCta?.url ?? "/login"}>
             <Button className="bg-accent ">
               <Image src={userIcon} alt="User Icon" className="size-4" />
 
-              <span className="text-gradient bg-gradient-primary">Sign In</span>
+              <span className="text-gradient bg-gradient-primary">{headerData?.header?.secondaryCta?.label ?? "Sign In"}</span>
             </Button>
           </Link>
 
-          <Link href="/onboarding">
+          <Link href={headerData?.header?.primaryCta?.url ?? "/onboarding"}>
             <Button className="bg-gradient-primary">
-              Get Started
+              {headerData?.header?.primaryCta?.label ?? "Get Started"}
               <ArrowRight />
             </Button>
           </Link>
