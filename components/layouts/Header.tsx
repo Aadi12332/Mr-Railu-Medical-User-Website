@@ -45,7 +45,10 @@ export function Header() {
           return {
             label: item.label,
             to: item.url,
-            items: conditions,
+            items: item?.children.map((child: any) => ({
+              label: child.label,
+              to: child.url ?? "",
+            })),
           }
         }
 
@@ -53,11 +56,10 @@ export function Header() {
           return {
             label: item.label,
             to: item.url,
-            items: [
-              { label: "Medication Refill", to: "/services/medication-refill" },
-              { label: "Treatments Management", to: "/services/treatments-management" },
-              { label: "Work Excuse Letter", to: "/services/work-excuse-letter" },
-            ],
+            items: item?.children.map((child: any) => ({
+              label: child.label,
+              to: child.url ?? "",
+            })),
           }
         }
 
@@ -65,7 +67,10 @@ export function Header() {
           return {
             label: item.label,
             to: item.url,
-            items: [{ label: "Latest", to: "/blog" }],
+            items: item?.children.map((child: any) => ({
+              label: child.label,
+              to: child.url ?? "",
+            })),
           }
         }
 
@@ -73,13 +78,10 @@ export function Header() {
           return {
             label: item.label,
             to: item.url,
-            items: [
-              { label: "About Us", to: "/about" },
-              { label: "Careers", to: "/careers" },
-              { label: "Contact Us", to: "/contact" },
-              { label: "Providers", to: "/providers" },
-              { label: "Reviews", to: "/reviews" },
-            ],
+            items: item?.children.map((child: any) => ({
+              label: child.label,
+              to: child.url ?? "",
+            })),
           }
         }
 
@@ -87,7 +89,11 @@ export function Header() {
           return {
             label: item.label,
             to: item.url,
-            items: [{ label: "General", to: "/faqs" }],
+            items: item?.children?.length > 0 ? item?.children.map((child: any) => ({
+              label: child.label,
+              to: child.url ?? "",
+            })) : [{ label: "General", to: "/faqs" }],
+
           }
         }
 
