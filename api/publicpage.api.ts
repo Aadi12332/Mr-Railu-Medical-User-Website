@@ -8,7 +8,7 @@ export const publicPageApi = {
     return axios.get(`/v1/public/blog/${slug}`);
   },
   getFAQ: () => {
-    return axios.get(`/v1/public/homepage/faqs`);
+    return axios.get(`/v1/public/faqs`);
   },
   getPrivacy: () => {
     return axios.get(`/v1/public/legal/privacy-policy`);
