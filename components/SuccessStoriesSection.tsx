@@ -34,7 +34,7 @@ export default function SuccessStoriesSection(props: any) {
         return
 
       }
-      const offset = page * itemsPerPage;
+      const offset = page;
 
       const res: any = await publicPageApi.getReview({
         limit: itemsPerPage,
@@ -95,10 +95,10 @@ export default function SuccessStoriesSection(props: any) {
   };
 
   if (loading)
-    return <p className="text-center h-[300px] flex justify-center items-center">Loading...</p>;
+    return <p className="text-center h-75 flex justify-center items-center">Loading...</p>;
 
   if (error)
-    return <p className="text-center h-[300px] flex justify-center items-center">{error}</p>;
+    return <p className="text-center h-75 flex justify-center items-center">{error}</p>;
 
   return (
     <section className="py-16">

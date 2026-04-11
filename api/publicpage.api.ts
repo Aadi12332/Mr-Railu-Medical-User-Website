@@ -29,7 +29,7 @@ export const publicPageApi = {
     return axios.get(`/v1/public/careers`);
   },
   getReview: (p0: { limit: number; offset: number; }) => {
-    return axios.get(`/v1/public/reviews/?skip=${p0.offset}&limit=${p0.limit}`);
+    return axios.get(`/v1/public/reviews/?page=${p0.offset}&limit=${p0.limit}`);
   },
   getProviders: () => {
     return axios.get(`/v1/public/providers/`);

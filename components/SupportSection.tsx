@@ -63,7 +63,7 @@ export default function SupportSection({ data }: any) {
                     alt=""
                     width={100}
                     height={96}
-                    className="object-cover aspect-square h-96"
+                    className="object-cover w-full h-96"
                   />
                 </div>
               </div>
