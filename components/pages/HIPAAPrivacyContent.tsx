@@ -221,7 +221,7 @@ export default function HIPAAPrivacyContent({ data }: any) {
               {parsed.article3.map((item: string) => (
                 <AccordionItem key={item} value={item}>
                   <AccordionTrigger className="py-4">
-                    <Users className="size-4 mr-2" />
+                    <Users className="w-4 mr-2 min-w-4" />
                     {item}
                   </AccordionTrigger>
                   <AccordionContent />

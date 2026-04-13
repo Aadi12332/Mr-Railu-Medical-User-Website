@@ -54,11 +54,11 @@ export default function RefillPricing({
           {refillPlans.map((p) => (
             <Card key={p.id} className="border border-primary p-0 rounded-md">
               <CardHeader className="bg-[#eaf7f3] rounded-t-lg border-b border-primary px-6 py-4">
-                <CardTitle className="text-xl font-semibold text-slate-900">
+                <CardTitle className="text-xl text-center font-semibold text-slate-900">
                   {p.title}
                 </CardTitle>
 
-                <div className="text-primary font-semibold text-lg md:text-xl">
+                <div className="text-primary font-semibold text-lg md:text-xl text-center">
                   {p.price}
                 </div>
               </CardHeader>

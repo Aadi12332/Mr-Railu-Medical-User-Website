@@ -113,7 +113,6 @@ export default function page() {
         </div>
       </div>
 
-      {/* Search + filters */}
       <div className="flex flex-col  gap-3">
         <div className="flex-1">
           <InputGroup className="bg-accent border-0 h-10">
@@ -220,7 +219,7 @@ export default function page() {
                     <div className="font-medium">
                       {p?.experience ? `${p.experience} years` : "-"}
                     </div>
-                    <div className="font-medium">$100</div>
+                    <div className="font-medium">${p?.sessionFee ?? "N/A"}</div>
                   </div>
                 </div>
 

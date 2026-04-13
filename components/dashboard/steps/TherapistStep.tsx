@@ -37,7 +37,7 @@ export default function TherapistStep({ provider }: { provider: any }) {
         <div className="space-y-1">
           <div className="">{provider?.experience??"0 year"} </div>
           <div className="">{provider?.specialty??"Specialist"}</div>
-          <div className="">{provider?.fee??0}</div>
+          <div className="">${provider?.sessionFee??0}</div>
         </div>
       </div>
     </div>

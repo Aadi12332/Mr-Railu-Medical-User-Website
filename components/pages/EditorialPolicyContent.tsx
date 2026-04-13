@@ -122,9 +122,9 @@ export default function EditorialPolicyContent({ data }: any) {
                   </h2>
                 </div>
 
-                <div className="pl-15 text-base leading-relaxed text-muted-foreground space-y-2">
+                <div className="pl-5 text-base leading-relaxed text-muted-foreground space-y-2">
                   {s.content.map((c: string, i: number) => (
-                    <p key={i}>{c}</p>
+                    <li key={i}>{c}</li>
                   ))}
                 </div>
               </Card>

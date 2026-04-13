@@ -34,53 +34,52 @@ const priorityColorMap: Record<Ticket["priority"], string> = {
 
 export default function SupportPage() {
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState<boolean>(false);
-  const [tickets, setTickets] = useState<Ticket[]>([])
-const [loading, setLoading] = useState(false);
-const fetchTickets = async () => {
-  if (typeof window === 'undefined') return;
-  const token = window.localStorage.getItem("patientToken")
-  if (!token) return
-  setLoading(true);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(false);
+  const fetchTickets = async () => {
+    if (typeof window === "undefined") return;
+    const token = window.localStorage.getItem("patientToken");
+    if (!token) return;
+    setLoading(true);
 
-  try {
-    const res=await settingApi.getSupport("patient")
-  
+    try {
+      const res = await settingApi.getSupport("patient");
 
-    if (res?.data?.tickets) {
-      setTickets(res.data.tickets.map(transformTicket))
+      if (res?.data?.tickets) {
+        setTickets(res.data.tickets.map(transformTicket));
+      }
+    } catch (err) {
+      console.error("Error fetching tickets", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Error fetching tickets", err)
-  } finally {
-    setLoading(false);
-  }
-}
+  };
 
-useEffect(() => {
-  fetchTickets()
-}, [])
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   const capitalize = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1)
+    str.charAt(0).toUpperCase() + str.slice(1);
 
   const mapStatus = (status: string): Ticket["status"] => {
-    if (status === "open") return "Open"
-    if (status === "in-progress") return "In Progress"
-    return "Resolved"
-  }
+    if (status === "open") return "Open";
+    if (status === "in-progress") return "In Progress";
+    return "Resolved";
+  };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString()
-  }
+    return new Date(date).toLocaleDateString();
+  };
 
   const timeAgo = (date: string) => {
-    const diff = Date.now() - new Date(date).getTime()
-    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const diff = Date.now() - new Date(date).getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
 
-    if (hours < 24) return `${hours}h ago`
-    const days = Math.floor(hours / 24)
-    return `${days}d ago`
-  }
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
 
   const transformTicket = (t: any): Ticket => ({
     id: t._id,
@@ -91,7 +90,7 @@ useEffect(() => {
     createdDate: formatDate(t.createdAt),
     updatedAgo: timeAgo(t.updatedAt),
     messagesCount: t.replies?.length || 0,
-  })
+  });
 
   function openTicketDialog() {
     setIsTicketDialogOpen(true);
@@ -159,58 +158,56 @@ useEffect(() => {
             </CardHeader>
 
             <CardContent className="space-y-3 max-h-[700px] overflow-auto">
-             
-             {loading ? (
-  <div className="flex justify-center items-center py-10">
-    <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
-  </div>
-) : tickets.length === 0 ? (
-  <p className="text-center text-sm text-gray-500 py-10">
-    No tickets found
-  </p>
-) : (
-  tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="rounded-lg lg:rounded-xl p-3 lg:p-6 border bg-white"
-                >
-                  <div className="text-sm font-medium">{ticket.title}</div>
+              {loading ? (
+                <div className="flex justify-center items-center py-10">
+                  <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+                </div>
+              ) : tickets.length === 0 ? (
+                <p className="text-center text-sm text-gray-500 py-10">
+                  No tickets found
+                </p>
+              ) : (
+                tickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="rounded-lg lg:rounded-xl p-3 lg:p-6 border bg-white"
+                  >
+                    <div className="text-sm font-medium">{ticket.title}</div>
 
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-700">
-                      {ticket.category}
-                    </span>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-700">
+                        {ticket.category}
+                      </span>
 
-                    <span
-                      className={`text-xs px-2 py-1 rounded-md ${statusColorMap[ticket.status]}`}
-                    >
-                      {ticket.status}
-                    </span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-md ${statusColorMap[ticket.status]}`}
+                      >
+                        {ticket.status}
+                      </span>
 
-                    <span
-                      className={`text-xs px-2 py-1 rounded-md ${priorityColorMap[ticket.priority]}`}
-                    >
-                      {ticket.priority}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex items-end justify-between text-xs text-muted-foreground">
-                    <span>Created {ticket.createdDate}</span>
-
-                    <div className="flex items-center gap-4">
-                      <span>Updated {ticket.updatedAgo}</span>
-
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="size-3" />
-                        {ticket.messagesCount}
-                        <span className="ml-1">messages</span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-md ${priorityColorMap[ticket.priority]}`}
+                      >
+                        {ticket.priority}
                       </span>
                     </div>
+
+                    <div className="mt-4 flex items-end justify-between text-xs text-muted-foreground">
+                      <span>Created {ticket.createdDate}</span>
+
+                      <div className="flex items-center gap-4">
+                        <span>Updated {ticket.updatedAgo}</span>
+
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="size-3" />
+                          {ticket.messagesCount}
+                          <span className="ml-1">messages</span>
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
-)}
-         
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -255,6 +252,15 @@ useEffect(() => {
                 </p>
                 <Button
                   size="sm"
+                  onClick={() => {
+                    if (/Mobi|Android/i.test(navigator.userAgent)) {
+                      window.location.href = "tel:911";
+                    } else {
+                      alert(
+                        "Please call 988 (Suicide & Crisis Lifeline) or 911 immediately using your phone",
+                      );
+                    }
+                  }}
                   className="mt-3 w-full bg-red-600 text-white hover:bg-red-600/90"
                 >
                   Emergency Resources
@@ -265,11 +271,11 @@ useEffect(() => {
         </div>
       </div>
 
-     <CreateSupportTicketDialog
-  open={isTicketDialogOpen}
-  onOpenChange={handleDialogChange}
-  onSuccess={fetchTickets}
-/>
+      <CreateSupportTicketDialog
+        open={isTicketDialogOpen}
+        onOpenChange={handleDialogChange}
+        onSuccess={fetchTickets}
+      />
     </>
   );
 }
