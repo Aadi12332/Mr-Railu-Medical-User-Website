@@ -55,7 +55,7 @@ export default function GettingStartedSection({ howItWorksSection, howItWorkes }
         <div className="max-w-6xl mx-auto">
           <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
             {stepsToRender.map((s: any) => (
-              <div key={s.id} className="border rounded-2xl p-2">
+              <div key={s.id} className="">
                 <Card className="p-0 overflow-hidden">
                   <div className="overflow-hidden h-44 aspect-square">
                     <Image

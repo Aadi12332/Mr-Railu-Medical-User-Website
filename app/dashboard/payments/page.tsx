@@ -29,7 +29,7 @@ const summaryCards: SummaryCard[] = [
   {
     id: "total",
     label: "Total Spent (2026)",
-    value: 570,
+    value: "",
     isCurrency: true,
     icon: DollarSign,
     iconClassName: "bg-blue-100 text-blue-600",

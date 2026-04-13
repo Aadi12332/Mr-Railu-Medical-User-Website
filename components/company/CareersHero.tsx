@@ -47,13 +47,13 @@ export default function CareersHero({ loading, error, careers }: { loading: bool
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Link href="/company/careers#openings">
+                <Link href="/careers#openings">
                   <Button className="bg-gradient-primary h-10" size="lg">
                     View Open Position
                   </Button>
                 </Link>
 
-                <Link href="/company/contact">
+                <Link href="/contact">
                   <Button variant="outline" size="lg" className="h-10">
                     Contact us
                   </Button>

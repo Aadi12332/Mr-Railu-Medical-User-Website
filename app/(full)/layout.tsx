@@ -1,6 +1,7 @@
 import Image from "next/image";
 import logo from "@/assets/medical-health-tele-logo.png";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
+import Link from "next/link";
 
 export default function AuthLayout({
   children,
@@ -9,7 +10,6 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen bg-[#F4F9F8] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* decorative background patterns (both sides) */}
       <div className="absolute -scale-x-100 left-0 z-0 opacity-40 max-w-xs pointer-events-none">
         <Image
           src={bgPattern}
@@ -26,14 +26,20 @@ export default function AuthLayout({
       </div>
 
       <div className="w-full  relative z-10">
-        {/* Logo */}
         <div className="flex justify-center mb-6">
-          <Image
+          {/* <Image
             src={logo}
             alt="Mental Health Tele"
             priority
             className="object-contain"
-          />
+          /> */}
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src={logo}
+              alt="Mental Health Tele logo"
+              className="sm:h-9 h-6 w-auto min-w-[100px]  object-contain"
+            />
+          </Link>
         </div>
         {children}
       </div>
