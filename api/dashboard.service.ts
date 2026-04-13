@@ -43,6 +43,9 @@ export const dashboardApi = {
   getMyProviders: (role: string) => {
     return axios.get(`/v1/${role}/providers/my-providers`);
   },
+  getProviders: (role: string) => {
+    return axios.get(`/v1/${role}/providers`);
+  },
   getMoodOptions: (role: string) => {
     return axios.get(`/v1/${role}/mood/options`);
   },

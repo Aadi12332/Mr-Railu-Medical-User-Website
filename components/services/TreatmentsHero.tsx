@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 
-export default function TreatmentsHero() {
+export default function TreatmentsHero({ data }: { data?: any }) {
+  const title = data?.heroTitle || "Treatments support that fits your life";
+  const words = title.split(" ");
+  const midPoint = Math.max(1, Math.floor(words.length / 2));
+  const firstPart = words.slice(0, midPoint).join(" ");
+  const secondPart = words.slice(midPoint).join(" ");
+
   return (
     <section className="py-10">
       <Container>
@@ -27,24 +33,22 @@ export default function TreatmentsHero() {
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className=" text-4xl md:text-5xl font-medium tracking-tight leading-tight">
-                <span className="block text-primary">Treatments support</span>
-                <span className="block text-primary font-medium">
-                  that fits{" "}
-                  <span className="text-slate-900 font-medium">your life</span>
+                <span className="block text-primary">{firstPart}</span>
+                <span className="block text-slate-900 font-medium mt-2">
+                  {secondPart}
                 </span>
               </h1>
 
-              <p className="mx-auto max-w-lg text-base md:text-lg text-muted-foreground leading-relaxed">
-                Whether you’re at home or on the go, you can connect with a
-                provider and receive guidance when you need it.
+              <p className="mx-auto mt-4 max-w-lg text-base md:text-lg text-muted-foreground leading-relaxed">
+                {data?.heroSubtitle || "Whether you’re at home or on the go, you can connect with a provider and receive guidance when you need it."}
               </p>
             </div>
 
             <div className="mt-10 flex justify-center">
-              <Link href="/onboarding">
+              <Link href={data?.heroCtaUrl || "/onboarding"}>
                 <Button className="bg-gradient-primary" size="lg">
-                  Book Your Session
-                  <ArrowRight className="w-5 h-5" />
+                  {data?.heroCtaLabel || "Book Your Session"}
+                  <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
             </div>

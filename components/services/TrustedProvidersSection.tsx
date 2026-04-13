@@ -57,8 +57,15 @@ const providers: Provider[] = [
   },
 ];
 
-export default function TrustedProvidersSection() {
-  // static list now; no need for fetch or state
+export default function TrustedProvidersSection({ data }: { data?: any }) {
+  // Use data if available, else fallback to static providers
+  const currentProviders = data && data.length > 0 ? data.map((p: any) => ({
+    id: p.id || p._id,
+    name: p.fullName || p.name,
+    description: p.bio || p.description,
+    image: p.profileImageUrl || expertImg1, // fallback if missing
+    isStaticImage: !p.profileImageUrl,
+  })) : providers.map(p => ({ ...p, isStaticImage: true }));
 
   const Controls = function Controls() {
     const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
@@ -87,16 +94,24 @@ export default function TrustedProvidersSection() {
   };
 
   // helper to render a provider card
-  const renderCard = (p: Provider) => (
+  const renderCard = (p: any) => (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 hover:shadow-md transition-shadow">
-      <div className="overflow-hidden rounded-xl aspect-square mb-3 bg-gray-50">
-        <Image
-          src={p.image}
-          alt={p.name}
-          width={640}
-          height={520}
-          className="object-cover w-full h-full"
-        />
+      <div className="overflow-hidden rounded-xl aspect-square mb-3 bg-gray-50 flex items-center justify-center text-3xl font-bold text-gray-300">
+        {p.isStaticImage ? (
+          <Image
+            src={p.image}
+            alt={p.name}
+            width={640}
+            height={520}
+            className="object-cover w-full h-full"
+          />
+        ) : (
+          <img
+            src={p.image}
+            alt={p.name}
+            className="object-cover w-full h-full"
+          />
+        )}
       </div>
 
       <div className="text-sm font-semibold text-slate-900">{p.name}</div>
@@ -126,7 +141,7 @@ export default function TrustedProvidersSection() {
             ]}
           >
             <CarouselContent className="-ml-4">
-              {[...providers, ...providers].map((p, index) => (
+              {[...currentProviders, ...currentProviders].map((p, index) => (
                 <CarouselItem
                   key={index}
                   className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/4"

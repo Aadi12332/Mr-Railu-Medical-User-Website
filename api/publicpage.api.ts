@@ -84,4 +84,7 @@ export const publicPageApi = {
   getProviderBySlug: (slug: string) => {
     return axios.get(`/v1/public/providers?condition=${slug}`);
   },
+  getServiceBySlug: (slug: string) => {
+    return axios.get(`/v1/public/services/${slug}`);
+  },
 };

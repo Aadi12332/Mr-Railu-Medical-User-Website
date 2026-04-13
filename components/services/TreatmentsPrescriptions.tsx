@@ -4,8 +4,10 @@ import handlePrescriptionImage from "@/assets/services/handle-prescription.png";
 import Image from "next/image";
 import { Container } from "@/components/ui/container";
 
-export default function TreatmentsPrescriptions() {
-  const features = [
+import Link from "next/link";
+
+export default function TreatmentsPrescriptions({ data }: { data?: any }) {
+  const features = data?.bullets || [
     {
       id: 1,
       text: `Through our platform, you can consult with licensed medical professionals authorized to provide care in your state. Providers review your symptoms and medical background to determine the most appropriate treatment approach.`,
@@ -15,6 +17,12 @@ export default function TreatmentsPrescriptions() {
       text: `When medication is part of your care plan, prescriptions are sent electronically to the pharmacy you choose, with clear guidance on usage and safety — all without leaving home.`,
     },
   ];
+
+  const titleWords = (data?.title || "Handle Your Prescriptions Digitally, With Confidence").split(" ");
+  const midIndex = Math.ceil(titleWords.length / 2);
+  const title1 = titleWords.slice(0, midIndex).join(" ");
+  const title2 = titleWords.slice(midIndex).join(" ");
+
   return (
     <section className="py-16 bg-[#f3faf8]">
       <Container>
@@ -28,9 +36,11 @@ export default function TreatmentsPrescriptions() {
 
               <div className="p-1">
                 <Image
-                  src={handlePrescriptionImage}
+                  src={data?.imageUrl || handlePrescriptionImage}
                   alt="Handle Prescription"
                   className="w-full h-80 aspect-square object-cover rounded-md"
+                  width={400}
+                  height={400}
                 />
               </div>
             </div>
@@ -39,16 +49,16 @@ export default function TreatmentsPrescriptions() {
           <div>
             <h2 className="text-3xl font-semibold leading-tight">
               <span className="block text-primary">
-                Handle Your Prescriptions
+                {title1}
               </span>
-              <span className="block text-slate-900">
-                Digitally, With Confidence
+              <span className="block text-slate-900 mt-1">
+                {title2}
               </span>
             </h2>
 
             <div className="mt-6 space-y-4">
-              {features.map((f) => (
-                <div key={f.id} className="flex items-start gap-4">
+              {features.map((f: any, i: number) => (
+                <div key={f.id || i} className="flex items-start gap-4">
                   <div className="shrink-0">
                     <div className="size-6 rounded-full bg-gradient-primary text-white flex items-center justify-center">
                       <Check className="w-4 h-4" />
@@ -62,10 +72,12 @@ export default function TreatmentsPrescriptions() {
             </div>
 
             <div className="mt-6">
-              <Button className="bg-gradient-primary" size="lg">
-                Start Your Care
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              <Link href={data?.ctaUrl || "/onboarding"}>
+                <Button className="bg-gradient-primary" size="lg">
+                  {data?.ctaLabel || "Start Your Care"}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

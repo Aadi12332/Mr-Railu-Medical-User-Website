@@ -41,7 +41,18 @@ const rows = [
   },
 ];
 
-export default function TreatmentsComparison() {
+export default function TreatmentsComparison({ data }: { data?: any }) {
+  const currentRows = data?.comparisonRows?.length ? data.comparisonRows.map((r: any) => ({
+    feature: r.feature,
+    online: { text: r.online, positive: r.onlinePositive, isText: typeof r.onlinePositive !== 'boolean' },
+    inPerson: { text: r.inPerson, positive: r.inPersonPositive, isText: typeof r.inPersonPositive !== 'boolean' }
+  })) : rows;
+
+  const titleWords = (data?.comparisonTitle || "Why Online Medication Care Works Better For Many People").split(" ");
+  const midIndex = Math.ceil(titleWords.length / 2);
+  const title1 = titleWords.slice(0, midIndex).join(" ");
+  const title2 = titleWords.slice(midIndex).join(" ");
+
   return (
     <section className="py-16">
       <Container>
@@ -50,17 +61,14 @@ export default function TreatmentsComparison() {
             <div className="text-center mb-6">
               <h2 className="text-2xl md:text-3xl font-semibold tracking-tight leading-tight">
                 <span className="block text-primary">
-                  Why Online Medication Care Works Better
+                  {title1}
                 </span>
                 <span className="block text-slate-700 font-semibold mt-1">
-                  For Many People
+                  {title2}
                 </span>
               </h2>
               <p className="mt-3 text-sm text-muted-foreground max-w-2xl mx-auto">
-                Access To Mental Health Care Shouldn&apos;t Depend On Location,
-                Mobility, Or Long Waiting Lists. If Visiting A Clinic Is
-                Difficult Or Time-Consuming, Online Care Offers A Practical
-                Alternative.
+                {data?.comparisonSubtitle || "Access To Mental Health Care Shouldn't Depend On Location, Mobility, Or Long Waiting Lists. If Visiting A Clinic Is Difficult Or Time-Consuming, Online Care Offers A Practical Alternative."}
               </p>
             </div>
 
@@ -75,7 +83,7 @@ export default function TreatmentsComparison() {
                 </thead>
 
                 <tbody className="divide-y divide-gray-200">
-                  {rows.map((r) => (
+                  {currentRows.map((r: any) => (
                     <tr key={r.feature} className="bg-white">
                       <td className="px-4 py-4 align-top text-sm text-slate-700 border-r border-gray-200">
                         {r.feature}
@@ -90,9 +98,9 @@ export default function TreatmentsComparison() {
                           <div className="flex items-center gap-3">
                             <div>
                               {r.online.positive ? (
-                                <Check className="w-3.5 h-3.5" />
+                                <Check className="w-3.5 h-3.5 text-primary" />
                               ) : (
-                                <X className="w-3.5 h-3.5" />
+                                <X className="w-3.5 h-3.5 text-red-500" />
                               )}
                             </div>
                             <div
@@ -108,12 +116,12 @@ export default function TreatmentsComparison() {
                         {r.inPerson.isText ? (
                           <div className="font-medium">{r.inPerson.text}</div>
                         ) : (
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 items-center justify-center">
                             <div>
                               {r.inPerson.positive ? (
-                                <Check className="w-3.5 h-3.5" />
+                                <Check className="w-3.5 h-3.5 text-primary" />
                               ) : (
-                                <X className="w-3.5 h-3.5" />
+                                <X className="w-3.5 h-3.5 text-red-500" />
                               )}
                             </div>
                             <div
@@ -131,12 +139,12 @@ export default function TreatmentsComparison() {
             </div>
 
             <div className="mt-6 text-center">
-              <Link href="/appointment">
+              <Link href={data?.comparisonCtaUrl || "/appointment"}>
                 <Button
                   className="bg-gradient-primary inline-flex items-center gap-3"
                   size="lg"
                 >
-                  Begin Online Care
+                  {data?.comparisonCtaLabel || "Begin Online Care"}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>

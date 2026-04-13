@@ -22,19 +22,25 @@ const steps = [
   },
 ];
 
-export default function TreatmentsSteps() {
+export default function TreatmentsSteps({ data }: { data?: any }) {
+  const currentSteps = data?.howItWorksSteps || steps;
+  const titleWords = (data?.howItWorksTitle || "Getting Treatments Online Is Simple").split(" ");
+  const midIndex = Math.ceil(titleWords.length / 2);
+  const title = titleWords.slice(0, midIndex).join(" ");
+  const subtitle = titleWords.slice(midIndex).join(" ");
+
   return (
     <section className="py-16">
       <Container>
         <SectionHeader
-          title="Getting Treatments"
-          subtitle="Online Is Simple"
+          title={title}
+          subtitle={subtitle}
           className="mb-10"
         />
 
         <div className="relative">
           <div className="grid gap-8 md:grid-cols-3 items-start">
-            {steps.map((step) => (
+            {currentSteps.map((step: any) => (
               <div key={step.title} className="text-center px-4">
                 <div className="mx-auto w-20 h-20 flex items-center justify-center rounded-lg bg-gradient-primary text-white mb-4">
                   <Image src={bulbIcon} alt="Bulb" width={40} height={40} />
@@ -50,7 +56,7 @@ export default function TreatmentsSteps() {
           </div>
 
           <div className="hidden md:block pointer-events-none">
-            {steps.slice(0, -1).map((_, i) => (
+            {currentSteps.slice(0, -1).map((_: any, i: number) => (
               <Image
                 key={i}
                 src={arrowIcon}
@@ -58,7 +64,7 @@ export default function TreatmentsSteps() {
                 width={160}
                 height={40}
                 className="absolute top-10 transform -translate-y-1/2"
-                style={{ left: `${((i + 1) / steps.length) * 100 - 8}%` }}
+                style={{ left: `${((i + 1) / currentSteps.length) * 100 - 8}%` }}
               />
             ))}
           </div>

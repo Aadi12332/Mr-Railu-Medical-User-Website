@@ -16,8 +16,8 @@ import { SectionHeader } from "@/components/ui/section-header";
 
 import { Container } from "@/components/ui/container";
 
-export default function MedicationsSupported() {
-  const items = [
+export default function MedicationsSupported({ data }: { data?: any }) {
+  const items = data?.conditionCards || [
     {
       id: "anxiety",
       title: "Anxiety",
@@ -62,15 +62,20 @@ export default function MedicationsSupported() {
     },
   ];
 
+  const titleWords = (data?.medicationsTitle || "Medications Supported Through Our Platform").split(" ");
+  const midIndex = Math.ceil(titleWords.length / 2);
+  const title = titleWords.slice(0, midIndex).join(" ");
+  const subtitle = titleWords.slice(midIndex).join(" ");
+
   return (
     <section className="py-16 md:py-20">
       <Container>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col text-center items-center mb-8">
             <SectionHeader
-              title="Medications Supported"
-              subtitle="Through Our Platform"
-              description="Our licensed healthcare professionals are authorized to evaluate symptoms and, when appropriate, prescribe or continue medications for various mental health and wellness conditions including certain regulated medications, based on clinical guidelines."
+              title={title}
+              subtitle={subtitle}
+              description={data?.medicationsSubtitle || "Our licensed healthcare professionals are authorized to evaluate symptoms and, when appropriate, prescribe or continue medications for various mental health and wellness conditions including certain regulated medications, based on clinical guidelines."}
             />
           </div>
 
@@ -79,24 +84,25 @@ export default function MedicationsSupported() {
             <div>
               <div className="rounded-lg mt-6">
                 <Image
-                  src={medImg}
+                  src={data?.medicationsImageUrl || medImg}
                   alt="Medications supported"
                   className="object-cover w-full aspect-square md:max-w-md rounded-md"
+                  width={400}
+                  height={400}
                 />
               </div>
 
-              <p className="mt-6 max-w-md leading-relaxed">
-                A Detailed List Of Medications Available Through Our Platform
-                Can Be Reviewed During Your Consultation.
+              <p className="mt-6 max-w-md leading-relaxed text-muted-foreground">
+                {data?.medicationsNote || "A Detailed List Of Medications Available Through Our Platform Can Be Reviewed During Your Consultation."}
               </p>
 
               <div className="mt-4">
                 <Button size="lg" className="bg-gradient-primary">
                   <Link
-                    href="/services/medication-refill"
+                    href={data?.medicationsCtaUrl || "/services/medication-refill"}
                     className="flex items-center gap-3"
                   >
-                    View Medication Options <ArrowRight className="w-4 h-4" />
+                    {data?.medicationsCtaLabel || "View Medication Options"} <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>
               </div>
@@ -105,16 +111,16 @@ export default function MedicationsSupported() {
             {/* right: detail card + list */}
             <div className="w-full max-w-md">
               <Accordion type="single" collapsible className="space-y-4 mt-6">
-                {items.map((item, i) => (
+                {items.map((item: any, i: number) => (
                   <AccordionItem
-                    key={item.id}
-                    value={item.id}
+                    key={item.id || item.name}
+                    value={item.id || item.name}
                     className={cn(" shadow-lg rounded-md border", {
                       "border-2 border-primary": i === 0,
                     })}
                   >
-                    <AccordionTrigger className="bg-white px-4 py-3 text-sm font-medium">
-                      {item.title}
+                    <AccordionTrigger className="bg-white px-4 py-3 text-sm font-medium hover:no-underline">
+                      {item.title || item.name}
                     </AccordionTrigger>
                     <AccordionContent className="bg-white px-4 pb-4 text-sm text-muted-foreground">
                       {item.description}

@@ -214,16 +214,78 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
       <div className="relative max-w-6xl mx-auto p-5 pt-16 py-8 space-y-4 bg-[#E6E8EE] flex flex-col items-center min-h-[60vh]">
         <Card className="w-full p-6 shadow-lg space-y-4">
           <Skeleton className="h-8 w-1/4 mb-6" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+          
+          {/* Basic Information Section */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+
+          {/* Emergency Contact Section */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
           </div>
-          <Skeleton className="h-20 w-full" />
+
+          {/* Medical Questions Section */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+
+          {/* PHQ-9 Questionnaire Section */}
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <div className="overflow-x-auto">
+              <div className="space-y-2">
+                {/* Table header skeleton */}
+                <div className="flex gap-2 p-2 bg-gray-100">
+                  <Skeleton className="h-4 flex-1" />
+                  {[0, 1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-4 w-20" />
+                  ))}
+                </div>
+                {/* Question rows skeleton */}
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="flex gap-2 p-2 border-t">
+                    <Skeleton className="h-4 flex-1" />
+                    {[0, 1, 2, 3].map((j) => (
+                      <Skeleton key={j} className="h-4 w-8 rounded-full" />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Difficulty options skeleton */}
+            <div className="border-t p-3">
+              <Skeleton className="h-4 w-64 mb-3" />
+              <div className="flex gap-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col items-center">
+                    <Skeleton className="h-3 w-20 mb-1" />
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end pt-4">
             <Skeleton className="h-10 w-32" />
           </div>

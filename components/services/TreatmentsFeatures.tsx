@@ -29,7 +29,13 @@ const features = [
   },
 ];
 
-export default function TreatmentsFeatures() {
+import Link from "next/link";
+export default function TreatmentsFeatures({ data }: { data?: any }) {
+  const cards = data?.whyPlatformCards || features;
+  const titleWords = (data?.whyPlatformTitle || "Why People Prefer Our Platform").split(" ");
+  const firstPart = titleWords.slice(0, 3).join(" ");
+  const secondPart = titleWords.slice(3).join(" ");
+
   return (
     <section className="py-12">
       <Container>
@@ -37,18 +43,22 @@ export default function TreatmentsFeatures() {
           <h2 className="text-2xl md:text-3xl font-medium tracking-tight">
             <span className="block">
               <span className="text-gradient bg-gradient-primary">
-                Why People Prefer{" "}
+                {firstPart}{" "}
               </span>
-              <span className="font-semibold">Our Platform</span>
+              <span className="font-semibold">{secondPart}</span>
             </span>
           </h2>
-          <Button className="bg-gradient-primary" size="lg">
-            Start Online Care
-          </Button>
+          {data?.whyPlatformCtaLabel && (
+            <Link href={data?.whyPlatformCtaUrl || "/onboarding"}>
+              <Button className="bg-gradient-primary" size="lg">
+                {data.whyPlatformCtaLabel}
+              </Button>
+            </Link>
+          )}
         </div>
 
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-3">
-          {features.map((f) => (
+          {cards.map((f: any) => (
             <div
               key={f.title}
               className="bg-[#21958008] border rounded-lg p-6 shadow-sm"
@@ -63,7 +73,7 @@ export default function TreatmentsFeatures() {
                     {f.title}
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    {f.desc}
+                    {f.description || f.desc}
                   </p>
                 </div>
               </div>

@@ -42,7 +42,7 @@ export default function page() {
   const [isVideoSession, setIsVideoSession] = useState(false);
   const [connection, setConnection] = useState<any>(null);
 
-  const { user } = useAuth();
+  const { user, getProfile } = useAuth();
   const [moodOptions, setMoodOptions] = useState<any>([]);
   const [moodHistory, setMoodHistory] = useState<any>(0);
   const [dashboardData, setDashboardData] = useState<any>({ nextAppointmentLoading: false, nextAppointment: null });
@@ -216,6 +216,9 @@ export default function page() {
     }
   }
   useEffect(() => {
+    if (!user) {
+      getProfile();
+    }
     handleMoodOption();
     handleMoodHistory();
     handleDashboard()
@@ -242,7 +245,7 @@ export default function page() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-medium">
-            Welcome back, {user?.firstName ?? ""} <span className="ml-1">👋</span>
+            Welcome back, {user?.firstName ?? ""} {user?.lastName ?? ""} <span className="ml-1">👋</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Here&apos;s your mental health overview for today

@@ -56,18 +56,18 @@ const SkeletonCard = () => (
   </Card>
 );
 export default function page() {
-const [role, setRole] = useState("");
+  const [role, setRole] = useState("");
   const [providers, setProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState("");
-const [specialty, setSpecialty] = useState("all");
-const [rating, setRating] = useState("any");
-const [priceRange, setPriceRange] = useState("any");
-const [selectedProvider, setSelectedProvider] = useState<any>(null);
-  const handleMyProviders=async()=>{
+  const [specialty, setSpecialty] = useState("all");
+  const [rating, setRating] = useState("any");
+  const [priceRange, setPriceRange] = useState("any");
+  const [selectedProvider, setSelectedProvider] = useState<any>(null);
+  const handleMyProviders = async () => {
     setLoading(true);
     try {
-      const response = await dashboardApi.getMyProviders(role??"");
+      const response = await dashboardApi.getProviders(role ?? "");
       const data = response.data;
       setProviders(data?.providers || []);
     } catch (error) {
@@ -77,31 +77,31 @@ const [selectedProvider, setSelectedProvider] = useState<any>(null);
     }
   }
   useEffect(() => {
-  handleMyProviders();
-}, [role]);
+    handleMyProviders();
+  }, [role]);
 
-useEffect(() => {
-  setRole(localStorage.getItem("role") || "");
-}, []);
-const filteredProviders = providers.filter((p: any) => {
-  const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
-  const spec = p.specialty?.toLowerCase() || "";
-const ratingValue = Number(p.rating || 0);
-  const matchesSearch =
-    fullName.includes(search.toLowerCase()) ||
-    spec.includes(search.toLowerCase());
+  useEffect(() => {
+    setRole(localStorage.getItem("role") || "");
+  }, []);
+  const filteredProviders = providers.filter((p: any) => {
+    const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
+    const spec = p.specialty?.toLowerCase() || "";
+    const ratingValue = Number(p.rating || 0);
+    const matchesSearch =
+      fullName.includes(search.toLowerCase()) ||
+      spec.includes(search.toLowerCase());
 
-  const matchesSpecialty =
-    specialty === "all" || spec.includes(specialty);
+    const matchesSpecialty =
+      specialty === "all" || spec.includes(specialty);
 
-  const matchesRating =
-    rating === "any" || ratingValue >= Number(rating);
+    const matchesRating =
+      rating === "any" || ratingValue >= Number(rating);
 
     const matchesPriceRange =
-    priceRange === "any" || (p.price ?? 0) >= Number(priceRange);
+      priceRange === "any" || (p.price ?? 0) >= Number(priceRange);
 
-  return matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange;
-});
+    return matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange;
+  });
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -126,7 +126,7 @@ const ratingValue = Number(p.rating || 0);
               placeholder="Search by name, specialty, or condition..."
               aria-label="Search providers"
               value={search}
-  onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
 
             />
           </InputGroup>
@@ -173,77 +173,77 @@ const ratingValue = Number(p.rating || 0);
 
       {/* Providers grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {loading
-    ? Array.from({ length: 6 }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))
-    : filteredProviders.map((p: any) => (
-  <Card key={p._id} className="p-4">
-    <div className="flex flex-col items-center text-center">
-      <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
-        <AvatarFallback>
-          {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
-        </AvatarFallback>
-      </Avatar>
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))
+          : filteredProviders.map((p: any) => (
+            <Card key={p._id} className="p-4">
+              <div className="flex flex-col items-center text-center">
+                <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
+                  <AvatarFallback>
+                    {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
+                  </AvatarFallback>
+                </Avatar>
 
-      <div className="mt-4">
-        <div className="text-sm font-semibold">
-          Dr. {p?.firstName} {p?.lastName}
-        </div>
+                <div className="mt-4">
+                  <div className="text-sm font-semibold">
+                    Dr. {p?.firstName} {p?.lastName}
+                  </div>
 
-        <div className="text-xs text-muted-foreground">
-          {p?.specialty || "Specialist"}
-        </div>
+                  <div className="text-xs text-muted-foreground">
+                    {p?.specialty || "Specialist"}
+                  </div>
 
-        <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
-          <div className="flex items-center gap-2">
-            <Star className="size-3 text-amber-400 fill-current" />
-            <RatingStars rating={p?.rating ?? 0}/>
-            <span className="font-semibold text-sm">
-              {p?.rating ?? 0}
-            </span>
-          </div>
-        </div>
+                  <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
+                    <div className="flex items-center gap-2">
+                      <Star className="size-3 text-amber-400 fill-current" />
+                      <RatingStars rating={p?.rating ?? 0} />
+                      <span className="font-semibold text-sm">
+                        {p?.rating ?? 0}
+                      </span>
+                    </div>
+                  </div>
 
-        <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
-          Available Today
-        </Badge>
+                  <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
+                    Available Today
+                  </Badge>
+                </div>
+
+                <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="space-y-1">
+                    <div>Experience</div>
+                    <div>Session Fee</div>
+                  </div>
+
+                  <div className="text-right space-y-1">
+                    <div className="font-medium">
+                      {p?.experience ? `${p.experience} years` : "-"}
+                    </div>
+                    <div className="font-medium">$100</div>
+                  </div>
+                </div>
+
+                <div className="mt-6 w-full flex gap-2">
+                  <div className="flex-1">
+                    <BookAppointmentDialog provider={p} />
+                  </div>
+
+                  <PaymentDialog>
+                    <Button variant="outline" className="w-full flex-1">
+                      Pay
+                    </Button>
+                  </PaymentDialog>
+                </div>
+              </div>
+            </Card>
+          ))}
       </div>
-
-      <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
-        <div className="space-y-1">
-          <div>Experience</div>
-          <div>Session Fee</div>
-        </div>
-
-        <div className="text-right space-y-1">
-          <div className="font-medium">
-            {p?.experience ? `${p.experience} years` : "-"}
-          </div>
-          <div className="font-medium">$100</div>
-        </div>
-      </div>
-
-      <div className="mt-6 w-full flex gap-2">
-        <div className="flex-1">
-          <BookAppointmentDialog provider={p} />
-        </div>
-
-        <PaymentDialog>
-          <Button variant="outline" className="w-full flex-1">
-            Pay
-          </Button>
-        </PaymentDialog>
-      </div>
-    </div>
-  </Card>
-))}
-      </div>
-      {!filteredProviders.length && (
-  <p className="text-center text-sm text-muted-foreground">
-    No providers found
-  </p>
-)}
+      {!filteredProviders.length && !loading && (
+        <p className="text-center text-sm text-muted-foreground">
+          No providers found
+        </p>
+      )}
     </div>
   );
 }

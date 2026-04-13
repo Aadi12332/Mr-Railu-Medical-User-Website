@@ -56,6 +56,7 @@ export default function TreatmentsPricing({
   description?: string;
   data?:any
 }) {
+  console.log({data})
   return (
     <section className="py-16 md:py-20 bg-[#f3faf8]">
       <Container>

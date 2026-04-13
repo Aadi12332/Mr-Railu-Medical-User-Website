@@ -20,14 +20,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getProfile = async () => {
     const token = localStorage.getItem("patientToken");
-    if (!token) {
+    const currentRole = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : role;
+    if (!token || !currentRole) {
       setLoading(false);
       return;
     }
 
     try {
-      const res = await settingApi.getRoleProfile(role!);
-      setUser(res?.data || null);
+      const res = await settingApi.getRoleProfile(currentRole);
+      // Fallback: If data is nested like res.data.data, we might want res.data.data or res.data
+      const userData = res?.data?.data || res?.data || null;
+      setUser(userData);
     } catch (err) {
       console.error("Profile fetch failed", err);
       setUser(null);
