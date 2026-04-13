@@ -23,31 +23,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
 import { toast } from "react-toastify";
 
-// PHQ-9 questions
-const PHQ_QUESTIONS = [
-  "Little interest or pleasure in doing things",
-  "Feeling down, depressed, or hopeless",
-  "Trouble falling or staying asleep, or sleeping too much",
-  "Feeling tired or having little energy",
-  "Poor appetite or overeating",
-  "Feeling bad about yourself or that you are a failure or have let yourself or your family down",
-  "Trouble concentrating on things, such as reading the newspaper or watching television",
-  "Moving or speaking so slowly that other people could have noticed? Or the opposite being so fidgety or restless that you have been moving around a lot more than usual",
-  "Thoughts that you would be better off dead or of hurting yourself in some way",
-];
-
-const phqSchema = z.object(
-  Object.fromEntries(
-    PHQ_QUESTIONS.map((_, index) => [
-      String(index + 1),
-      z
-        .number({ required_error: "Please select one option" })
-        .int()
-        .min(0)
-        .max(3),
-    ]),
-  ) as Record<string, z.ZodNumber>,
-);
+// Dynamic PHQ-9 schema will be created based on API data
 
 const intakeFormSchema = z.object({
   // basic info
@@ -97,8 +73,8 @@ const intakeFormSchema = z.object({
   pharmacyAddress: z.string().optional(),
   heardFrom: z.string().optional(),
 
-  // phq
-  phq: phqSchema,
+  // phq - will be dynamically created
+  phq: z.record(z.number().int().min(0).max(3)).optional(),
   difficulty: z.string().optional(),
 });
 
@@ -110,17 +86,30 @@ export default function MedicalIntakePage() {
 
   const intakeSections = bookingFlow?.intakeStep?.sections;
   const hasDynamicSections = Array.isArray(intakeSections) && intakeSections.length > 0;
-
+console.log({bookingFlow});
+const intakeForm=bookingFlow?.intakeStep?.phq9
 
   const showSection = (key: string) => {
     if (!hasDynamicSections) return true;
     return intakeSections.some((s: any) => s.key === key);
   };
+  // Create dynamic PHQ-9 default values based on API data
+  const createPhqDefaults = () => {
+    if (!intakeForm?.questions) return {};
+    
+    const defaults: Record<string, number> = {};
+    intakeForm.questions.forEach((question: any) => {
+      defaults[question.key] = 0; // Default to "Not At All" (value 0)
+    });
+    return defaults;
+  };
+
   const form = useForm<IntakeFormValues>({
     resolver: zodResolver(intakeFormSchema),
     defaultValues: {
       sex: "",
-      phq: {},
+      phq: createPhqDefaults(),
+      difficulty: "",
     },
     // validate on submit, re-validate on change and focus the first error
     mode: "onSubmit",
@@ -738,11 +727,11 @@ export default function MedicalIntakePage() {
         )}
 
         {/* PHQ-9 */}
-        {showSection("phq9") && (
+        {showSection("phq9") && intakeForm && (
           <Card>
             <CardHeader>
               <h2 className="text-lg font-medium text-primary">
-                Patient Health Questionnaire-9
+                {intakeForm.title}
               </h2>
             </CardHeader>
             <CardContent>
@@ -751,102 +740,96 @@ export default function MedicalIntakePage() {
                   <thead>
                     <tr className="bg-slate-100">
                       <th className="p-2" colSpan={3}>
-                        Over the last 2 weeks, how often have you been bothered by
-                        any of the following problems? (Use &quot;√&quot; to
-                        indicate your answer)
+                        {intakeForm.prompt}
                       </th>
-                      {[
-                        "Not At All",
-                        "Several Days",
-                        "More Than Half The Days",
-                        "Nearly Every Day",
-                      ].map((h) => (
-                        <th key={h} className="p-2 text-center">
-                          {h}
-                        </th>
-                      ))}
+                      {intakeForm.responseOptions
+                        .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+                        .map((option: any) => (
+                          <th key={option.value} className="p-2 text-center">
+                            {option.label}
+                          </th>
+                        ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {PHQ_QUESTIONS.map((q, index) => {
-                      const key = `phq.${index + 1}` as const;
-                      const phqError = (
-                        form.formState.errors.phq as
-                        | Record<string, { message?: string } | undefined>
-                        | undefined
-                      )?.[String(index + 1)];
-                      return (
-                        <Fragment key={index}>
-                          <tr className="border-t border-slate-200 py-2">
-                            <td className="p-2 py-3 text-sm" colSpan={3}>
-                              {index + 1}. {q}
-                            </td>
-                            {[0, 1, 2, 3].map((val) => (
-                              <td key={val} className="p-2 py-3 text-center">
-                                <Controller
-                                  control={form.control}
-                                  name={key}
-                                  render={({ field }) => (
-                                    <input
-                                      type="radio"
-                                      value={val}
-                                      checked={Number(field.value) === val}
-                                      onChange={() => field.onChange(val)}
+                    {intakeForm.questions
+                      .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+                      .map((question: any, index: number) => {
+                        const key = `phq.${question.key}` as const;
+                        const phqError = (
+                          form.formState.errors.phq as
+                          | Record<string, { message?: string } | undefined>
+                          | undefined
+                        )?.[question.key];
+                        return (
+                          <Fragment key={question.key}>
+                            <tr className="border-t border-slate-200 py-2">
+                              <td className="p-2 py-3 text-sm" colSpan={3}>
+                                {question.text}
+                              </td>
+                              {intakeForm.responseOptions
+                                .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+                                .map((option: any) => (
+                                  <td key={option.value} className="p-2 py-3 text-center">
+                                    <Controller
+                                      control={form.control}
+                                      name={key}
+                                      render={({ field }) => (
+                                        <input
+                                          type="radio"
+                                          value={option.value}
+                                          checked={Number(field.value) === option.value}
+                                          onChange={() => field.onChange(option.value)}
+                                        />
+                                      )}
                                     />
-                                  )}
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                          {phqError?.message && (
-                            <tr
-                              className="border-t border-slate-100"
-                              key={`err-${index}`}
-                            >
-                              <td
-                                className="px-2 pb-2 text-destructive text-xs"
-                                colSpan={7}
-                              >
-                                Question {index + 1}: {phqError.message}
-                              </td>
+                                  </td>
+                                ))}
                             </tr>
-                          )}
-                        </Fragment>
-                      );
-                    })}
+                            {phqError?.message && (
+                              <tr
+                                className="border-t border-slate-100"
+                                key={`err-${question.key}`}
+                              >
+                                <td
+                                  className="px-2 pb-2 text-destructive text-xs"
+                                  colSpan={intakeForm.responseOptions.length + 3}
+                                >
+                                  {question.text}: {phqError.message}
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
               <div className="border-t border-slate-200">
                 <div className="p-2">
-                  If you checked off any problems, how difficult have these
-                  problems made it for you to do your work, take care of things at
-                  home, or get along with other people?
+                  {intakeForm.difficultyPrompt}
                   <div className="mt-2 flex flex-wrap gap-4">
-                    {[
-                      "Not Difficult At All",
-                      "Somewhat Difficult",
-                      "Very Difficult",
-                      "Extremely Difficult",
-                    ].map((opt) => (
-                      <div key={opt} className="flex items-center gap-2">
-                        <Controller
-                          control={form.control}
-                          name="difficulty"
-                          render={({ field }) => (
-                            <div className="flex flex-col items-center bg-[#F4F9F8B2] rounded p-4 gap-1">
-                              <span className="text-sm">{opt}</span>
-                              <input
-                                type="radio"
-                                value={opt}
-                                checked={field.value === opt}
-                                onChange={() => field.onChange(opt)}
-                              />
-                            </div>
-                          )}
-                        />
-                      </div>
-                    ))}
+                    {intakeForm.difficultyOptions
+                      .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+                      .map((option: any) => (
+                        <div key={option.value} className="flex items-center gap-2">
+                          <Controller
+                            control={form.control}
+                            name="difficulty"
+                            render={({ field }) => (
+                              <div className="flex flex-col items-center bg-[#F4F9F8B2] rounded p-4 gap-1">
+                                <span className="text-sm">{option.label}</span>
+                                <input
+                                  type="radio"
+                                  value={option.value}
+                                  checked={field.value === option.value}
+                                  onChange={() => field.onChange(option.value)}
+                                />
+                              </div>
+                            )}
+                          />
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
