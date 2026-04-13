@@ -149,21 +149,21 @@ export default function FAQCategories({ search }: { search: string }) {
 
   if (loading)
     return (
-      <p className="text-center h-[300px] flex items-center justify-center">
+      <p className="text-center h-75 flex items-center justify-center">
         Loading...
       </p>
     );
 
   if (error)
     return (
-      <p className="text-center h-[300px] flex items-center justify-center">
+      <p className="text-center h-75 flex items-center justify-center">
         {error}
       </p>
     );
 
   if (!loading && faqs.length === 0) {
     return (
-      <p className="text-center h-[300px] flex items-center justify-center">
+      <p className="text-center h-75 flex items-center justify-center">
         No FAQs found
       </p>
     );
