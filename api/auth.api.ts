@@ -4,6 +4,7 @@ import { AuthResponse, LoginPayload, RegisterPayload } from "./types"
 export const authApi = {
   patientRegister: async (payload: RegisterPayload): Promise<AuthResponse> => {
     const res = await axios.post("/v1/auth/patient/register", payload)
+    localStorage.setItem("role", "patient");
     if (res.data?.token) localStorage.setItem("patientToken", res.data.token)
     return res
   },
@@ -14,8 +15,8 @@ export const authApi = {
     return res
   },
 
-  patientLogout: () =>{
-    const role=localStorage.getItem("role")
+  patientLogout: () => {
+    const role = localStorage.getItem("role")
     return axios.post(`/v1/${role?.toLowerCase()}/auth/logout`)
   },
 
@@ -30,6 +31,6 @@ export const authApi = {
 
   resetPassword: (payload: { token: string; newPassword: string; role: "Patient" | "Provider" }) =>
     axios.post(`/v1/auth/${payload.role.toLowerCase()}/reset-password`, payload),
-    
-  
+
+
 }

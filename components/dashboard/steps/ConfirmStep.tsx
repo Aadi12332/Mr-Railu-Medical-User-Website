@@ -12,6 +12,7 @@ export default function ConfirmStep({
   date: Date | undefined;
   selectedTime: string | null;
 }) {
+
   return (
     <div className="w-full">
       <div className="rounded-lg border border-green-200 bg-green-50/60 p-6 mb-6">
@@ -37,7 +38,7 @@ export default function ConfirmStep({
 
           <div>Session Fee:</div>
           <div className="text-right font-medium text-foreground">
-            {provider.fee??0}
+            $ {provider.sessionFee ?? 0}
           </div>
         </div>
       </div>

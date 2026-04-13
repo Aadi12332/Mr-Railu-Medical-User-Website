@@ -75,107 +75,107 @@ type Tab = "upcoming" | "history";
 
 export default function PaymentsPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>(
-[]  );
+    []);
 
   const [tab, setTab] = useState<Tab>("upcoming");
-const [payments, setPayments] = useState<any[]>([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState("");
- const handleCards=async()=>{
-    try{
-        const res=await dashboardApi.getCardsApi("patient");
-        const data=res?.data?.paymentMethods?.map((i:any)=>{
-          return {
-            id: i._id,
-            brand: i.brand,
-            last4: i.last4,
-            expiry: `${i.expMonth}/${i.expYear}`,
-            isDefault: i.isDefault,
-          }
-        })
-        setMethods(data || []);
-    }catch(error){
-        console.error(error);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const handleCards = async () => {
+    try {
+      const res = await dashboardApi.getCardsApi("patient");
+      const data = res?.data?.paymentMethods?.map((i: any) => {
+        return {
+          id: i._id,
+          brand: i.brand,
+          last4: i.last4,
+          expiry: `${i.expMonth}/${i.expYear}`,
+          isDefault: i.isDefault,
+        }
+      })
+      setMethods(data || []);
+    } catch (error) {
+      console.error(error);
     }
   }
 
-const fetchPayments = async () => {
-  try {
-    setLoading(true);
-    setError("");
+  const fetchPayments = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-    const res = await dashboardApi.getPayments("patient");
-    setPayments(res?.data?.payments || []);
+      const res = await dashboardApi.getPayments("patient");
+      setPayments(res?.data?.payments || []);
 
-  } catch (err) {
-    console.error("Payment error:", err);
-    setError("Failed to load payments");
-  } finally {
-    setLoading(false);
-  }
-};
-const handleDefaultCard=async(cardId:string)=>{
-  try{
-    const res=await dashboardApi.defaultCardApi("patient", cardId);
-    console.log({res});
-    handleCards();
-  }catch(error){
-    console.error(error);
-  }
-}
-const addCard=async(payload:any)=>{
-  try{
-    const dataPayload={
-      cardNumber: payload.last4,
-      expMonth: payload.expiry.split("/")[0],
-      expYear: payload.expiry.split("/")[1],
-      cvv: payload.cvv,
-      cardholderName: payload.cardholderName,
+    } catch (err) {
+      console.error("Payment error:", err);
+      setError("Failed to load payments");
+    } finally {
+      setLoading(false);
     }
-    const res=await dashboardApi.postAddCardApi("patient", dataPayload);
-    setMethods((prev) => [...prev, res?.data?.paymentMethod]);
-    handleCards();
-  }catch(error){
-    console.error(error);
-  }
-} 
-
-useEffect(() => {
-  handleCards();  
-  fetchPayments();
-}, []);
-const mappedPayments = payments.map((item) => {
-  const provider = item?.appointmentId?.providerId;
-
-  return {
-    id: item?._id,
-    description:
-      item?.description ||
-      `Session with Dr. ${provider?.firstName || ""} ${provider?.lastName || ""}`,
-    date: new Date(item?.createdAt).toDateString(),
-    amount: item?.amount ,
-    status: item?.status === "pending" ? "Scheduled" : "Paid",
-    method: item?.cardBrand
-      ? `${item?.cardBrand} **** ${item?.cardLast4}`
-      : "",
-    invoice: item?.invoiceNumber,
   };
-});
-const filteredPayments = mappedPayments.filter((p) => {
-  if (tab === "upcoming") return p.status === "Scheduled";
-  return p.status === "Paid";
-});
- 
- 
- const handleDeleteCardApi=async(cardId:string)=>{
-  try{
-    const res=await dashboardApi.deleteCardApi("patient", cardId);
-    console.log({res});
-    handleCards();
-  }catch(error){
-    console.error(error);
+  const handleDefaultCard = async (cardId: string) => {
+    try {
+      const res = await dashboardApi.defaultCardApi("patient", cardId);
+      console.log({ res });
+      handleCards();
+    } catch (error) {
+      console.error(error);
+    }
   }
-}
+  const addCard = async (payload: any) => {
+    try {
+      const dataPayload = {
+        cardNumber: payload.last4,
+        expMonth: payload.expiry.split("/")[0],
+        expYear: payload.expiry.split("/")[1],
+        cvv: payload.cvv,
+        cardholderName: payload.cardholderName,
+      }
+      const res = await dashboardApi.postAddCardApi("patient", dataPayload);
+      setMethods((prev) => [...prev, res?.data?.paymentMethod]);
+      handleCards();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    handleCards();
+    fetchPayments();
+  }, []);
+  const mappedPayments = payments.map((item) => {
+    const provider = item?.appointmentId?.providerId;
+
+    return {
+      id: item?._id,
+      description:
+        item?.description ||
+        `Session with Dr. ${provider?.firstName || ""} ${provider?.lastName || ""}`,
+      date: new Date(item?.createdAt).toDateString(),
+      amount: item?.amount,
+      status: item?.status === "pending" ? "Scheduled" : "Paid",
+      method: item?.cardBrand
+        ? `${item?.cardBrand} **** ${item?.cardLast4}`
+        : "",
+      invoice: item?.invoiceNumber,
+    };
+  });
+  const filteredPayments = mappedPayments.filter((p) => {
+    if (tab === "upcoming") return p.status === "Scheduled";
+    return p.status === "Paid";
+  });
+
+
+  const handleDeleteCardApi = async (cardId: string) => {
+    try {
+      const res = await dashboardApi.deleteCardApi("patient", cardId);
+      console.log({ res });
+      handleCards();
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <div className="space-y-6 h-full">
       {/* header */}
@@ -203,11 +203,11 @@ const filteredPayments = mappedPayments.filter((p) => {
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">{card.label}</p>
-                  <p className="text-2xl font-medium leading-none">
+                  {card.value && <p className="text-2xl font-medium leading-none">
                     {typeof card.value === "number" && card.isCurrency
                       ? `$${card.value}`
                       : card.value}
-                  </p>
+                  </p>}
                 </div>
               </div>
             </Card>
@@ -221,8 +221,8 @@ const filteredPayments = mappedPayments.filter((p) => {
           <h2 className="text-lg font-medium">Payment Methods</h2>
           <AddPaymentMethodDialog
             onAdd={(method) => {
-              console.log({method});addCard(method)
-              }}
+              console.log({ method }); addCard(method)
+            }}
           />
         </div>
         <div className="mt-2 gap-5 grid grid-cols-1 md:grid-cols-2">
@@ -254,34 +254,34 @@ const filteredPayments = mappedPayments.filter((p) => {
       </div>
 
       {/* list of payments */}
-   <div className="space-y-4">
-  
-  {loading &&
-    Array(3)
-      .fill(0)
-      .map((_, i) => (
-        <div
-          key={i}
-          className="h-[100px] rounded-lg bg-gray-200 animate-pulse"
-        />
-      ))}
+      <div className="space-y-4">
 
-  {error && (
-    <p className="text-center text-red-500">{error}</p>
-  )}
+        {loading &&
+          Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <div
+                key={i}
+                className="h-[100px] rounded-lg bg-gray-200 animate-pulse"
+              />
+            ))}
 
-  {!loading && !error && filteredPayments.length === 0 && (
-    <p className="text-center text-muted-foreground">
-      No payments to show.
-    </p>
-  )}
+        {error && (
+          <p className="text-center text-red-500">{error}</p>
+        )}
 
-  {!loading &&
-    !error &&
-    filteredPayments.map((item) => (
-      <PaymentItemCard key={item.id} item={item} />
-    ))}
-</div>
+        {!loading && !error && filteredPayments.length === 0 && (
+          <p className="text-center text-muted-foreground">
+            No payments to show.
+          </p>
+        )}
+
+        {!loading &&
+          !error &&
+          filteredPayments.map((item) => (
+            <PaymentItemCard key={item.id} item={item} />
+          ))}
+      </div>
     </div>
   );
 }

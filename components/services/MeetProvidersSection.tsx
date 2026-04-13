@@ -57,42 +57,48 @@ interface MeetProvidersSectionProps {
 }
 
 export default function MeetProvidersSection({
-  data,loading,error,
+  data, loading, error,
   title = "Meet our",
   subtitle = "providers",
   description = "Quality care shouldn't come with surprise costs. Here's exactly what you'll pay.",
   layout = "carousel",
   rows = 1,
 }: any) {
-  const renderCard = (p: any) => (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 hover:shadow-md transition-shadow">
-      <div className="overflow-hidden rounded-xl aspect-square mb-3 bg-gray-50">
-        <Image
-          src={p.imageUrl}
-          alt={p.name}
-          width={640}
-          height={520}
-          className="object-cover w-full h-full"
-        />
+  const renderCard = (p: any) => {
+    const imageUrl = p.imageUrl || p.profileImageUrl || expertImg1;
+    const displayName = p.name || `Dr. ${p.firstName} ${p.lastName}`;
+    const displayRole = p.role || p.specialty || "Provider";
+    const displayBio = p.bio || "A Highly Experienced Physician With A Strong Background In Primary Care And Mental Health.";
+
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 hover:shadow-md transition-shadow">
+        <div className="overflow-hidden rounded-xl aspect-square mb-3 bg-gray-50">
+          <Image
+            src={imageUrl}
+            alt={displayName}
+            width={640}
+            height={520}
+            className="object-cover w-full h-full"
+          />
+        </div>
+
+        <div className="text-sm font-semibold text-slate-900 line-clamp-1">{displayName}</div>
+        <div className="text-sm font-normal text-slate-900 line-clamp-1">{displayRole}</div>
+
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-3">
+          {displayBio}
+        </p>
       </div>
-
-      <div className="text-sm font-semibold text-slate-900">{p.name}</div>
-      <div className="text-sm font-normal text-slate-900">{p.role}</div>
-
-
-      <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
-        {p.bio}
-      </p>
-    </div>
-  );
+    );
+  };
 
   return (
     <section className="py-16 bg-transparent">
       <Container>
         <SectionHeader
-          title={data?.teamTitle??''}
-          subtitle={data?.teamSubtitle??""}
-          description={data?.teamDescription??""}
+          title={data?.teamTitle ?? ''}
+          subtitle={data?.teamSubtitle ?? ""}
+          description={data?.teamDescription ?? ""}
         />
 
         <div className="mt-8 space-y-6">
@@ -111,7 +117,7 @@ export default function MeetProvidersSection({
                 ]}
               >
                 <CarouselContent className="-ml-4">
-                  {(data?.teamMembers??[])?.map((p:any, index:number) => (
+                  {(data?.teamMembers ?? [])?.map((p: any, index: number) => (
                     <CarouselItem
                       key={`${p.id}-${index}`}
                       className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/4"
@@ -124,9 +130,7 @@ export default function MeetProvidersSection({
             ))
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[...providers, ...providers].map((p, index) => (
-                <div key={`${p.id}-${index}`}>{renderCard(p)}</div>
-              ))}
+
             </div>
           )}
         </div>

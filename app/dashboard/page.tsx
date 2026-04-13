@@ -216,9 +216,7 @@ export default function page() {
     }
   }
   useEffect(() => {
-    if (!user) {
-      getProfile();
-    }
+    getProfile();
     handleMoodOption();
     handleMoodHistory();
     handleDashboard()

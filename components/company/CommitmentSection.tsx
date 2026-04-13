@@ -24,20 +24,38 @@ const commitments = [
   },
 ];
 
-export default function CommitmentSection() {
+export default function CommitmentSection({
+  title,
+  subtitle,
+  features,
+}: {
+  title?: string;
+  subtitle?: string;
+  features?: any[];
+}) {
+  const displayTitle = title || "Our Commitment";
+  const displaySubtitle = subtitle || "To Excellence";
+  const cards = features && features.length > 0 ? features : commitments;
+
   return (
     <section className="py-16 bg-white">
       <Container>
-        <SectionHeader title="Our Commitment" subtitle="To Excellence" />
+        <SectionHeader title={displayTitle} subtitle={displaySubtitle} />
 
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-8">
-          {commitments.map((c) => (
-            <Card key={c.id} className="p-5 gap-0 flex flex-col shadow ring-0">
+          {cards.map((c: any, index: number) => (
+            <Card key={c.id || c._id || index} className="p-5 gap-0 flex flex-col shadow ring-0">
               <div className="size-13 bg-[#B8E8E2] text-primary rounded-xl flex items-center justify-center mb-4">
-                <c.icon className="size-6" />
+                {typeof c.icon === "string" ? (
+                  <span className="text-2xl">{c.icon}</span>
+                ) : c.icon ? (
+                  <c.icon className="size-6" />
+                ) : (
+                  <span className="text-2xl">🌟</span>
+                )}
               </div>
               <h4 className="text-lg font-semibold">{c.title}</h4>
-              <p className="mt-2 text-sm text-muted-foreground">{c.desc}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{c.desc || c.description}</p>
             </Card>
           ))}
         </div>

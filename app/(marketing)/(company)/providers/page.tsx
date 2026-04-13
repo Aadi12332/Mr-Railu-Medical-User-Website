@@ -1,29 +1,65 @@
 "use client"
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import ProvidersHero from "@/components/company/ProvidersHero";
 import CommitmentSection from "@/components/company/CommitmentSection";
 import MeetProvidersSection from "@/components/services/MeetProvidersSection";
-
 import PatientTestimonialsSection from "@/components/PatientTestimonialsSection";
 import FAQSection from "@/components/FAQSection";
 import { publicPageApi } from "@/api/publicpage.api";
 import { useFetch } from "@/hooks/useFetch";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function page() {
-const { data, loading, error } = useFetch(publicPageApi.getProviders);
+  const { data, loading, error } = useFetch(publicPageApi.getProviders) as any;
+
+  if (loading) {
+    return (
+      <div className="py-20 max-w-5xl mx-auto space-y-8 px-4">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-20 text-center text-red-500 min-h-[400px] flex items-center justify-center">
+        <p>Something went wrong loading data.</p>
+      </div>
+    );
+  }
+
+  const pageContent = data?.pageContent || {};
+  const providers = data?.providers || [];
+  const faqs = data?.faqs || [];
+
   return (
     <>
-      <ProvidersHero />
-      <CommitmentSection />
+      <ProvidersHero
+        title={pageContent.heroTitle}
+        subtitle={pageContent.heroSubtitle}
+      />
+      <CommitmentSection
+        title={pageContent.featureCardsTitle}
+        subtitle={pageContent.featureCardsSubtitle}
+        features={pageContent.featureCards}
+      />
       <MeetProvidersSection
-        title="Your Trusted"
-        subtitle="Care Network"
-        description=""
-        rows={2}
+        data={{
+          teamTitle: pageContent.teamTitle || "Meet our",
+          teamSubtitle: pageContent.teamSubtitle || "providers",
+          teamDescription: "",
+          teamMembers: providers,
+        }}
+        rows={1}
       />
 
       <PatientTestimonialsSection />
-      <FAQSection />
+
+      {faqs && faqs.length > 0 && (
+        <FAQSection data={faqs} />
+      )}
     </>
   );
 }

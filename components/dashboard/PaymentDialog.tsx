@@ -21,8 +21,12 @@ import { stripePromise } from "@/lib/stripe";
 
 function PaymentDialogWrapper({
   children,
+  open,
+  onClose
 }: {
   children: React.ReactNode;
+  open?: boolean
+  onClose?: () => void
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -57,7 +61,7 @@ function PaymentDialogWrapper({
         data: {
           object: {
             id: paymentMethod.id,
-            amount: 19900,
+            amount: sessionStorage.getItem("providerAmount") || 0,
             currency: "usd",
             status: "succeeded",
           },
@@ -75,7 +79,7 @@ function PaymentDialogWrapper({
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="flex items-center relative">
@@ -199,7 +203,7 @@ function PaymentDialogWrapper({
                   Expiration Date
                 </Label>
                 <div className={cn("bg-white border h-11 rounded-xl shadow-sm px-3 flex items-center", cardExpiryError ? "border-red-500" : "border-slate-200")}>
-                  <CardExpiryElement 
+                  <CardExpiryElement
                     onChange={(e) => setCardExpiryError(e.error?.message || "")}
                     options={{
                       style: {
@@ -212,7 +216,7 @@ function PaymentDialogWrapper({
                         }
                       },
                     }}
-                    className="w-full" 
+                    className="w-full"
                   />
                 </div>
                 {cardExpiryError && <p className="text-red-500 text-xs mt-1">{cardExpiryError}</p>}
@@ -226,7 +230,7 @@ function PaymentDialogWrapper({
               <div className="flex items-start gap-4">
                 <div className="w-full">
                   <div className={cn("bg-white border h-11 rounded-xl shadow-sm px-3 flex items-center w-full", cardCvcError ? "border-red-500" : "border-slate-200")}>
-                    <CardCvcElement 
+                    <CardCvcElement
                       onChange={(e) => setCardCvcError(e.error?.message || "")}
                       options={{
                         style: {
@@ -239,7 +243,7 @@ function PaymentDialogWrapper({
                           }
                         }
                       }}
-                      className="w-full" 
+                      className="w-full"
                     />
                   </div>
                   {cardCvcError && <p className="text-red-500 text-xs mt-1">{cardCvcError}</p>}
@@ -277,10 +281,10 @@ function PaymentDialogWrapper({
     </Dialog>
   );
 }
-const PaymentDialog = ({ children }: { children: any }) => {
+const PaymentDialog = ({ children, open, onClose }: { children: any, open?: boolean, onClose?: () => void }) => {
   return (
     <Elements stripe={stripePromise}>
-      <PaymentDialogWrapper>
+      <PaymentDialogWrapper open={open} onClose={onClose}>
         {children}
       </PaymentDialogWrapper>
     </Elements>

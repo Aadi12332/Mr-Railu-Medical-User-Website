@@ -1,7 +1,7 @@
 import axios from "./axiosInstance";
 
 export const dashboardApi = {
-  getDashboardData: (role: string) => {
+  getDashboardData: (role = "patient") => {
     return axios.get(`/v1/${role}/dashboard`);
   },
   getHomepageData: () => {
@@ -25,64 +25,64 @@ export const dashboardApi = {
   getNotificationReadAll: () => {
     return axios.put(`/v1/patient/notifications/read-all`);
   },
-  getSessionData: (role: string) => {
+  getSessionData: (role = "patient") => {
     return axios.get(`/v1/${role}/sessions`);
   },
-  postSessionData: (role: string, payload: any) => {
+  postSessionData: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/sessions/${payload.sessionId}/join`, payload);
   },
-  getAppointments: (role: string) => {
+  getAppointments: (role = "patient") => {
     return axios.get(`/v1/${role}/appointments`);
   },
-  getActivePrescriptions: (role: string) => {
+  getActivePrescriptions: (role = "patient") => {
     return axios.get(`/v1/${role}/prescriptions`);
   },
-  getMentalPlans: (role: string) => {
+  getMentalPlans: (role = "patient") => {
     return axios.get(`/v1/${role}/plans`);
   },
-  getMyProviders: (role: string) => {
+  getMyProviders: (role = "patient") => {
     return axios.get(`/v1/${role}/providers/my-providers`);
   },
-  getProviders: (role: string) => {
+  getProviders: (role = "patient") => {
     return axios.get(`/v1/${role}/providers`);
   },
-  getMoodOptions: (role: string) => {
+  getMoodOptions: (role = "patient") => {
     return axios.get(`/v1/${role}/mood/options`);
   },
-  getMoodHistory: (role: string) => {
+  getMoodHistory: (role = "patient") => {
     return axios.get(`/v1/${role}/mood/`);
   },
-  postRequestRefill: (role: string, prescriptionId: string, payload: any) => {
+  postRequestRefill: (role = "patient", prescriptionId: string, payload: any) => {
     return axios.post(
       `/v1/${role}/prescriptions/${prescriptionId}/request-refill`,
       payload,
     );
   },
-  getPayments: (role: string) => {
+  getPayments: (role = "patient") => {
     return axios.get(`/v1/${role}/payments`);
   },
-  postMoodApi: (role: string, payload: any) => {
+  postMoodApi: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/mood`, payload);
   },
-  getPaymentById: (role: string, paymentId: string) => {
+  getPaymentById: (role = "patient", paymentId: string) => {
     return axios.get(`/v1/${role}/payments/${paymentId}`);
   },
-  getPrefillCount: (role: string) => {
+  getPrefillCount: (role = "patient") => {
     return axios.get(`/v1/${role}/prescriptions/counts`);
   },
-  getCardsApi: (role: string) => {
+  getCardsApi: (role = "patient") => {
     return axios.get(`/v1/${role}/payment-methods`);
   },
-  postAddCardApi: (role: string, payload: any) => {
+  postAddCardApi: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/payment-methods`, payload);
   },
-  defaultCardApi: (role: string, cardId: string) => {
+  defaultCardApi: (role = "patient", cardId: string) => {
     return axios.put(`/v1/${role}/payment-methods/${cardId}/default`);
   },
-  deleteCardApi: (role: string, cardId: string) => {
+  deleteCardApi: (role = "patient", cardId: string) => {
     return axios.delete(`/v1/${role}/payment-methods/${cardId}`);
   },
-  downloadPrescription: (role: string, prescriptionId: string) => {
+  downloadPrescription: (role = "patient", prescriptionId: string) => {
     return axios.get(`/v1/${role}/prescriptions/${prescriptionId}/download`, {
       responseType: "arraybuffer",
     });

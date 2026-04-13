@@ -59,19 +59,23 @@ export default function page() {
   const [role, setRole] = useState("");
   const [providers, setProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [rating, setRating] = useState("any");
   const [priceRange, setPriceRange] = useState("any");
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const handleMyProviders = async () => {
-    setLoading(true);
+    if (!role) return;
     try {
+      setLoading(true);
+      setError(null);
       const response = await dashboardApi.getProviders(role ?? "");
       const data = response.data;
       setProviders(data?.providers || []);
-    } catch (error) {
-      console.log("Error fetching providers:", error);
+    } catch (err: any) {
+      console.log("Error fetching providers:", err);
+      setError(err?.message || "Failed to fetch providers");
     } finally {
       setLoading(false);
     }
@@ -171,74 +175,87 @@ export default function page() {
       </div>
 
       {/* Providers grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))
-          : filteredProviders.map((p: any) => (
-            <Card key={p._id} className="p-4">
-              <div className="flex flex-col items-center text-center">
-                <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
-                  <AvatarFallback>
-                    {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
-                  </AvatarFallback>
-                </Avatar>
+      {error && (
+        <Card className="p-8 text-center text-red-500 shadow-md">
+           <p>{error}</p>
+        </Card>
+      )}
 
-                <div className="mt-4">
-                  <div className="text-sm font-semibold">
-                    Dr. {p?.firstName} {p?.lastName}
+      {!error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))
+            : filteredProviders.map((p: any) => (
+              <Card key={p._id} className="p-4">
+                <div className="flex flex-col items-center text-center">
+                  <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
+                    <AvatarFallback>
+                      {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="mt-4">
+                    <div className="text-sm font-semibold">
+                      Dr. {p?.firstName} {p?.lastName}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">
+                      {p?.specialty || "Specialist"}
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
+                      <div className="flex items-center gap-2">
+                        <Star className="size-3 text-amber-400 fill-current" />
+                        <RatingStars rating={p?.rating ?? 0} />
+                        <span className="font-semibold text-sm">
+                          {p?.rating ?? 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
+                      Available Today
+                    </Badge>
                   </div>
 
-                  <div className="text-xs text-muted-foreground">
-                    {p?.specialty || "Specialist"}
-                  </div>
+                  <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="space-y-1">
+                      <div>Experience</div>
+                      <div>Session Fee</div>
+                    </div>
 
-                  <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
-                    <div className="flex items-center gap-2">
-                      <Star className="size-3 text-amber-400 fill-current" />
-                      <RatingStars rating={p?.rating ?? 0} />
-                      <span className="font-semibold text-sm">
-                        {p?.rating ?? 0}
-                      </span>
+                    <div className="text-right space-y-1">
+                      <div className="font-medium">
+                        {p?.experience ? `${p.experience} years` : "-"}
+                      </div>
+                      <div className="font-medium">${p?.sessionFee ?? "N/A"}</div>
                     </div>
                   </div>
 
-                  <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
-                    Available Today
-                  </Badge>
-                </div>
-
-                <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="space-y-1">
-                    <div>Experience</div>
-                    <div>Session Fee</div>
-                  </div>
-
-                  <div className="text-right space-y-1">
-                    <div className="font-medium">
-                      {p?.experience ? `${p.experience} years` : "-"}
+                  <div className="mt-6 w-full flex gap-2">
+                    <div className="flex-1">
+                      <BookAppointmentDialog provider={p} />
                     </div>
-                    <div className="font-medium">${p?.sessionFee ?? "N/A"}</div>
+
+                    <PaymentDialog>
+                      <Button variant="outline" className="w-full flex-1"
+                        onClick={() => {
+                          sessionStorage.setItem("providerAmount", p?.sessionFee)
+                        }}
+                      >
+                        Pay
+                      </Button>
+                    </PaymentDialog>
                   </div>
                 </div>
+              </Card>
+            ))}
+        </div>
+      )}
 
-                <div className="mt-6 w-full flex gap-2">
-                  <div className="flex-1">
-                    <BookAppointmentDialog provider={p} />
-                  </div>
-
-                  <PaymentDialog>
-                    <Button variant="outline" className="w-full flex-1">
-                      Pay
-                    </Button>
-                  </PaymentDialog>
-                </div>
-              </div>
-            </Card>
-          ))}
-      </div>
-      {!filteredProviders.length && !loading && (
+      {!error && !filteredProviders.length && !loading && (
         <p className="text-center text-sm text-muted-foreground">
           No providers found
         </p>

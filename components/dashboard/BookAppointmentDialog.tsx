@@ -21,12 +21,17 @@ import PaymentDialog from "@/components/dashboard/PaymentDialog";
 import { Provider } from "@/components/dashboard/types";
 import { patientApi } from "@/api/patient.api";
 import { toast } from "react-toastify";
+import dayjs from "dayjs"
+import customParseFormat from "dayjs/plugin/customParseFormat"
+dayjs.extend(customParseFormat)
 
 export default function BookAppointmentDialog({
   provider,
 }: {
   provider: any;
 }) {
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+
   const [step, setStep] = useState<number>(1);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -36,28 +41,36 @@ export default function BookAppointmentDialog({
   useEffect(() => {
     setSelectedTime(null);
   }, [date]);
-  const handleBooking=async()=>{
-  try{
-const res=await patientApi.bookAppointment({
-  providerId: provider._id,
-  date: date?.toISOString(),
-  time: selectedTime,
-  type:sessionType,
-  // reason,
- })
- toast.success(res?.data?.message || "Appointment booked successfully")
-  }catch(error:any){
-    toast.error(error?.response?.data?.message || "Failed to book appointment")
+  const handleBooking = async () => {
+
+    try {
+      const time = dayjs(selectedTime, "hh:mm A").format("HH:mm")
+
+      const res = await patientApi.bookAppointment({
+        providerId: provider._id,
+        date: date?.toISOString(),
+        time: time,
+        type: sessionType,
+        // reason,
+      })
+      sessionStorage.setItem("providerAmount", provider?.sessionFee)
+      setIsSuccess(true)
+
+      toast.success(res?.data?.message || "Appointment booked successfully")
+    } catch (error: any) {
+      setIsSuccess(false)
+      toast.error(error?.message || "Failed to book appointment")
+    }
+
+
   }
- 
-}
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button className="bg-gradient-dash w-full">
           <Video className="size-4 mr-2" /> Book Now
         </Button>
-        
+
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg">
@@ -83,13 +96,12 @@ const res=await patientApi.bookAppointment({
                 return (
                   <div key={label} className="flex flex-col items-center gap-2">
                     <div
-                      className={`size-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                        active
+                      className={`size-8 rounded-full flex items-center justify-center text-xs font-medium ${active
+                        ? "bg-gradient-dash text-white"
+                        : completed
                           ? "bg-gradient-dash text-white"
-                          : completed
-                            ? "bg-gradient-dash text-white"
-                            : "bg-muted text-muted-foreground"
-                      }`}
+                          : "bg-muted text-muted-foreground"
+                        }`}
                     >
                       {i + 1}
                     </div>
@@ -105,12 +117,13 @@ const res=await patientApi.bookAppointment({
 
         <div className="mt-4">
           {step === 1 && <TherapistStep provider={provider} />}
-          {step === 2 && <DateStep date={date} setDate={setDate} provider={provider}/>}
+          {step === 2 && <DateStep date={date} setDate={setDate} provider={provider} />}
           {step === 3 && (
             <TimeStep
               date={date}
               selectedTime={selectedTime}
               setSelectedTime={setSelectedTime}
+              provider={provider}
             />
           )}
           {step === 4 && (
@@ -145,8 +158,8 @@ const res=await patientApi.bookAppointment({
             )}
 
             {step === 5 ? (
-              <PaymentDialog>
-                <Button size="lg" className="flex-1 bg-gradient-dash" onClick={()=>handleBooking()}>
+              <PaymentDialog open={isSuccess} onClose={() => setIsSuccess(false)}>
+                <Button size="lg" className="flex-1 bg-gradient-dash" onClick={() => handleBooking()}>
                   confirm
                 </Button>
               </PaymentDialog>

@@ -46,7 +46,7 @@ const SIDEBAR_MENU = [
 
 export default function DashSidebar() {
   const pathname = usePathname();
-const router = useRouter();
+  const router = useRouter();
   function isMenuActive(href: string) {
     if (href === "/dashboard") {
       return pathname === "/dashboard";
@@ -75,7 +75,7 @@ const router = useRouter();
                   <button
                     onClick={async () => {
                       const role = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : null;
-                      const loginPath = role === "Patient" ? "/patient-login" : "/provider-login";
+                      const loginPath = "/patient-login";
 
                       try {
                         await authApi.patientLogout();

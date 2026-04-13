@@ -56,10 +56,10 @@ export default function LoginCard({
 
       if (role === "Patient") {
         const response = await authApi.patientLogin({ email, password });
-        localStorage.setItem("role", "Patient");
+        localStorage.setItem("role", "patient");
       } else {
         await providerApi.login({ email, password });
-        localStorage.setItem("role", "Provider");
+        localStorage.setItem("role", "provider");
       }
 
       await getProfile();
