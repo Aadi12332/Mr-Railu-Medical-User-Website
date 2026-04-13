@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authApi } from "@/api/auth.api";
 import { providerApi } from "@/api/provider.api";
+import { useAuth } from "@/components/context/auth.context";
 
 type Props = {
   role: "Patient" | "Provider";
@@ -17,6 +18,7 @@ export default function LoginCard({
   signUpPath,
 }: Props) {
   const router = useRouter();
+  const { getProfile } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [email, setEmail] = useState("");
@@ -60,6 +62,7 @@ export default function LoginCard({
         localStorage.setItem("role", "Provider");
       }
 
+      await getProfile();
       router.push(onSubmitPath);
     } catch (err: any) {
       setErrors({ api: err?.message || "Login failed" });

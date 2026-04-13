@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const role = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : null;
 
   const getProfile = async () => {
-    const token = localStorage.getItem("patientToken");
     const currentRole = typeof localStorage !== 'undefined' ? localStorage.getItem("role") : role;
+    const token = currentRole === "Provider" ? localStorage.getItem("providerToken") : localStorage.getItem("patientToken");
     if (!token || !currentRole) {
       setLoading(false);
       return;

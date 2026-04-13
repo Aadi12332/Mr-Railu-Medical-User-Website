@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authApi } from "@/api/auth.api";
+import { useAuth } from "@/components/context/auth.context";
 
 const patientRegisterSchema = z
   .object({
@@ -41,6 +42,7 @@ type PatientRegisterFormValues = z.infer<typeof patientRegisterSchema>;
 
 export default function PatientRegisterCard() {
   const router = useRouter();
+  const { getProfile } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -68,6 +70,7 @@ export default function PatientRegisterCard() {
         password: values.password,
       });
 
+      await getProfile();
       router.push("/dashboard");
     } catch (e: any) {
       setApiError(e?.message || "Registration failed");

@@ -25,6 +25,7 @@ import {
 import { patientApi } from "@/api/patient.api";
 import { toast } from "react-toastify";
 import { useRef } from "react";
+import { useAuth } from "@/components/context/auth.context";
 
 const timeZoneOptions = [
   "Pacific Time (PT)",
@@ -75,6 +76,8 @@ export function ProfileSettingsForm({
   defaultValues,
   onSubmit,
 }: ProfileSettingsFormProps) {
+  const { getProfile } = useAuth();
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -128,8 +131,8 @@ export function ProfileSettingsForm({
         const res = await patientApi.getProfile();
         const data = res?.data;
         const dob = data?.dateOfBirth
-  ? dayjs(data.dateOfBirth).format("YYYY-MM-DD")
-  : "";
+          ? dayjs(data.dateOfBirth).format("YYYY-MM-DD")
+          : "";
         form.reset({
           firstName: data?.firstName || "",
           lastName: data?.lastName || "",
@@ -159,6 +162,7 @@ export function ProfileSettingsForm({
         address: values.address,
         timezone: values.timeZone,
       });
+      await getProfile();
       toast.success("Profile updated successfully");
       onSubmit?.(values);
     } catch (e) {
