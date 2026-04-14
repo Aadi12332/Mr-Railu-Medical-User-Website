@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
 import { ChatWindow } from "@/components/messages/ChatWindow";
 import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
 import { settingApi } from "@/api/setting.api";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchParams } from "next/navigation";
 
-export default function MessagesPage() {
+function MessagesContent() {
   const [activeConversationId, setActiveConversationId] = useState<
     string | undefined
   >(undefined);
@@ -91,5 +91,13 @@ export default function MessagesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div>Loading messages...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }
