@@ -31,11 +31,19 @@ interface Slot {
 interface RescheduleAppointmentDialogProps {
   appointment: Appointment;
   trigger?: React.ReactNode;
+  handleCloseReschedule: () => void;
+  openReschedule: boolean;
+  setOpenReschedule: (open: boolean) => void;
+  fetchAppointments:any;
 }
 
 export default function RescheduleAppointmentDialog({
   appointment,
   trigger,
+  handleCloseReschedule,
+  openReschedule,
+  setOpenReschedule,
+  fetchAppointments
 }: RescheduleAppointmentDialogProps) {
   const router = useRouter();
   const handleCancel = async () => {
@@ -77,8 +85,7 @@ export default function RescheduleAppointmentDialog({
               minute: "2-digit",
             });
 
-          const format24 = (dt: Date) =>
-            dt.toTimeString().slice(0, 5);
+          const format24 = (dt: Date) => dt.toTimeString().slice(0, 5);
 
           slots.push({
             id: `${rawDate}-${h}-${m}`,
@@ -111,12 +118,11 @@ export default function RescheduleAppointmentDialog({
     try {
       const res: any = await patientApi.getRescheduleById(
         appointment.id,
-        payload
+        payload,
       );
-      toast.success(res?.message || "Failed to reschedule appointment");
-
-      console.log("Reschedule Payload:", payload);
-      console.log("API Response:", res);
+      setOpenReschedule(false);
+      fetchAppointments();
+      toast.success(res?.message || "Successfully rescheduled appointment");
     } catch (error: any) {
       console.error(error);
       toast.error(error?.message || "Failed to reschedule appointment");
@@ -124,17 +130,19 @@ export default function RescheduleAppointmentDialog({
   };
 
   return (
-    <Dialog>
+    <Dialog open={openReschedule} onOpenChange={setOpenReschedule}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 border-emerald-500 text-emerald-500"
-          >
-            <SquarePen className="size-4 mr-1" /> Reschedule
-          </Button>
-        )}
+        <div onClick={() => setOpenReschedule(true)}>
+          {trigger || (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 border-emerald-500 text-emerald-500"
+            >
+              <SquarePen className="size-4 mr-1" /> Reschedule
+            </Button>
+          )}
+        </div>
       </DialogTrigger>
 
       <DialogContent className="w-full max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
@@ -162,10 +170,11 @@ export default function RescheduleAppointmentDialog({
               <div
                 key={slot.id}
                 onClick={() => setSelectedSlot(slot)}
-                className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${selectedSlot?.id === slot.id
-                  ? "border border-emerald-500 rounded-md"
-                  : ""
-                  }`}
+                className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${
+                  selectedSlot?.id === slot.id
+                    ? "border border-emerald-500 rounded-md"
+                    : ""
+                }`}
               >
                 <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-28 text-left">
                   {slot.date}
@@ -210,10 +219,7 @@ export default function RescheduleAppointmentDialog({
               Cancel
             </Button>
           </DialogClose>
-          <Button
-            className="bg-gradient-dash"
-            onClick={handleSchedule}
-          >
+          <Button className="bg-gradient-dash" onClick={handleSchedule}>
             Done
           </Button>
         </DialogFooter>

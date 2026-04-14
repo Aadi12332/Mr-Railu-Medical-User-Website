@@ -157,7 +157,7 @@ export default function SupportPage() {
               </Button>
             </CardHeader>
 
-            <CardContent className="space-y-3 max-h-[700px] overflow-auto">
+            <CardContent className="space-y-3 max-h-175 overflow-auto">
               {loading ? (
                 <div className="flex justify-center items-center py-10">
                   <div className="w-6 h-6 border-2 border-gray-300 border-t-black rounded-full animate-spin" />

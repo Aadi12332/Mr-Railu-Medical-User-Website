@@ -42,10 +42,14 @@ interface AppointmentCardProps {
   appointment: Appointment;
   handleCancelApp:any;
   handleStartSession:any;
+  fetchAppointments:any;
 }
 
-export function AppointmentCard({ appointment: app,handleCancelApp,handleStartSession }: AppointmentCardProps) {
- 
+export function AppointmentCard({ appointment: app,handleCancelApp,handleStartSession, fetchAppointments }: AppointmentCardProps) {
+ const [openReschedule, setOpenReschedule] = React.useState(false);
+ const handleCloseReschedule = () => setOpenReschedule(false);
+
+
   const handleCancel = async (id:any) => {
   try {
     const res: any = await patientApi.cancelAppointment(id);
@@ -117,6 +121,10 @@ export function AppointmentCard({ appointment: app,handleCancelApp,handleStartSe
             {(app.status === "Confirmed" || app.status === "Pending") && (
               <>
                 <RescheduleAppointmentDialog
+                handleCloseReschedule={handleCloseReschedule}
+                openReschedule={openReschedule}
+                setOpenReschedule={setOpenReschedule}
+                fetchAppointments={fetchAppointments}
                   appointment={app}
                   trigger={
                     <Button

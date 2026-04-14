@@ -9,8 +9,8 @@ import bgPattern from "@/assets/landing/hero/bg-pattern.png";
 export default function CareersHero({ loading, error, careers }: { loading: boolean; error: string | null, careers: any }) {
 
 
-  if (loading) return <p className="h-[300px] flex justify-center items-center">Loading...</p>;
-  if (error) return <p className="h-[300px] flex justify-center items-center">{error}</p>;
+  if (loading) return <p className="h-75 flex justify-center items-center">Loading...</p>;
+  if (error) return <p className="h-75 flex justify-center items-center">{error}</p>;
   return (
     <section className="py-10 relative">
       <Container className="relative">
@@ -70,7 +70,7 @@ export default function CareersHero({ loading, error, careers }: { loading: bool
                     alt="Careers hero"
                     width={940}
                     height={620}
-                    className="object-cover w-full h-[360px] md:h-[420px]"
+                    className="object-cover w-full h-90 md:h-105"
                   />
                 </div>
               </div>

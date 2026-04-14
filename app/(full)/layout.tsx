@@ -37,7 +37,7 @@ export default function AuthLayout({
             <Image
               src={logo}
               alt="Mental Health Tele logo"
-              className="sm:h-9 h-6 w-auto min-w-[100px]  object-contain"
+              className="sm:h-9 h-6 w-auto min-w-25  object-contain"
             />
           </Link>
         </div>

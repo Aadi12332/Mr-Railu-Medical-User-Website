@@ -262,7 +262,7 @@ export default function PaymentsPage() {
             .map((_, i) => (
               <div
                 key={i}
-                className="h-[100px] rounded-lg bg-gray-200 animate-pulse"
+                className="h-25 rounded-lg bg-gray-200 animate-pulse"
               />
             ))}
 

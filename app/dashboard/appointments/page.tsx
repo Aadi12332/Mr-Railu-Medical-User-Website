@@ -22,7 +22,7 @@ export default function AppointmentsPage() {
 const [isVideoSession, setIsVideoSession] = useState(false);
 const [connection,setConnection] = useState<any>(null);
 
-  const fetchAppointments = async () => {
+ const fetchAppointments = async () => {
     try {
       setLoading(true);
       const res = await dashboardApi.getAppointments("patient");
@@ -142,7 +142,7 @@ if(isVideoSession) {
             .map((_, i) => (
               <div
                 key={i}
-                className="h-[120px] rounded-lg bg-gray-200 animate-pulse"
+                className="h-30 rounded-lg bg-gray-200 animate-pulse"
               />
             ))}
 
@@ -155,6 +155,7 @@ if(isVideoSession) {
         {!loading &&
           filtered.map((app) => (
             <AppointmentCard 
+            fetchAppointments={fetchAppointments}
             handleStartSession={handleStartSession}
             key={app.id} appointment={app} handleCancelApp={handleCancelApp}/>
           ))}
