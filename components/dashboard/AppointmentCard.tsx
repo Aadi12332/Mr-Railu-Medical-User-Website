@@ -120,7 +120,8 @@ export function AppointmentCard({ appointment: app, handleCancelApp, handleStart
             <div className="flex justify-between gap-2 flex-1">
               {(app.status === "Confirmed" || app.status === "Pending") && (
                 <>
-                  <RescheduleAppointmentDialog
+                  <div className="flex-1">
+                    <RescheduleAppointmentDialog
                     handleCloseReschedule={handleCloseReschedule}
                     openReschedule={openReschedule}
                     setOpenReschedule={setOpenReschedule}
@@ -130,12 +131,13 @@ export function AppointmentCard({ appointment: app, handleCancelApp, handleStart
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 border-emerald-500 text-emerald-500"
+                        className="flex-1! border-emerald-500 text-emerald-500"
                       >
                         <SquarePen className="size-4 mr-1" /> Reschedule
                       </Button>
                     }
                   />
+                  </div>
                   <CancelAppointmentDialog
                     appointment={app}
                     trigger={

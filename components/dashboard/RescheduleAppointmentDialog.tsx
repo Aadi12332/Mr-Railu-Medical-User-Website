@@ -130,20 +130,23 @@ export default function RescheduleAppointmentDialog({
   };
 
   return (
-    <Dialog open={openReschedule} onOpenChange={setOpenReschedule}>
-      <DialogTrigger asChild>
-        <div onClick={() => setOpenReschedule(true)}>
-          {trigger || (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 border-emerald-500 text-emerald-500"
-            >
-              <SquarePen className="size-4 mr-1" /> Reschedule
-            </Button>
-          )}
-        </div>
-      </DialogTrigger>
+<Dialog open={openReschedule} onOpenChange={setOpenReschedule}>
+  <DialogTrigger asChild>
+    <div
+      onClick={() => setOpenReschedule(true)}
+      className="w-full flex-1"
+    >
+      {trigger || (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full border-emerald-500 text-emerald-500"
+        >
+          <SquarePen className="size-4 mr-1" /> Reschedule
+        </Button>
+      )}
+    </div>
+  </DialogTrigger>
 
       <DialogContent className="w-full max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
