@@ -176,7 +176,6 @@ export function PaymentSettingsForm({
   }, [form]);
 
   function handleAddMethod() {
-    // just a placeholder, real implementation would open a modal/stripe flow
     const newMethod: PaymentMethod = {
       id: `pm_${methods.length + 1}`,
       brand: "Mastercard",
@@ -238,13 +237,6 @@ export function PaymentSettingsForm({
               </div>
             </div>
           ))}
-          {/* <Button
-            variant="outline"
-            className="w-full border-primary text-primary"
-            onClick={handleAddMethod}
-          >
-            Add New Payment Method
-          </Button> */}
           <AddPaymentMethodDialog
             onAdd={(method) => {
               console.log({ method }); addCard(method)

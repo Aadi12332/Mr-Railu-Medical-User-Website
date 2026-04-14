@@ -8,6 +8,7 @@ import CreateSupportTicketDialog from "@/components/dashboard/CreateSupportTicke
 import { CircleHelp, MessageSquare, Plus, Square } from "lucide-react";
 import { useEffect } from "react";
 import { settingApi } from "@/api/setting.api";
+import EmergencyButton from "@/components/dashboard/EmergencyButton";
 
 type Ticket = {
   id: string;
@@ -250,21 +251,7 @@ export default function SupportPage() {
                   If you&apos;re in crisis, please call 988 (Suicide &amp;
                   Crisis Lifeline) or 911 immediately.
                 </p>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    if (/Mobi|Android/i.test(navigator.userAgent)) {
-                      window.location.href = "tel:911";
-                    } else {
-                      alert(
-                        "Please call 988 (Suicide & Crisis Lifeline) or 911 immediately using your phone",
-                      );
-                    }
-                  }}
-                  className="mt-3 w-full bg-red-600 text-white hover:bg-red-600/90"
-                >
-                  Emergency Resources
-                </Button>
+                <EmergencyButton />
               </CardContent>
             </Card>
           </div>

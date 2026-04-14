@@ -70,9 +70,9 @@ export default function page() {
     try {
       setLoading(true);
       setError(null);
-      const response = await dashboardApi.getProviders(role ?? "");
-      const data = response.data;
-      setProviders(data?.providers || []);
+      const response: any = await dashboardApi.getProviders(role ?? "");
+      const data = response || response?.data || {};
+      setProviders(data?.providers || data?.data?.providers || []);
     } catch (err: any) {
       console.log("Error fetching providers:", err);
       setError(err?.message || "Failed to fetch providers");
@@ -87,6 +87,7 @@ export default function page() {
   useEffect(() => {
     setRole(localStorage.getItem("role") || "");
   }, []);
+  
   const filteredProviders = providers.filter((p: any) => {
     const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
     const spec = p.specialty?.toLowerCase() || "";

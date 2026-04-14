@@ -24,7 +24,7 @@ export default function page() {
 
   if (error) {
     return (
-      <div className="py-20 text-center text-red-500 min-h-[400px] flex items-center justify-center">
+      <div className="py-20 text-center text-red-500 min-h-100 flex items-center justify-center">
         <p>Something went wrong loading data.</p>
       </div>
     );

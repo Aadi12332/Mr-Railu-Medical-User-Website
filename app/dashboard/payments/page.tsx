@@ -19,64 +19,16 @@ interface SummaryCard {
   id: string;
   label: string;
   value: number | string;
-  /** whether the value should be formatted as a dollar amount */
   isCurrency?: boolean;
   icon: React.ComponentType<{ className?: string }>;
   iconClassName: string;
 }
 
-const summaryCards: SummaryCard[] = [
-  {
-    id: "total",
-    label: "Total Spent (2026)",
-    value: "",
-    isCurrency: true,
-    icon: DollarSign,
-    iconClassName: "bg-blue-100 text-blue-600",
-  },
-  {
-    id: "upcoming",
-    label: "Upcoming Payments",
-    value: 270,
-    isCurrency: true,
-    icon: Clock,
-    iconClassName: "bg-yellow-100 text-yellow-600",
-  },
-  {
-    id: "sessions",
-    label: "Sessions This Month",
-    value: 3,
-    isCurrency: false,
-    icon: CheckCircle,
-    iconClassName: "bg-emerald-100 text-emerald-600",
-  },
-];
-
-const PAYMENT_METHODS_INITIAL: PaymentMethod[] = [
-  {
-    id: "pm1",
-    brand: "Visa",
-    last4: "4242",
-    expiry: "12/27",
-    isDefault: true,
-  },
-  {
-    id: "pm2",
-    brand: "Mastercard",
-    last4: "5555",
-    expiry: "08/26",
-    isDefault: false,
-  },
-];
-
-
-
 type Tab = "upcoming" | "history";
 
 export default function PaymentsPage() {
-  const [methods, setMethods] = useState<PaymentMethod[]>(
-    []);
-
+  const [methods, setMethods] = useState<PaymentMethod[]>([]);
+const [summary, setSummary] = useState<any>(null);
   const [tab, setTab] = useState<Tab>("upcoming");
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,13 +43,13 @@ export default function PaymentsPage() {
           last4: i.last4,
           expiry: `${i.expMonth}/${i.expYear}`,
           isDefault: i.isDefault,
-        }
-      })
+        };
+      });
       setMethods(data || []);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const fetchPayments = async () => {
     try {
@@ -106,7 +58,6 @@ export default function PaymentsPage() {
 
       const res = await dashboardApi.getPayments("patient");
       setPayments(res?.data?.payments || []);
-
     } catch (err) {
       console.error("Payment error:", err);
       setError("Failed to load payments");
@@ -114,6 +65,7 @@ export default function PaymentsPage() {
       setLoading(false);
     }
   };
+
   const handleDefaultCard = async (cardId: string) => {
     try {
       const res = await dashboardApi.defaultCardApi("patient", cardId);
@@ -122,7 +74,8 @@ export default function PaymentsPage() {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
+
   const addCard = async (payload: any) => {
     try {
       const dataPayload = {
@@ -131,19 +84,62 @@ export default function PaymentsPage() {
         expYear: payload.expiry.split("/")[1],
         cvv: payload.cvv,
         cardholderName: payload.cardholderName,
-      }
+      };
       const res = await dashboardApi.postAddCardApi("patient", dataPayload);
       setMethods((prev) => [...prev, res?.data?.paymentMethod]);
       handleCards();
     } catch (error) {
       console.error(error);
     }
-  }
+  };
+
+  const fetchPaymentSummary = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const resSummary = await dashboardApi.getPaymentSummary("patient");
+      setSummary(resSummary);
+    } catch (err) {
+      console.error("Payment summary error:", err);
+      setError("Failed to load payment summary");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     handleCards();
     fetchPayments();
+    fetchPaymentSummary();
   }, []);
+
+  const summaryCards: SummaryCard[] = [
+  {
+    id: "total",
+    label: `Total Spent (${summary?.data?.summary?.year})`,
+    value: summary?.data?.summary?.totalSpent ?? 0,
+    isCurrency: true,
+    icon: DollarSign,
+    iconClassName: "bg-blue-100 text-blue-600",
+  },
+  {
+    id: "upcoming",
+    label: "Upcoming Payments",
+    value: summary?.data?.summary?.upcomingPayments ?? 0,
+    isCurrency: true,
+    icon: Clock,
+    iconClassName: "bg-yellow-100 text-yellow-600",
+  },
+  {
+    id: "sessions",
+    label: "Sessions This Month",
+    value: summary?.data?.summary?.sessionsThisMonth ?? 0,
+    isCurrency: false,
+    icon: CheckCircle,
+    iconClassName: "bg-emerald-100 text-emerald-600",
+  },
+];
+
   const mappedPayments = payments.map((item) => {
     const provider = item?.appointmentId?.providerId;
 
@@ -161,11 +157,11 @@ export default function PaymentsPage() {
       invoice: item?.invoiceNumber,
     };
   });
+
   const filteredPayments = mappedPayments.filter((p) => {
     if (tab === "upcoming") return p.status === "Scheduled";
     return p.status === "Paid";
   });
-
 
   const handleDeleteCardApi = async (cardId: string) => {
     try {
@@ -175,10 +171,9 @@ export default function PaymentsPage() {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
   return (
     <div className="space-y-6 h-full">
-      {/* header */}
       <div>
         <h1 className="text-2xl font-medium">Payments & Billing</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -186,7 +181,6 @@ export default function PaymentsPage() {
         </p>
       </div>
 
-      {/* summary cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {summaryCards.map((card) => {
           const Icon = card.icon;
@@ -202,12 +196,14 @@ export default function PaymentsPage() {
                   <Icon className="size-4" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">{card.label}</p>
-                  {card.value && <p className="text-2xl font-medium leading-none">
-                    {typeof card.value === "number" && card.isCurrency
-                      ? `$${card.value}`
-                      : card.value}
-                  </p>}
+                  <p className="text-md text-muted-foreground">{card.label}</p>
+                  {card.value !== undefined && card.value !== null && (
+                    <p className="text-2xl font-medium leading-none">
+  {typeof card.value === "number" && card.isCurrency
+    ? `$${card.value}`
+    : card.value}
+</p>
+                  )}
                 </div>
               </div>
             </Card>
@@ -215,13 +211,13 @@ export default function PaymentsPage() {
         })}
       </div>
 
-      {/* payment methods section */}
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Payment Methods</h2>
           <AddPaymentMethodDialog
             onAdd={(method) => {
-              console.log({ method }); addCard(method)
+              console.log({ method });
+              addCard(method);
             }}
           />
         </div>
@@ -255,7 +251,6 @@ export default function PaymentsPage() {
 
       {/* list of payments */}
       <div className="space-y-4">
-
         {loading &&
           Array(3)
             .fill(0)
@@ -266,9 +261,7 @@ export default function PaymentsPage() {
               />
             ))}
 
-        {error && (
-          <p className="text-center text-red-500">{error}</p>
-        )}
+        {error && <p className="text-center text-red-500">{error}</p>}
 
         {!loading && !error && filteredPayments.length === 0 && (
           <p className="text-center text-muted-foreground">

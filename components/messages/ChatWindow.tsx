@@ -80,7 +80,7 @@ export function ChatWindow({
   }, [chatId]);
 
   return (
-    <section className="w-full flex h-full min-h-[620px] flex-col rounded-xl border bg-card">
+    <section className="w-full flex h-full min-h-155 flex-col rounded-xl border bg-card">
       <ChatHeader
         conversation={conversationData}
         onClose={onCloseConversation}

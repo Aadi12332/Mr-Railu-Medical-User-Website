@@ -6,14 +6,18 @@ import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
 import { settingApi } from "@/api/setting.api";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchParams } from "next/navigation";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { StartChatModal } from "@/components/messages/StartChatModal";
+import { dashboardApi } from "@/api/dashboard.service";
 
 function MessagesContent() {
   const [activeConversationId, setActiveConversationId] = useState<
     string | undefined
   >(undefined);
-  const searparams = useSearchParams()
-  const chatId = searparams.get("chatId")
-
+  const searparams = useSearchParams();
+  const chatId = searparams.get("chatId");
   const [searchQuery, setSearchQuery] = useState("");
   const [chatList, setChatList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -22,7 +26,7 @@ function MessagesContent() {
   const activeConversation = useMemo(
     () =>
       chatList.find(
-        (item) => String(item.id || item._id) === String(activeConversationId)
+        (item) => String(item.id || item._id) === String(activeConversationId),
       ),
     [activeConversationId, chatList],
   );
@@ -51,18 +55,23 @@ function MessagesContent() {
   useEffect(() => {
     fetchChatList();
   }, [search]);
+
   useEffect(() => {
     if (chatId) {
       setActiveConversationId(chatId);
     }
   }, [chatId]);
+
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-medium">Messages</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Secure communication with your therapists
-        </p>
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-medium">Messages</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Secure communication with your therapists
+          </p>
+        </div>
+        <StartChatModal fetchChatList={fetchChatList} />
       </header>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">

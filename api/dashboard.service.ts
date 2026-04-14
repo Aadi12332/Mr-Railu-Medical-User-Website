@@ -64,6 +64,9 @@ export const dashboardApi = {
   postMoodApi: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/mood`, payload);
   },
+  getPaymentSummary: (role = "patient") => {
+    return axios.get(`/v1/${role}/payments/summary`);
+  },
   getPaymentById: (role = "patient", paymentId: string) => {
     return axios.get(`/v1/${role}/payments/${paymentId}`);
   },

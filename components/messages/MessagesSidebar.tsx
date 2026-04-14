@@ -13,7 +13,6 @@ type MessagesSidebarProps = {
   error: string;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-
 };
 
 export function MessagesSidebar({
@@ -25,7 +24,6 @@ export function MessagesSidebar({
   searchQuery,
   setSearchQuery,
 }: MessagesSidebarProps) {
-
   return (
     <aside className="h-full rounded-xl border bg-card">
       <div className="border-b p-3">
@@ -41,16 +39,25 @@ export function MessagesSidebar({
       </div>
 
       <div className="h-105 overflow-y-auto md:h-140">
-        {loading && <p className="h-full flex justify-center items-center p-3 text-sm animate-pulse">Loading chats...</p>}
+        {loading && (
+          <p className="h-full flex justify-center items-center p-3 text-sm animate-pulse">
+            Loading chats...
+          </p>
+        )}
 
-        {error && <p className="text-red-500 h-full flex justify-center items-center p-3 text-sm">{error}</p>}
+        {error && (
+          <p className="text-red-500 h-full flex justify-center items-center p-3 text-sm">
+            {error}
+          </p>
+        )}
 
         {!loading && !error && chatList.length === 0 && (
-          <p className="h-full flex justify-center items-center p-3 text-sm">No chats found</p>
+          <p className="h-full flex justify-center items-center p-3 text-sm">
+            No chats found
+          </p>
         )}
         <div className="divide-y">
-          {
-            !loading &&
+          {!loading &&
             chatList?.map((conversation: any) => {
               const isActive = activeConversationId === conversation.id;
 
@@ -74,7 +81,9 @@ export function MessagesSidebar({
                             className="size-full object-cover rounded-full"
                           />
                         ) : (
-                          conversation.providerId?.avatarInitials
+                          `${conversation.providerId?.firstName?.charAt(0) || ""}${
+                            conversation.providerId?.lastName?.charAt(0) || ""
+                          }`.toUpperCase()
                         )}
                       </AvatarFallback>
                     </Avatar>
@@ -82,17 +91,23 @@ export function MessagesSidebar({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-medium">
-                          {conversation.providerId?.firstName} {conversation.providerId?.lastName}
+                          {conversation.providerId?.firstName}{" "}
+                          {conversation.providerId?.lastName}
                         </p>
-                        {conversation.updatedAt && <p className="text-muted-foreground shrink-0 text-xs">
-                          {new Date(conversation.updatedAt).toLocaleString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>}
+                        {conversation.updatedAt && (
+                          <p className="text-muted-foreground shrink-0 text-xs">
+                            {new Date(conversation.updatedAt).toLocaleString(
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </p>
+                        )}
                       </div>
 
                       <p className="text-muted-foreground mt-0.5 text-xs">

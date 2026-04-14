@@ -569,7 +569,7 @@ export default function page() {
             <CardTitle>Recent Appointments</CardTitle>
           </CardHeader>
 
-          <CardContent className="overflow-x-auto max-h-[450px] overflow-y-auto p-0">
+          <CardContent className="overflow-x-auto max-h-112.5 overflow-y-auto p-0">
             <table className="w-full">
               <thead className="text-sm text-muted-foreground">
                 <tr className="border-b">
@@ -667,7 +667,7 @@ export default function page() {
               ))}
             </CardContent>
           ) : dashboardData?.prescriptions?.length > 0 ? (
-            <CardContent className="space-y-4 max-h-[450px] overflow-y-auto">
+            <CardContent className="space-y-4 max-h-112.5 overflow-y-auto">
               {dashboardData?.prescriptions?.map((prescription: any) =>
                 prescription?.medications?.map((med: any) => (
                   <div key={med._id} className="rounded-lg bg-muted p-4">
