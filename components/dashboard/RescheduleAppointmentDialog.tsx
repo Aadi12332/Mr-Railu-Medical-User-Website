@@ -165,7 +165,7 @@ export default function RescheduleAppointmentDialog({
             </div>
           </div>
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+          <div className="space-y-3 max-h-100 overflow-y-auto">
             {slots.map((slot) => (
               <div
                 key={slot.id}
