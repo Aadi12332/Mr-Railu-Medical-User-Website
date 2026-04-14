@@ -100,7 +100,6 @@ export default function EarningsCalculatorSection() {
               ))}
             </div>
 
-            {/* Slider */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-muted-foreground">
@@ -112,20 +111,17 @@ export default function EarningsCalculatorSection() {
               </div>
 
               <div className="relative">
-                {/* range input */}
                 <input
                   type="range"
                   min={workType.minHours}
                   max={workType.maxHours}
                   value={hours}
                   onChange={(e) => setHours(Number(e.target.value) as any)}
-                  className="w-full h-2 appearance-none bg-transparent cursor-pointer slider z-10 relative"
+                  className="w-full h-2 appearance-none bg-transparent cursor-pointer slider z-10 relative bottom-[3px]"
                 />
 
-                {/* track */}
                 <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-full"></div>
 
-                {/* fill */}
                 <div
                   className="absolute top-0 left-0 h-2 bg-gradient-primary rounded-full"
                   style={{ width: `${progress}%` }}

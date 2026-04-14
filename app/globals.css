@@ -155,14 +155,11 @@
 
 .scroll-hide {
   -ms-overflow-style: none;
-  /* Internet Explorer 10+ */
   scrollbar-width: none;
-  /* Firefox, Safari 18.2+, Chromium 121+ */
 }
 
 .scroll-hide::-webkit-scrollbar {
   display: none;
-  /* Older Safari and Chromium */
 }
 
 .blog-content h2 {
@@ -172,12 +169,17 @@
   margin-bottom: 16px;
 }
 
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .slider::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  background: #0ea5e9;
+  background: #219580;
   border: 3px solid white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   cursor: pointer;
@@ -188,7 +190,7 @@
   width: 18px;
   height: 18px;
   border-radius: 9999px;
-  background: #0ea5e9;
+  background: #219580;
   border: 3px solid white;
   cursor: pointer;
 }

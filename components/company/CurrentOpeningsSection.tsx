@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { ChevronRight, MapPin, Briefcase, Star } from "lucide-react";
+import { Card } from "../ui/card";
 import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/ui/section-header";
-import { Card } from "../ui/card";
+import CareersList from "./CareersList";
 
 const openings = [
   {
@@ -67,34 +67,7 @@ export default function CurrentOpeningsSection({loading,error,careers}: {loading
         />
 
         <div className="mt-10 max-w-3xl mx-auto space-y-4">
-          {(careers??[]).map((job:any) => (
-            <Link key={job._id} href={job?.applyUrl} className="group block">
-              <Card className="flex flex-row justify-between items-center p-4">
-                <div>
-                  <h4 className="text-lg font-semibold text-slate-900">
-                    {job.title}
-                  </h4>
-                  <div className="mt-1 flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{job.location}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Briefcase className="w-4 h-4" />
-                      <span>{job.type}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4" />
-                      <span>{job.level}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="size-8 rounded-full flex justify-center items-center bg-gray-100">
-                  <ChevronRight className="w-5 h-5 text-primary" />
-                </div>
-              </Card>
-            </Link>
-          ))}
+          <CareersList careers={careers} loading={loading} error={error} />
         </div>
       </Container>
     </section>
