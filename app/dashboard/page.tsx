@@ -23,6 +23,7 @@ import {
   Download,
   RefreshCw,
   RefreshCcw,
+  Clipboard,
 } from "lucide-react";
 import { useAuth } from "@/components/context/auth.context";
 import { useEffect, useState } from "react";
@@ -32,6 +33,7 @@ import { RatingStars } from "@/components/ui/rating";
 import { toast } from "react-toastify";
 import RequestRefillDialog from "@/components/dashboard/RequestRefillDialog";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
 const VideoCall = dynamic(() => import("./video-sessions/video"), {
   ssr: false,
@@ -39,6 +41,7 @@ const VideoCall = dynamic(() => import("./video-sessions/video"), {
 });
 
 export default function page() {
+  const router = useRouter()
   const [isVideoSession, setIsVideoSession] = useState(false);
   const [connection, setConnection] = useState<any>(null);
 
@@ -215,6 +218,21 @@ export default function page() {
       console.error("Mood History API Error:", error);
     }
   }
+  const handleChat = async () => {
+    try {
+      const role =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("role")?.toLowerCase()
+          : "";
+
+      const res = await dashboardApi.getMessageProvider(role || "", {
+        "providerId": dashboardData.nextAppointment?.providerId?._id
+      });
+      router.push(`/dashboard/messages?chatId=${res?.data?.chat?._id}`)
+    } catch (error: any) {
+      console.error("Something went wrong:", error);
+    }
+  }
   useEffect(() => {
     getProfile();
     handleMoodOption();
@@ -279,8 +297,8 @@ export default function page() {
               </div>
               <div className="h-10 w-32 bg-gray-200 rounded" />
             </CardContent>
-          ) : (
-            dashboardData?.sessionData?.sessions?.length > 0 && dashboardData?.sessionData?.sessions?.slice(0, 1)?.map((item: any) => (
+          ) : dashboardData?.sessionData?.sessions?.length > 0 ? (
+            dashboardData?.sessionData?.sessions?.slice(0, 1)?.map((item: any) => (
               <CardContent key={item._id} className="flex justify-between gap-6">
                 <div className="flex flex-col md:flex-row gap-4">
                   <Avatar className="size-20 border border-slate-100 bg-white">
@@ -344,6 +362,11 @@ export default function page() {
                 </Button>
               </CardContent>
             ))
+          ) : (
+            <CardContent className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+              <Video className="mb-2 size-8 opacity-20" />
+              <p>No upcoming sessions today.</p>
+            </CardContent>
           )}
         </Card>
 
@@ -353,66 +376,102 @@ export default function page() {
               <CardTitle>Next Appointment</CardTitle>
             </div>
           </CardHeader>
+          {dashboardData?.nextAppointmentLoading ? (
+            <CardContent className="flex flex-col gap-4 animate-pulse">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="h-3 w-16 bg-gray-200 rounded" />
+                  <div className="h-4 w-32 bg-gray-200 rounded" />
+                </div>
+                <div className="h-6 w-20 bg-gray-200 rounded-full" />
+              </div>
+              <div className="space-y-2 flex flex-col">
+                <div className="h-3 w-20 bg-gray-200 rounded" />
+                <div className="h-4 w-40 bg-gray-200 rounded mt-1" />
+              </div>
+            </CardContent>
+          ) : dashboardData?.nextAppointment ? (
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">Provider</div>
+                  <div className="font-medium">{dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
+                </div>
 
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col items-end">
+                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-100">
+                    {dashboardData.nextAppointment?.status ?? ""}
+                  </Badge>
+                </div>
+              </div>
+
               <div>
-                <div className="text-sm text-muted-foreground">Provider</div>
-                <div className="font-medium">{dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
+                <div className="text-sm text-muted-foreground">Date & Time</div>
+                <div className="font-medium mt-1">
+                  {dashboardData.nextAppointment?.date ? dayjs(dashboardData.nextAppointment?.date).format("MMMM D, YYYY") : ""}
+                  <br />
+                  {dashboardData.nextAppointment?.time ? dashboardData.nextAppointment?.time : ""}
+                </div>
               </div>
-
-              <div className="flex flex-col items-end">
-                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-100">
-                  {dashboardData.nextAppointment?.status ?? ""}
-                </Badge>
-              </div>
-            </div>
-
-            <div>
-              <div className="text-sm text-muted-foreground">Date & Time</div>
-              <div className="font-medium mt-1">
-                {dashboardData.nextAppointment?.date ? dayjs(dashboardData.nextAppointment?.date).format("MMMM D, YYYY") : ""}
-                <br />
-                {dashboardData.nextAppointment?.time ? dashboardData.nextAppointment?.time : ""}
-              </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          ) : (
+            <CardContent className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+              <Calendar className="mb-2 size-8 opacity-20" />
+              <p>No upcoming appointments.</p>
+            </CardContent>
+          )}
         </Card>
 
         <Card className="col-span-12 md:col-span-6 lg:col-span-4">
           <CardHeader>
             <CardTitle>My Providers</CardTitle>
           </CardHeader>
-
-          <CardContent className="flex flex-col items-center gap-4 ">
-            <Avatar className="size-20 ">
-              <AvatarFallback>{dashboardData?.nextAppointmentLoading ? "" : dashboardData.nextAppointment?.providerId?.firstName?.charAt(0) + dashboardData.nextAppointment?.providerId?.lastName?.charAt(0)}</AvatarFallback>
-            </Avatar>
-
-            <div className="text-center">
-              <div className="font-medium">{dashboardData?.nextAppointmentLoading ? "" : ""} {dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
-              <div className="text-xs text-muted-foreground">
-                {dashboardData.nextAppointment?.providerId?.specialty ?? ""}
+          {dashboardData?.nextAppointmentLoading ? (
+            <CardContent className="flex flex-col items-center gap-4 animate-pulse">
+              <div className="size-20 rounded-full bg-gray-200" />
+              <div className="space-y-2 flex flex-col items-center">
+                <div className="h-4 w-32 bg-gray-200 rounded" />
+                <div className="h-3 w-24 bg-gray-200 rounded" />
               </div>
+              <div className="w-full h-8 bg-gray-200 rounded mt-2" />
+            </CardContent>
+          ) : dashboardData?.nextAppointment?.providerId ? (
+            <CardContent className="flex flex-col items-center gap-4 ">
+              <Avatar className="size-20 ">
+                <AvatarFallback>{dashboardData.nextAppointment?.providerId?.firstName?.charAt(0)}{dashboardData.nextAppointment?.providerId?.lastName?.charAt(0)}</AvatarFallback>
+              </Avatar>
 
-              <div className="mt-3 flex items-center justify-center gap-3">
-                <div className="flex items-center gap-1 text-amber-400">
-                  <RatingStars rating={dashboardData?.nextAppointment?.providerId?.rating ?? 0} />
-                  <span className="text-sm font-semibold">{dashboardData?.nextAppointment?.providerId?.rating}</span>
+              <div className="text-center">
+                <div className="font-medium">{dashboardData.nextAppointment?.providerId?.firstName ?? ""} {dashboardData.nextAppointment?.providerId?.lastName ?? ""}</div>
+                <div className="text-xs text-muted-foreground">
+                  {dashboardData.nextAppointment?.providerId?.specialty ?? ""}
+                </div>
+
+                <div className="mt-3 flex items-center justify-center gap-3">
+                  <div className="flex items-center gap-1 text-amber-400">
+                    <RatingStars rating={dashboardData?.nextAppointment?.providerId?.rating ?? 0} />
+                    <span className="text-sm font-semibold">{dashboardData?.nextAppointment?.providerId?.rating}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="w-full">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full border-primary text-primary"
-              >
-                <MessageSquare className="size-4 mr-2" /> Message
-              </Button>
-            </div>
-          </CardContent>
+              <div className="w-full">
+                <Button
+                  variant="outline"
+                  onClick={() => handleChat()}
+                  size="sm"
+                  className="w-full border-primary text-primary"
+                >
+                  <MessageSquare className="size-4 mr-2" /> Message
+                </Button>
+              </div>
+            </CardContent>
+          ) : (
+            <CardContent className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+              <MessageSquare className="mb-2 size-8 opacity-20" />
+              <p>No assigned providers.</p>
+            </CardContent>
+          )}
         </Card>
 
         <Card className="col-span-12 md:col-span-6 lg:col-span-4">
@@ -430,7 +489,7 @@ export default function page() {
                 <div className="h-3 w-40 bg-gray-200 rounded" />
               </div>
             </CardContent>
-          ) : (
+          ) : dashboardData?.mentalPlans?.length > 0 ? (
             <CardContent>
               <div className="space-y-1">
                 <div className="text-sm text-muted-foreground">current plan</div>
@@ -458,6 +517,11 @@ export default function page() {
                   </span>
                 </div>
               </div>
+            </CardContent>
+          ) : (
+            <CardContent className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+              <Star className="mb-2 size-8 opacity-20" />
+              <p>No active mental health plans.</p>
             </CardContent>
           )}
         </Card>
@@ -538,7 +602,7 @@ export default function page() {
                     </tr>
                   ))}
                 </tbody>
-              ) :
+              ) : dashboardData?.recentAppointment?.length > 0 ? (
                 <tbody className="text-sm">
                   {dashboardData?.recentAppointment?.slice(0, 3).map((item: any, index: number) => (
                     <tr key={item._id} className="border-b">
@@ -565,7 +629,16 @@ export default function page() {
                       </td>
                     </tr>
                   ))}
-                </tbody>}
+                </tbody>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-muted-foreground">
+                      No recent appointments found.
+                    </td>
+                  </tr>
+                </tbody>
+              )}
             </table>
           </CardContent>
         </Card>
@@ -593,7 +666,7 @@ export default function page() {
                 </div>
               ))}
             </CardContent>
-          ) :
+          ) : dashboardData?.prescriptions?.length > 0 ? (
             <CardContent className="space-y-4 max-h-[450px] overflow-y-auto">
               {dashboardData?.prescriptions?.map((prescription: any) =>
                 prescription?.medications?.map((med: any) => (
@@ -634,7 +707,12 @@ export default function page() {
                 ))
               )}
             </CardContent>
-          }
+          ) : (
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+              <Clipboard className="mb-2 size-8 opacity-20" />
+              <p>No active prescriptions.</p>
+            </CardContent>
+          )}
 
         </Card>
       </div>

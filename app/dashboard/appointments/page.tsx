@@ -19,14 +19,13 @@ export default function AppointmentsPage() {
   const [tab, setTab] = useState<"upcoming" | "past" | "cancelled">("upcoming");
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-const [isVideoSession, setIsVideoSession] = useState(false);
-const [connection,setConnection] = useState<any>(null);
+  const [isVideoSession, setIsVideoSession] = useState(false);
+  const [connection, setConnection] = useState<any>(null);
 
- const fetchAppointments = async () => {
+  const fetchAppointments = async () => {
     try {
       setLoading(true);
       const res = await dashboardApi.getAppointments("patient");
-      console.log({res},"==========res")
       setAppointments(res?.data?.appointments || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -38,11 +37,11 @@ const [connection,setConnection] = useState<any>(null);
   useEffect(() => {
     fetchAppointments();
   }, []);
-const handleCancelApp=  () => {
-  setAppointments([]);
-  
- fetchAppointments();
-};
+  const handleCancelApp = () => {
+    setAppointments([]);
+
+    fetchAppointments();
+  };
   const mappedAppointments = appointments.map((item) => {
     const provider = item?.providerId;
 
@@ -53,16 +52,16 @@ const handleCancelApp=  () => {
       initials: `${provider?.firstName?.[0] || ""}${provider?.lastName?.[0] || ""}`,
       date: new Date(item?.date).toDateString(),
       time: item?.time,
-      duration: 60,
+      duration: item?.sessionDurationMinutes,
       type: item?.type === "video" ? "Video Call" : "Audio Call",
       status:
         item?.status === "confirmed"
           ? "Confirmed"
           : item?.status === "cancelled"
-          ? "Cancelled"
-          : item?.status === "completed"
-          ? "Past"
-          : "Pending",
+            ? "Cancelled"
+            : item?.status === "completed"
+              ? "Past"
+              : "Pending",
     };
   });
 
@@ -85,25 +84,25 @@ const handleCancelApp=  () => {
     if (diff === 24 * 60 * 60 * 1000) return "tomorrow";
     return `on ${app.date}`;
   }
-const handleStartSession = async (id: string) => {
-  try {
-    const res = await dashboardApi.postSessionData("patient", { sessionId: id });
+  const handleStartSession = async (id: string) => {
+    try {
+      const res = await dashboardApi.postSessionData("patient", { sessionId: id });
 
-    setIsVideoSession(true);
-    setConnection(res?.data?.connection || null);
-    toast.success("Session started successfully");
-  } catch (error: any) {
-    toast.error(
-      error?.message || "Failed to start session"
-    );
+      setIsVideoSession(true);
+      setConnection(res?.data?.connection || null);
+      toast.success("Session started successfully");
+    } catch (error: any) {
+      toast.error(
+        error?.message || "Failed to start session"
+      );
+    }
+  };
+  if (isVideoSession) {
+    return <VideoCall connection={connection} />;
   }
-};
-if(isVideoSession) {
-  return <VideoCall connection={connection} />;
-}
   return (
     <div className="space-y-6 h-full">
-      
+
       <div>
         <h1 className="text-2xl font-medium">My Appointments</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -135,7 +134,7 @@ if(isVideoSession) {
       </div>
 
       <div className="space-y-4">
-        
+
         {loading &&
           Array(3)
             .fill(0)
@@ -154,10 +153,10 @@ if(isVideoSession) {
 
         {!loading &&
           filtered.map((app) => (
-            <AppointmentCard 
-            fetchAppointments={fetchAppointments}
-            handleStartSession={handleStartSession}
-            key={app.id} appointment={app} handleCancelApp={handleCancelApp}/>
+            <AppointmentCard
+              fetchAppointments={fetchAppointments}
+              handleStartSession={handleStartSession}
+              key={app.id} appointment={app} handleCancelApp={handleCancelApp} />
           ))}
       </div>
     </div>

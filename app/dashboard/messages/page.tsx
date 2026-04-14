@@ -5,11 +5,14 @@ import { ChatWindow } from "@/components/messages/ChatWindow";
 import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
 import { settingApi } from "@/api/setting.api";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchParams } from "next/navigation";
 
 export default function MessagesPage() {
   const [activeConversationId, setActiveConversationId] = useState<
     string | undefined
   >(undefined);
+  const searparams = useSearchParams()
+  const chatId = searparams.get("chatId")
 
   const [searchQuery, setSearchQuery] = useState("");
   const [chatList, setChatList] = useState<any[]>([]);
@@ -48,6 +51,11 @@ export default function MessagesPage() {
   useEffect(() => {
     fetchChatList();
   }, [search]);
+  useEffect(() => {
+    if (chatId) {
+      setActiveConversationId(chatId);
+    }
+  }, [chatId]);
   return (
     <div className="space-y-6">
       <header>

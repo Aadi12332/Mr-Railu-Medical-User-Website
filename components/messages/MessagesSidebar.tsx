@@ -13,7 +13,7 @@ type MessagesSidebarProps = {
   error: string;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  
+
 };
 
 export function MessagesSidebar({
@@ -51,7 +51,7 @@ export function MessagesSidebar({
         <div className="divide-y">
           {
             !loading &&
-            chatList?.map((conversation) => {
+            chatList?.map((conversation: any) => {
               const isActive = activeConversationId === conversation.id;
 
               return (
@@ -84,15 +84,15 @@ export function MessagesSidebar({
                         <p className="truncate text-sm font-medium">
                           {conversation.providerId?.firstName} {conversation.providerId?.lastName}
                         </p>
-                        <p className="text-muted-foreground shrink-0 text-xs">
-                          {new Date(conversation.lastMessageAt).toLocaleString("en-IN", {
+                        {conversation.updatedAt && <p className="text-muted-foreground shrink-0 text-xs">
+                          {new Date(conversation.updatedAt).toLocaleString("en-IN", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
-                        </p>
+                        </p>}
                       </div>
 
                       <p className="text-muted-foreground mt-0.5 text-xs">

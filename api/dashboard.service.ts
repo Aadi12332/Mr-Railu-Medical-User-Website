@@ -90,4 +90,7 @@ export const dashboardApi = {
   getAiConsent: () => {
     return axios.get(`/v1/public/legal/ai-usage-consent`);
   },
+  getMessageProvider: (role = "patient", payload: any) => {
+    return axios.post(`/v1/${role}/chat/start`, payload);
+  },
 };

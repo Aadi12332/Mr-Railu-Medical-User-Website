@@ -19,8 +19,8 @@ export interface Appointment {
   date: string; // iso or human
   time: string; // human
   duration: number; // minutes
-  type: "Video Call" | "Phone Call"|"video"|any;
-  status: "Confirmed" | "Pending" | "Cancelled" | "Past"|any;
+  type: "Video Call" | "Phone Call" | "video" | any;
+  status: "Confirmed" | "Pending" | "Cancelled" | "Past" | any;
 }
 
 export function statusVariants(status: Appointment["status"]) {
@@ -40,30 +40,30 @@ export function statusVariants(status: Appointment["status"]) {
 
 interface AppointmentCardProps {
   appointment: Appointment;
-  handleCancelApp:any;
-  handleStartSession:any;
-  fetchAppointments:any;
+  handleCancelApp: any;
+  handleStartSession: any;
+  fetchAppointments: any;
 }
 
-export function AppointmentCard({ appointment: app,handleCancelApp,handleStartSession, fetchAppointments }: AppointmentCardProps) {
- const [openReschedule, setOpenReschedule] = React.useState(false);
- const handleCloseReschedule = () => setOpenReschedule(false);
+export function AppointmentCard({ appointment: app, handleCancelApp, handleStartSession, fetchAppointments }: AppointmentCardProps) {
+  const [openReschedule, setOpenReschedule] = React.useState(false);
+  const handleCloseReschedule = () => setOpenReschedule(false);
 
-
-  const handleCancel = async (id:any) => {
-  try {
-    const res: any = await patientApi.cancelAppointment(id);
-    if (res?.status) {
-      handleCancelApp();
-      toast.success(res?.message || "Appointment cancelled successfully");
-    } else {
-      throw new Error(res?.message || "Cancel failed");
+  console.log(app)
+  const handleCancel = async (id: any) => {
+    try {
+      const res: any = await patientApi.cancelAppointment(id);
+      if (res?.status) {
+        handleCancelApp();
+        toast.success(res?.message || "Appointment cancelled successfully");
+      } else {
+        throw new Error(res?.message || "Cancel failed");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.message || "Something went wrong");
     }
-  } catch (error: any) {
-    console.error(error);
-    toast.error(error?.message || "Something went wrong");
-  }
-};
+  };
   return (
     <Card className="p-4">
       <div className="flex items-start gap-4">
@@ -110,59 +110,59 @@ export function AppointmentCard({ appointment: app,handleCancelApp,handleStartSe
       {(app.status === "Confirmed" ||
         app.status === "Pending" ||
         app.status === "Past") && (
-        <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
-          {app.status === "Confirmed" && app.type === "Video Call" && (
-            <Button className="w-full flex-1 bg-gradient-dash" onClick={() => handleStartSession(app.id)}>
-              <Video className="size-4 mr-2" /> Join Session
-            </Button>
-          )}
-
-          <div className="flex justify-between gap-2 flex-1">
-            {(app.status === "Confirmed" || app.status === "Pending") && (
-              <>
-                <RescheduleAppointmentDialog
-                handleCloseReschedule={handleCloseReschedule}
-                openReschedule={openReschedule}
-                setOpenReschedule={setOpenReschedule}
-                fetchAppointments={fetchAppointments}
-                  appointment={app}
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-emerald-500 text-emerald-500"
-                    >
-                      <SquarePen className="size-4 mr-1" /> Reschedule
-                    </Button>
-                  }
-                />
-                <CancelAppointmentDialog
-                  appointment={app}
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-destructive text-destructive"
-                    >
-                      <X className="size-4 mr-1" /> Cancel
-                    </Button>
-                  }
-                  onConfirm={(app:any) => {
-                    // TODO: implement cancellation logic (API call)
-                    console.log("cancelled", app.id);
-                    handleCancel(app.id??"")
-                  }}
-                />
-              </>
-            )}
-            {app.status === "Past" && (
-              <Button className="w-full" variant="outline">
-                View Session Notes
+          <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
+            {app.status === "Confirmed" && app.type === "Video Call" && (
+              <Button className="w-full flex-1 bg-gradient-dash" onClick={() => handleStartSession(app.id)}>
+                <Video className="size-4 mr-2" /> Join Session
               </Button>
             )}
+
+            <div className="flex justify-between gap-2 flex-1">
+              {(app.status === "Confirmed" || app.status === "Pending") && (
+                <>
+                  <RescheduleAppointmentDialog
+                    handleCloseReschedule={handleCloseReschedule}
+                    openReschedule={openReschedule}
+                    setOpenReschedule={setOpenReschedule}
+                    fetchAppointments={fetchAppointments}
+                    appointment={app}
+                    trigger={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-emerald-500 text-emerald-500"
+                      >
+                        <SquarePen className="size-4 mr-1" /> Reschedule
+                      </Button>
+                    }
+                  />
+                  <CancelAppointmentDialog
+                    appointment={app}
+                    trigger={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-destructive text-destructive"
+                      >
+                        <X className="size-4 mr-1" /> Cancel
+                      </Button>
+                    }
+                    onConfirm={(app: any) => {
+                      // TODO: implement cancellation logic (API call)
+                      console.log("cancelled", app.id);
+                      handleCancel(app.id ?? "")
+                    }}
+                  />
+                </>
+              )}
+              {app.status === "Past" && (
+                <Button className="w-full" variant="outline">
+                  View Session Notes
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </Card>
   );
 }
