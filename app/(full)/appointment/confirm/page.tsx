@@ -12,6 +12,8 @@ export default function ConfirmAppointmentPage() {
   const patiendDetail = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("patiendDetail") || "{}") : ""
   const providerData = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("providerData") || "{}") : ""
   const selectedPlan = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("selectedSlot") || "{}") : ""
+  const fees = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("planFees") || "{}") : ""
+
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
       <CardHeader className="border-b-0">
@@ -95,7 +97,7 @@ export default function ConfirmAppointmentPage() {
                 <div className="text-sm text-slate-700">Consultation Fee</div>
               </div>
 
-              <div className="font-semibold">₹ {selectedPlan?.date === "Today" ? providerData?.sessionTypes[0]?.fee : providerData?.suggestedProvider?.sessionTypes[1]?.fee}</div>
+              <div className="font-semibold">$ {fees ?? 0}</div>
             </div>
           </div>
         </div>

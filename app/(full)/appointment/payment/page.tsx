@@ -83,6 +83,7 @@ function PaymentDialogWrapper({
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => router.back()}
             className="absolute left-0 h-10 w-10 rounded-full bg-[#eef7f6] text-[#2a9d8f] hover:bg-[#e0f0ef] hover:text-[#21867a]"
           >
             <ArrowLeft className="h-5 w-5" />

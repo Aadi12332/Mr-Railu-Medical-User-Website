@@ -13,8 +13,8 @@ export default function PaymentConfirmationPage() {
   const router = useRouter();
   const sessionData = typeof window !== "undefined" ? sessionStorage.getItem("providerData") ? JSON.parse(sessionStorage.getItem("providerData") ?? "") : "" : null;
   const selectedPlan = typeof window !== "undefined" ? sessionStorage.getItem("selectedSlot") ? JSON.parse(sessionStorage.getItem("selectedSlot") ?? "") : "" : null;
+  const fees = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("planFees") || "{}") : ""
 
-  console.log({selectedPlan});
   return (
     <div className="max-w-lg mx-auto space-y-5">
       {/* invoice summary */}
@@ -30,11 +30,11 @@ export default function PaymentConfirmationPage() {
           </div>
           <div className="flex justify-between text-sm text-slate-600">
             <span>Time:</span>
-            <span>{ selectedPlan?.time ? selectedPlan.time : `${selectedPlan?.start} - ${selectedPlan?.end}` }</span>
+            <span>{selectedPlan?.time ? selectedPlan.time : `${selectedPlan?.start} - ${selectedPlan?.end}`}</span>
           </div>
           <div className="flex justify-between font-medium">
             <span>Consultation Fee:</span>
-            <span>${selectedPlan?.date === "Today" ? sessionData?.sessionTypes[0]?.fee : sessionData?.suggestedProvider?.sessionTypes[1]?.fee}</span>
+            <span>$ {fees ?? 0}</span>
           </div>
         </CardContent>
       </Card>

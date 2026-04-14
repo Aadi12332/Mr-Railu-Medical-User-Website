@@ -12,7 +12,7 @@ const WORK_TYPES = [
   {
     label: "Full-Time",
     key: "full-time",
-    minHours: 30,
+    minHours: 0,
     maxHours: 60,
     defaultHours: 40,
     rate: 60,
@@ -20,7 +20,7 @@ const WORK_TYPES = [
   {
     label: "Part-Time",
     key: "part-time",
-    minHours: 10,
+    minHours: 0,
     maxHours: 30,
     defaultHours: 20,
     rate: 50,
@@ -31,19 +31,32 @@ type WorkTypeKey = (typeof WORK_TYPES)[number]["key"];
 
 export default function EarningsCalculatorSection() {
   const [activeType, setActiveType] = useState<WorkTypeKey>("full-time");
-  const [hours, setHours] = useState(40);
 
   const workType = WORK_TYPES.find((t) => t.key === activeType)!;
+
+  const [hours, setHours] = useState(workType.defaultHours);
+
 
   function handleTypeChange(key: WorkTypeKey) {
     setActiveType(key);
     const next = WORK_TYPES.find((t) => t.key === key)!;
     setHours(next.defaultHours);
   }
-
+  function handleHoursChange(value: number, type: WorkTypeKey) {
+    console.log({ type })
+    setActiveType(type);
+    const safeValue = Math.min(
+      workType.maxHours,
+      Math.max(workType.minHours, value)
+    );
+    setHours(safeValue as any);
+  }
   const annualEarnings = hours * workType.rate * 52;
 
-  const progress = (hours / workType.maxHours) * 100;
+  const progress =
+    ((hours - workType.minHours) /
+      (workType.maxHours - workType.minHours)) *
+    100;
 
   return (
     <section className="py-16 bg-slate-50">
@@ -73,7 +86,8 @@ export default function EarningsCalculatorSection() {
               {WORK_TYPES.map((type) => (
                 <button
                   key={type.key}
-                  onClick={() => handleTypeChange(type.key)}
+                  onClick={(e) => handleTypeChange(type.key)}
+
                   className={cn(
                     "px-6 py-2 text-sm font-medium transition-all duration-200 rounded-full",
                     activeType === type.key
@@ -98,11 +112,22 @@ export default function EarningsCalculatorSection() {
               </div>
 
               <div className="relative">
+                {/* range input */}
+                <input
+                  type="range"
+                  min={workType.minHours}
+                  max={workType.maxHours}
+                  value={hours}
+                  onChange={(e) => setHours(Number(e.target.value) as any)}
+                  className="w-full h-2 appearance-none bg-transparent cursor-pointer slider z-10 relative"
+                />
+
                 {/* track */}
-                <div className="w-full h-2 bg-gray-200 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-full"></div>
+
                 {/* fill */}
                 <div
-                  className="absolute top-0 left-0 h-2 bg-gradient-primary rounded-l-full"
+                  className="absolute top-0 left-0 h-2 bg-gradient-primary rounded-full"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
@@ -116,6 +141,7 @@ export default function EarningsCalculatorSection() {
                 </span>
               </div>
             </div>
+
 
             {/* Earnings Display */}
             <div className="bg-[#EAFEFA] border border-primary/20 rounded-3xl p-8 text-center mb-8">

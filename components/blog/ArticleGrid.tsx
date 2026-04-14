@@ -21,11 +21,10 @@ export default function ArticleGrid() {
     setError(null);
 
     try {
-      const offset = (page - 1) * itemsPerPage;
 
       const res: any = await publicPageApi.getBlog({
         limit: itemsPerPage,
-        offset,
+        page: page,
       });
 
       let posts = res?.data?.posts || [];
@@ -66,32 +65,32 @@ export default function ArticleGrid() {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-const pagination = useMemo(() => {
-  if (totalCount <= 7) {
-    return Array.from({ length: totalCount }, (_, i) => i + 1);
-  }
+  const pagination = useMemo(() => {
+    if (totalCount <= 7) {
+      return Array.from({ length: totalCount }, (_, i) => i + 1);
+    }
 
-  const pages: (number | string)[] = [];
-  pages.push(1);
+    const pages: (number | string)[] = [];
+    pages.push(1);
 
-  if (currentPage > 4) {
-    pages.push("...");
-  }
+    if (currentPage > 4) {
+      pages.push("...");
+    }
 
-  const start = Math.max(2, currentPage - 2);
-  const end = Math.min(totalCount - 1, currentPage + 2);
+    const start = Math.max(2, currentPage - 2);
+    const end = Math.min(totalCount - 1, currentPage + 2);
 
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
 
-  if (currentPage < totalCount - 3) {
-    pages.push("...");
-  }
+    if (currentPage < totalCount - 3) {
+      pages.push("...");
+    }
 
-  pages.push(totalCount);
-  return pages;
-}, [totalCount, currentPage]);
+    pages.push(totalCount);
+    return pages;
+  }, [totalCount, currentPage]);
 
   const handleClick = (page: number) => {
     setCurrentPage(page);

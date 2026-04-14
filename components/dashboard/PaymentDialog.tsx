@@ -18,6 +18,7 @@ import SuccessDialog from "./SuccessDialog";
 import { cn } from "@/lib/utils";
 import { stripeApi } from "@/api/stripe.api";
 import { stripePromise } from "@/lib/stripe";
+import { usePathname } from "next/navigation";
 
 function PaymentDialogWrapper({
   children,
@@ -28,6 +29,7 @@ function PaymentDialogWrapper({
   open?: boolean
   onClose?: () => void
 }) {
+  const pathname = usePathname()
   const stripe = useStripe();
   const elements = useElements();
   const [isSuccess, setIsSuccess] = useState(false)
@@ -83,13 +85,13 @@ function PaymentDialogWrapper({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="flex items-center relative">
-          <Button
+          {pathname !== "/dashboard/providers" && <Button
             variant="ghost"
             size="icon"
             className="absolute left-0 h-10 w-10 rounded-full bg-[#eef7f6] text-[#2a9d8f] hover:bg-[#e0f0ef] hover:text-[#21867a]"
           >
             <ArrowLeft className="h-5 w-5" />
-          </Button>
+          </Button>}
           <h2 className="text-2xl font-semibold text-center w-full text-slate-800">
             Payment Method
           </h2>

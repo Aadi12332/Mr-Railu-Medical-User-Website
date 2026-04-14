@@ -27,7 +27,7 @@ dayjs.extend(customParseFormat);
 
 export default function BookAppointmentDialog({ provider }: { provider: any }) {
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
-
+  const [open, setOpen] = useState(false);
   const [step, setStep] = useState<number>(1);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -39,13 +39,26 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
   }, [date]);
   const handleBooking = async () => {
     try {
-      const time = dayjs(selectedTime, "hh:mm A").format("HH:mm");
-  console.log("selectedTime:", selectedTime, time);
+      const parsed = dayjs(selectedTime, "hh:mm A");
+
+      let time = selectedTime;
+
+      if (parsed.isValid()) {
+        let minutes = parsed.minute();
+
+        const remainder = minutes % 20;
+
+        if (remainder !== 0) {
+          minutes = minutes - remainder;
+        }
+
+        time = parsed.minute(minutes).format("HH:mm");
+      }
 
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
         date: date?.toISOString(),
-        time: selectedTime,
+        time: time,
         type: sessionType,
         // reason,
       });
@@ -58,13 +71,22 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
       toast.error(error?.message || "Failed to book appointment");
     }
   };
+  useEffect(() => {
+    if (!open) {
+      setStep(1);
+      setDate(undefined);
+      setSelectedTime(null);
+      setSessionType("video");
+      setReason("");
+      setIsSuccess(false);
+    }
+  }, [open]);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button className="bg-gradient-dash w-full">
-          <Video className="size-4 mr-2" /> Book Now
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>      <DialogTrigger asChild>
+      <Button className="bg-gradient-dash w-full" onClick={() => setOpen(true)}>
+        <Video className="size-4 mr-2" /> Book Now
+      </Button>
+    </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
@@ -89,13 +111,12 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
                 return (
                   <div key={label} className="flex flex-col items-center gap-2">
                     <div
-                      className={`size-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                        active
+                      className={`size-8 rounded-full flex items-center justify-center text-xs font-medium ${active
+                        ? "bg-gradient-dash text-white"
+                        : completed
                           ? "bg-gradient-dash text-white"
-                          : completed
-                            ? "bg-gradient-dash text-white"
-                            : "bg-muted text-muted-foreground"
-                      }`}
+                          : "bg-muted text-muted-foreground"
+                        }`}
                     >
                       {i + 1}
                     </div>

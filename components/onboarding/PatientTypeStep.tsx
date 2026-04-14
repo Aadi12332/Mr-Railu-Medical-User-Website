@@ -47,7 +47,7 @@ export default function PatientTypeStep({
           <div
             key={opt.value}
             role="button"
-            onClick={() => onSelectPlan(opt.value)}
+            onClick={() => { onSelectPlan(opt.value); sessionStorage.setItem("planFees", opt.feeUsd) }}
             aria-pressed={selectedPlan === opt.value}
             className={`p-2 rounded-xl border transition-shadow cursor-pointer text-center flex flex-col items-center ${selectedPlan === opt.value
               ? "border-[#4A7C7E] bg-white shadow-sm"

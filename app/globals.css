@@ -121,9 +121,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -134,12 +136,15 @@
   .bg-gradient-primary {
     background-image: linear-gradient(to right, #346079, #219580);
   }
+
   .bg-gradient-dash {
     background-image: linear-gradient(to top, #346079, #219580);
   }
+
   .bg-sidebar-accent {
     background-image: linear-gradient(to top, #346079, #219580);
   }
+
   .text-gradient {
     background-clip: text;
     -webkit-background-clip: text;
@@ -149,15 +154,41 @@
 }
 
 .scroll-hide {
-    -ms-overflow-style: none;  /* Internet Explorer 10+ */
-    scrollbar-width: none;  /* Firefox, Safari 18.2+, Chromium 121+ */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox, Safari 18.2+, Chromium 121+ */
 }
-.scroll-hide::-webkit-scrollbar { 
-    display: none;  /* Older Safari and Chromium */
+
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+  /* Older Safari and Chromium */
 }
-.blog-content h2{
+
+.blog-content h2 {
   font-size: 30px;
   font-weight: 700;
   margin-top: 48px;
   margin-bottom: 16px;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #0ea5e9;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  margin-top: -8px;
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #0ea5e9;
+  border: 3px solid white;
+  cursor: pointer;
 }
