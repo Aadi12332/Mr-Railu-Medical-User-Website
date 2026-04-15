@@ -15,28 +15,34 @@ export function ChatMessages({ messages }: ChatMessagesProps) {
           <div
             key={message.id}
             className={cn(
-              "max-w-[80%]",
+              "max-w-[80%] w-fit",
               isPatientMessage ? "ml-auto" : "mr-auto",
             )}
           >
             <div
               className={cn(
-                "rounded-xl border px-4 py-3 text-sm leading-6",
+                "rounded-lg border px-2 py-1.5 text-sm leading-6",
                 isPatientMessage
-                  ? "bg-gradient-dash border-transparent text-primary-foreground"
+                  ? "bg-gray-100 text-gray-800"
                   : "bg-card",
               )}
             >
               {message.text}
             </div>
             <p
-              className={cn(
-                "text-muted-foreground mt-1 text-xs",
-                isPatientMessage ? "text-right" : "text-left",
-              )}
-            >
-              {message.time}
-            </p>
+  className={cn(
+    "text-muted-foreground mt-1 text-xs",
+    isPatientMessage ? "text-right" : "text-left",
+  )}
+>
+{new Date(message.time).toLocaleString("en-IN", {
+  day: "2-digit",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+})}
+</p>
           </div>
         );
       })}
