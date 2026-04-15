@@ -99,8 +99,8 @@ export const dashboardApi = {
   getMessageProvider: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/chat/start`, payload);
   },
-  postAdminMessage: (role = "patient", payload: any) => {
-    return axios.post(`/v1/${role}/chat/start-admin`, payload);
+  postAdminMessage: (role = "patient") => {
+    return axios.post(`/v1/${role}/chat/start-admin`);
   },
   
   sendSupportReply: (role = "patient", ticketId: string, payload: any) => {
