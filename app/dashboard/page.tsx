@@ -34,6 +34,7 @@ import { toast } from "react-toastify";
 import RequestRefillDialog from "@/components/dashboard/RequestRefillDialog";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import BreathingExercise from "@/components/company/BreathingExercise";
 
 const VideoCall = dynamic(() => import("./video-sessions/video"), {
   ssr: false,
@@ -519,7 +520,7 @@ export default function page() {
               </div>
             </CardContent>
           ) : (
-            <CardContent className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+            <CardContent className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground h-full">
               <Star className="mb-2 size-8 opacity-20" />
               <p>No active mental health plans.</p>
             </CardContent>
@@ -554,9 +555,7 @@ export default function page() {
             </div>
 
             <div>
-              <Button size="lg" className="w-full bg-gradient-dash">
-                Start Breathing Exercise
-              </Button>
+              <BreathingExercise />
             </div>
           </CardContent>
         </Card>

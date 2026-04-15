@@ -15,6 +15,15 @@ type MessagesSidebarProps = {
   setSearchQuery: (query: string) => void;
 };
 
+const getInitials = (name: string = "") => {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n.charAt(0))
+    .join("")
+    .toUpperCase();
+};
+
 export function MessagesSidebar({
   chatList,
   activeConversationId,
@@ -74,26 +83,33 @@ export function MessagesSidebar({
                   <div className="flex items-start gap-3">
                     <Avatar className="mt-0.5 size-10">
                       <AvatarFallback>
-                        {conversation.providerId?.profileImageUrl ? (
-                          <img
-                            src={conversation.providerId.profileImageUrl}
-                            alt={`${conversation.providerId.firstName} ${conversation.providerId.lastName}`}
-                            className="size-full object-cover rounded-full"
-                          />
-                        ) : (
-                          `${conversation.providerId?.firstName?.charAt(0) || ""}${
-                            conversation.providerId?.lastName?.charAt(0) || ""
-                          }`.toUpperCase()
-                        )}
-                      </AvatarFallback>
+  {conversation.chatType === "patient-admin" ? (
+    conversation.counterparty?.name ? (
+      getInitials(conversation.counterparty?.name)
+    ) : (
+      "ST"
+    )
+  ) : conversation.providerId?.profileImageUrl ? (
+    <img
+      src={conversation.providerId.profileImageUrl}
+      alt={`${conversation.providerId.firstName} ${conversation.providerId.lastName}`}
+      className="size-full object-cover rounded-full"
+    />
+  ) : (
+    `${conversation.providerId?.firstName?.charAt(0) || ""}${
+      conversation.providerId?.lastName?.charAt(0) || ""
+    }`.toUpperCase()
+  )}
+</AvatarFallback>
                     </Avatar>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-medium">
-                          {conversation.providerId?.firstName}{" "}
-                          {conversation.providerId?.lastName}
-                        </p>
+  {conversation.chatType === "patient-admin"
+    ? conversation.counterparty?.name
+    : `${conversation.providerId?.firstName || ""} ${conversation.providerId?.lastName || ""}`}
+</p>
                         {conversation.updatedAt && (
                           <p className="text-muted-foreground shrink-0 text-xs">
                             {new Date(conversation.updatedAt).toLocaleString(
@@ -111,8 +127,10 @@ export function MessagesSidebar({
                       </div>
 
                       <p className="text-muted-foreground mt-0.5 text-xs">
-                        {conversation.providerId?.specialty}
-                      </p>
+  {conversation.chatType === "patient-admin"
+    ? conversation.counterparty?.role 
+    : conversation.providerId?.specialty}
+</p>
 
                       <div className="mt-1 flex items-center justify-between gap-2">
                         <p className="text-muted-foreground line-clamp-1 text-xs">

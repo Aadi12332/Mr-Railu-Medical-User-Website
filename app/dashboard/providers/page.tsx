@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
 import { RatingStars } from "@/components/ui/rating";
-
+import { cn } from "@/lib/utils";
 
 const SkeletonCard = () => (
   <Card className="p-4 animate-pulse">
@@ -65,6 +65,9 @@ export default function page() {
   const [rating, setRating] = useState("any");
   const [priceRange, setPriceRange] = useState("any");
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
+  const [sessionTab, setSessionTab] = useState<"All Providers" | "My Providers">(
+    "All Providers",
+  );
   const handleMyProviders = async () => {
     if (!role) return;
     try {
@@ -79,7 +82,7 @@ export default function page() {
     } finally {
       setLoading(false);
     }
-  }
+  };
   useEffect(() => {
     handleMyProviders();
   }, [role]);
@@ -87,7 +90,7 @@ export default function page() {
   useEffect(() => {
     setRole(localStorage.getItem("role") || "");
   }, []);
-  
+
   const filteredProviders = providers.filter((p: any) => {
     const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
     const spec = p.specialty?.toLowerCase() || "";
@@ -96,16 +99,16 @@ export default function page() {
       fullName.includes(search.toLowerCase()) ||
       spec.includes(search.toLowerCase());
 
-    const matchesSpecialty =
-      specialty === "all" || spec.includes(specialty);
+    const matchesSpecialty = specialty === "all" || spec.includes(specialty);
 
-    const matchesRating =
-      rating === "any" || ratingValue >= Number(rating);
+    const matchesRating = rating === "any" || ratingValue >= Number(rating);
 
     const matchesPriceRange =
       priceRange === "any" || (p.price ?? 0) >= Number(priceRange);
 
-    return matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange;
+    return (
+      matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange
+    );
   });
   return (
     <div className="space-y-6">
@@ -118,141 +121,162 @@ export default function page() {
         </div>
       </div>
 
-      <div className="flex flex-col  gap-3">
-        <div className="flex-1">
-          <InputGroup className="bg-accent border-0 h-10">
-            <InputGroupAddon>
-              <Search className="size-4 text-muted-foreground" />
-            </InputGroupAddon>
-
-            <InputGroupInput
-              type="search"
-              placeholder="Search by name, specialty, or condition..."
-              aria-label="Search providers"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-
-            />
-          </InputGroup>
-        </div>
-
-        <div className="flex gap-2 w-full md:w-auto">
-          <Select onValueChange={setSpecialty}>
-            <SelectTrigger className="w-40 bg-accent border-0">
-              <SelectValue placeholder="Specialty" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="psychology">Psychology</SelectItem>
-              <SelectItem value="psychiatry">Psychiatry</SelectItem>
-              <SelectItem value="dermatology">Dermatology</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select onValueChange={setPriceRange}>
-            <SelectTrigger className="w-40 bg-accent border-0">
-              <SelectValue placeholder="Price Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="0-100">$0 - $100</SelectItem>
-              <SelectItem value="100-150">$100 - $150</SelectItem>
-              <SelectItem value="150+">$150+</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select onValueChange={setRating}>
-            <SelectTrigger className="w-40 bg-accent border-0">
-              <SelectValue placeholder="Rating" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Any</SelectItem>
-              <SelectItem value="4">4.0+</SelectItem>
-              <SelectItem value="4.5">4.5+</SelectItem>
-              <SelectItem value="5">5.0</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="inline-flex rounded-full bg-muted p-1">
+        {(["All Providers", "My Providers"] as const).map((tabItem) => (
+          <button
+            key={tabItem}
+            onClick={() => setSessionTab(tabItem)}
+            className={cn(
+              "rounded-full px-5 py-1.5 text-sm capitalize transition-all",
+              tabItem === sessionTab
+                ? "bg-gradient-dash text-white"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tabItem}
+          </button>
+        ))}
       </div>
 
-      {/* Providers grid */}
+        <div className="flex flex-col gap-3">
+          <div className="flex-1">
+            <InputGroup className="bg-accent border-0 h-10">
+              <InputGroupAddon>
+                <Search className="size-4 text-muted-foreground" />
+              </InputGroupAddon>
+
+              <InputGroupInput
+                type="search"
+                placeholder="Search by name, specialty, or condition..."
+                aria-label="Search providers"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </InputGroup>
+          </div>
+      {sessionTab === "All Providers" && (
+
+          <div className="flex gap-2 w-full md:w-auto">
+            <Select onValueChange={setSpecialty}>
+              <SelectTrigger className="w-40 bg-accent border-0">
+                <SelectValue placeholder="Specialty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="psychology">Psychology</SelectItem>
+                <SelectItem value="psychiatry">Psychiatry</SelectItem>
+                <SelectItem value="dermatology">Dermatology</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select onValueChange={setPriceRange}>
+              <SelectTrigger className="w-40 bg-accent border-0">
+                <SelectValue placeholder="Price Range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="0-100">$0 - $100</SelectItem>
+                <SelectItem value="100-150">$100 - $150</SelectItem>
+                <SelectItem value="150+">$150+</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select onValueChange={setRating}>
+              <SelectTrigger className="w-40 bg-accent border-0">
+                <SelectValue placeholder="Rating" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                <SelectItem value="4">4.0+</SelectItem>
+                <SelectItem value="4.5">4.5+</SelectItem>
+                <SelectItem value="5">5.0</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+      )}
+        </div>
+
       {error && (
         <Card className="p-8 text-center text-red-500 shadow-md">
-           <p>{error}</p>
+          <p>{error}</p>
         </Card>
       )}
 
       {!error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading
-            ? Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : filteredProviders.map((p: any) => (
-              <Card key={p._id} className="p-4">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
-                    <AvatarFallback>
-                      {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
-                    </AvatarFallback>
-                  </Avatar>
+                <Card key={p._id} className="p-4">
+                  <div className="flex flex-col items-center text-center">
+                    <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
+                      <AvatarFallback>
+                        {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  <div className="mt-4">
-                    <div className="text-sm font-semibold">
-                      Dr. {p?.firstName} {p?.lastName}
+                    <div className="mt-4">
+                      <div className="text-sm font-semibold">
+                        {`${/^dr\.?\s/i.test(p?.firstName || "") ? "" : "Dr. "}${p?.firstName || ""} ${p?.lastName || ""}`}
+                      </div>
+
+                      <div className="text-xs text-muted-foreground">
+                        {p?.specialty || "Specialist"}
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
+                        <div className="flex items-center gap-2">
+                          <RatingStars rating={p?.rating ?? 0} />
+                          <span className="font-semibold text-sm">
+                            {p?.rating ?? 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
+                        Available Today
+                      </Badge>
                     </div>
 
-                    <div className="text-xs text-muted-foreground">
-                      {p?.specialty || "Specialist"}
-                    </div>
+                    <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="space-y-1">
+                        <div>Experience</div>
+                        <div>Session Fee</div>
+                      </div>
 
-                    <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
-                      <div className="flex items-center gap-2">
-                        <Star className="size-3 text-amber-400 fill-current" />
-                        <RatingStars rating={p?.rating ?? 0} />
-                        <span className="font-semibold text-sm">
-                          {p?.rating ?? 0}
-                        </span>
+                      <div className="text-right space-y-1">
+                        <div className="font-medium">
+                          {p?.experience ? `${p.experience} years` : "-"}
+                        </div>
+                        <div className="font-medium">
+                          ${p?.sessionFee ?? "N/A"}
+                        </div>
                       </div>
                     </div>
 
-                    <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
-                      Available Today
-                    </Badge>
-                  </div>
-
-                  <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="space-y-1">
-                      <div>Experience</div>
-                      <div>Session Fee</div>
-                    </div>
-
-                    <div className="text-right space-y-1">
-                      <div className="font-medium">
-                        {p?.experience ? `${p.experience} years` : "-"}
+                    <div className="mt-6 w-full flex gap-2">
+                      <div className="flex-1">
+                        <BookAppointmentDialog provider={p} />
                       </div>
-                      <div className="font-medium">${p?.sessionFee ?? "N/A"}</div>
+
+                      <PaymentDialog>
+                        <Button
+                          variant="outline"
+                          className="w-full flex-1"
+                          onClick={() => {
+                            sessionStorage.setItem(
+                              "providerAmount",
+                              p?.sessionFee,
+                            );
+                          }}
+                        >
+                          Pay
+                        </Button>
+                      </PaymentDialog>
                     </div>
                   </div>
-
-                  <div className="mt-6 w-full flex gap-2">
-                    <div className="flex-1">
-                      <BookAppointmentDialog provider={p} />
-                    </div>
-
-                    <PaymentDialog>
-                      <Button variant="outline" className="w-full flex-1"
-                        onClick={() => {
-                          sessionStorage.setItem("providerAmount", p?.sessionFee)
-                        }}
-                      >
-                        Pay
-                      </Button>
-                    </PaymentDialog>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
         </div>
       )}
 

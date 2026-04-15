@@ -1,16 +1,15 @@
-"use client"
+"use client";
 import Image from "next/image";
-import { CheckCircle, ShieldIcon, VideoIcon } from "lucide-react";
+import { FileCheck, ShieldIcon, VideoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import Link from "next/link";
 
 import aboutHeroImg from "@/assets/company/about.png";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
+                const defaultIcons = [ShieldIcon, VideoIcon, FileCheck];
 
-export default function AboutHero({data,loading,error}:any) {
- 
-
+export default function AboutHero({ data, loading, error }: any) {
   if (loading)
     return (
       <section className="py-10 flex justify-center items-center">
@@ -37,7 +36,6 @@ export default function AboutHero({data,loading,error}:any) {
 
         <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-
             <div className="md:col-span-6">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
                 <span className="block text-primary">
@@ -53,32 +51,38 @@ export default function AboutHero({data,loading,error}:any) {
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Link href={data?.heroCta1Url??"/onboarding"}>
+                <Link href={data?.heroCta1Url ?? "/onboarding"}>
                   <Button className="bg-gradient-primary h-10" size="lg">
-                    {data?.heroCta1Label??"Start your assessment"}
+                    {data?.heroCta1Label ?? "Start your assessment"}
                   </Button>
                 </Link>
 
-                <Link href={data?.heroCta2Url??"/company/contact"}>
+                <Link href={data?.heroCta2Url ?? "/company/contact"}>
                   <Button variant="outline" size="lg" className="h-10">
-                    {data?.heroCta2Label??"Contact us"}
+                    {data?.heroCta2Label ?? "Contact us"}
                   </Button>
                 </Link>
               </div>
 
               <ul className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {(data?.heroFeatureBadges??[]).map((f:any, index:number) => (
-                  <li key={index} className="flex items-start gap-1">
-                    <div className="size-9 rounded-full bg-[#306A7A1A] text-primary flex items-center justify-center shrink-0 mt-1">
-                      {f.icon}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-slate-900">
-                        {f.label}
-                      </div>
-                    </div>
-                  </li>
-                ))}
+
+{(data?.heroFeatureBadges ?? []).map((f: any, index: number) => {
+  const IconComponent =
+    f?.icon || defaultIcons[index] || FileCheck; 
+
+  return (
+    <li key={index} className="flex items-start gap-1">
+      <div className="size-9 rounded-full bg-[#306A7A1A] text-primary flex items-center justify-center shrink-0 mt-1">
+        <IconComponent className="size-4" />
+      </div>
+      <div>
+        <div className="text-sm font-medium text-slate-900">
+          {f.label}
+        </div>
+      </div>
+    </li>
+  );
+})}
               </ul>
             </div>
 
@@ -86,16 +90,15 @@ export default function AboutHero({data,loading,error}:any) {
               <div className="relative w-full max-w-md">
                 <div className="rounded-2xl overflow-hidden shadow-2xl">
                   <Image
-                    src={data?.heroImageUrl??aboutHeroImg}
+                    src={data?.heroImageUrl || aboutHeroImg}
                     alt="About us hero"
                     width={940}
                     height={620}
-                    className="object-cover w-full h-[360px] md:h-[420px]"
+                    className="object-cover w-full h-90 md:h-105"
                   />
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </Container>

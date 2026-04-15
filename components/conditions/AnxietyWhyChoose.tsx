@@ -53,7 +53,6 @@ export default function AnxietyWhyChoose() {
             align="center"
           />
         </div>
-
         <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
           {features.map((f) => {
             const Icon = f.icon;

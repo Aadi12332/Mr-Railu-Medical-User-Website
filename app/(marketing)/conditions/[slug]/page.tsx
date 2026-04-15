@@ -23,7 +23,7 @@ export default function Page() {
         setError(null);
       
         try {
-          const res = await publicPageApi.getConditionsBySlug(param?.slug??''); // 👈 API bana lena
+          const res = await publicPageApi.getConditionsBySlug(param?.slug??''); 
           setData(res?.data?.page || null);
         } catch (err: any) {
           setError(err?.message || "Something went wrong");

@@ -120,7 +120,7 @@ export function AppointmentCard({ appointment: app, handleCancelApp, handleStart
             <div className="flex justify-between gap-2 flex-1">
               {(app.status === "Confirmed" || app.status === "Pending") && (
                 <>
-                  <div className="flex-1">
+                  <div className="flex-1 reschedulebtn">
                     <RescheduleAppointmentDialog
                     handleCloseReschedule={handleCloseReschedule}
                     openReschedule={openReschedule}

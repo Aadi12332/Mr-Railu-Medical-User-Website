@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import AutoScroll from "embla-carousel-auto-scroll";
 import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -15,7 +15,7 @@ import expertImg2 from "@/assets/landing/expert-2.png";
 import expertImg3 from "@/assets/landing/expert-3.png";
 import expertImg4 from "@/assets/landing/expert-4.png";
 
-const providers = [
+const defaultProviders = [
   {
     id: 1,
     name: "Dr. Jane Smith, MD",
@@ -46,29 +46,85 @@ const providers = [
   },
 ];
 
+const defaultImages = defaultProviders.map((p) => p.image);
+
+interface TeamMember {
+  id?: string | number;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  specialty?: string;
+  bio?: string;
+  description?: string;
+  imageUrl?: string;
+  profileImageUrl?: string;
+  image?: string | StaticImageData;
+}
+
 interface MeetProvidersSectionProps {
+  data?: {
+    teamTitle?: string;
+    teamSubtitle?: string;
+    teamDescription?: string;
+    teamMembers?: TeamMember[];
+  };
+  loading?: boolean;
+  error?: string | null;
   title?: string;
   subtitle?: string;
   description?: string;
-  /** layout variant – carousel (default) or grid */
   layout?: "carousel" | "grid";
-  /** how many carousel rows to render when using carousel layout */
   rows?: number;
 }
 
 export default function MeetProvidersSection({
-  data, loading, error,
+  data,
+  loading,
+  error,
   title = "Meet our",
   subtitle = "providers",
   description = "Quality care shouldn't come with surprise costs. Here's exactly what you'll pay.",
   layout = "carousel",
   rows = 1,
-}: any) {
-  const renderCard = (p: any) => {
-    const imageUrl = p.imageUrl || p.profileImageUrl || expertImg1;
-    const displayName = p.name || `Dr. ${p.firstName} ${p.lastName}`;
+}: MeetProvidersSectionProps) {
+  const members =
+    data?.teamMembers?.length && data.teamMembers.length > 0
+      ? data.teamMembers
+      : defaultProviders;
+
+  if (loading) {
+    return (
+      <section className="py-16 text-center">
+        <Container>
+          <p>Loading providers...</p>
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    console.error("Providers API error:", error);
+  }
+
+  const renderCard = (p: TeamMember, index: number) => {
+    const imageUrl =
+      p.imageUrl ||
+      p.profileImageUrl ||
+      p.image ||
+      defaultImages[index % defaultImages.length];
+
+    const displayName =
+      p.name ||
+      [`Dr.`, p.firstName, p.lastName].filter(Boolean).join(" ").trim() ||
+      "Provider";
+
     const displayRole = p.role || p.specialty || "Provider";
-    const displayBio = p.bio || "A Highly Experienced Physician With A Strong Background In Primary Care And Mental Health.";
+
+    const displayBio =
+      p.bio ||
+      p.description ||
+      "A Highly Experienced Physician With A Strong Background In Primary Care And Mental Health.";
 
     return (
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 hover:shadow-md transition-shadow">
@@ -82,8 +138,12 @@ export default function MeetProvidersSection({
           />
         </div>
 
-        <div className="text-sm font-semibold text-slate-900 line-clamp-1">{displayName}</div>
-        <div className="text-sm font-normal text-slate-900 line-clamp-1">{displayRole}</div>
+        <div className="text-sm font-semibold text-slate-900 line-clamp-1">
+          {displayName}
+        </div>
+        <div className="text-sm font-normal text-slate-900 line-clamp-1">
+          {displayRole}
+        </div>
 
         <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-3">
           {displayBio}
@@ -96,14 +156,13 @@ export default function MeetProvidersSection({
     <section className="py-16 bg-transparent">
       <Container>
         <SectionHeader
-          title={data?.teamTitle ?? ''}
-          subtitle={data?.teamSubtitle ?? ""}
-          description={data?.teamDescription ?? ""}
+          title={data?.teamTitle ?? title}
+          subtitle={data?.teamSubtitle ?? subtitle}
+          description={data?.teamDescription ?? description}
         />
 
         <div className="mt-8 space-y-6">
           {layout === "carousel" ? (
-            // render one or more carousel rows depending on `rows` prop
             Array.from({ length: rows }).map((_, rowIdx) => (
               <Carousel
                 key={rowIdx}
@@ -117,12 +176,12 @@ export default function MeetProvidersSection({
                 ]}
               >
                 <CarouselContent className="-ml-4">
-                  {(data?.teamMembers ?? [])?.map((p: any, index: number) => (
+                  {members.map((p: TeamMember, index: number) => (
                     <CarouselItem
-                      key={`${p.id}-${index}`}
+                      key={`${p.id ?? index}-${index}`}
                       className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/4"
                     >
-                      {renderCard(p)}
+                      {renderCard(p, index)}
                     </CarouselItem>
                   ))}
                 </CarouselContent>
@@ -130,7 +189,11 @@ export default function MeetProvidersSection({
             ))
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-
+              {members.map((p: TeamMember, index: number) => (
+                <div key={`${p.id ?? index}-${index}`}>
+                  {renderCard(p, index)}
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -47,28 +47,29 @@ export default function AdhdHowItWorks({data}: {data?: any}) {
         </div>
 
         <div className="max-w-6xl mx-auto mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-          {(data?.howItWorksSteps??[]).map((s:any) => {
-            // const Icon = s.icon;
-            return (
-              <div key={s.stepNumber} className="relative">
-                {/* numbered badge */}
-                <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-primary text-white shadow-lg flex items-center justify-center font-semibold">
-                  {s.stepNumber}
-                </div>
+         {(data?.howItWorksSteps ?? steps).map((s: any, index: number) => {
+  const Icon =
+    s.icon || steps[index]?.icon;
 
-                <div className="rounded-2xl bg-white border border-slate-100 p-6 h-full shadow-sm">
-                  <div className="w-10 h-10 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
-                    {/* <Icon className="w-5 h-5" /> */}
-                  </div>
+  return (
+    <div key={s.stepNumber || index} className="relative">
+      <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-primary text-white shadow-lg flex items-center justify-center font-semibold">
+        {s.stepNumber || index + 1}
+      </div>
 
-                  <h3 className="font-medium text-slate-900">{s.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    {s.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+      <div className="rounded-2xl bg-white border border-slate-100 p-6 h-full shadow-sm">
+        <div className="w-10 h-10 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
+          {Icon && <Icon className="w-5 h-5" />}
+        </div>
+
+        <h3 className="font-medium text-slate-900">{s.title}</h3>
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+          {s.description}
+        </p>
+      </div>
+    </div>
+  );
+})}
         </div>
       </Container>
     </section>

@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/ui/section-header";
 import Link from "next/link";
-
+const iconMap: any = {
+  Award,
+  DollarSign,
+  FlaskConical,
+  Pill,
+  Headphones,
+};
 export default function AdhdWhyChoose({data}: {data?: any}) {
   const features = [
     {
@@ -58,20 +64,22 @@ export default function AdhdWhyChoose({data}: {data?: any}) {
         </div>
 
         <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {(data?.whyChooseCards??[]).map((f:any) => {
-            return (
-              <div key={f.id} className="rounded-2xl bg-[#F9FAFB] p-5">
-                <div className="w-11 h-11 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
-                  {f.icon}
-                </div>
+          {(data?.whyChooseCards?.length ? data.whyChooseCards : features).map((f: any) => {
+  const Icon = typeof f.icon === "string" ? iconMap[f.icon] : f.icon;
 
-                <h3 className=" text-slate-900">{f.title}</h3>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                  {f.description}
-                </p>
-              </div>
-            );
-          })}
+  return (
+    <div key={f.id} className="rounded-2xl bg-[#F9FAFB] p-5">
+      <div className="w-11 h-11 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
+        {Icon && <Icon />}
+      </div>
+
+      <h3 className=" text-slate-900">{f.title}</h3>
+      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+        {f.description}
+      </p>
+    </div>
+  );
+})}
         </div>
 
         <div className="mt-8 flex justify-center">

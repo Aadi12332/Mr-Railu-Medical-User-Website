@@ -31,15 +31,10 @@ const headingVariants = cva(
 );
 
 interface SectionHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Primary-colored portion of the heading */
   title: string;
-  /** Dark-colored portion of the heading (optional second part) */
   subtitle?: string;
-  /** Paragraph text below the heading */
   description?: string;
-  /** Text alignment — defaults to "center" */
   align?: Align;
-  /** Render as h1 instead of the default h2 */
   as?: "h1" | "h2" | "h3";
 }
 

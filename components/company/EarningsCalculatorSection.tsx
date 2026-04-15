@@ -117,7 +117,7 @@ export default function EarningsCalculatorSection() {
                   max={workType.maxHours}
                   value={hours}
                   onChange={(e) => setHours(Number(e.target.value) as any)}
-                  className="w-full h-2 appearance-none bg-transparent cursor-pointer slider z-10 relative bottom-[3px]"
+                  className="w-full h-2 appearance-none bg-transparent cursor-pointer slider z-10 relative bottom-0.75"
                 />
 
                 <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-full"></div>

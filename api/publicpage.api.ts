@@ -28,6 +28,9 @@ export const publicPageApi = {
   getCareer: () => {
     return axios.get(`/v1/public/careers`);
   },
+  applyForJob: (jobId: string, data: any) => {
+    return axios.post(`/v1/public/careers/${jobId}/apply`, data);
+  },
   getReview: (p0: { limit: number; offset: number; }) => {
     return axios.get(`/v1/public/reviews/?page=${p0.offset}&limit=${p0.limit}`);
   },

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { dashboardApi } from "@/api/dashboard.service";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,15 +13,17 @@ import dynamic from "next/dynamic";
 
 const VideoCall = dynamic(() => import("./video"), {
   ssr: false,
-  loading: () => <div>Loading video session...</div>
+  loading: () => <div>Loading video session...</div>,
 });
 
 export default function page() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-const [isVideoSession, setIsVideoSession] = useState(false);
-const [connection,setConnection] = useState<any>(null);
-  const [sessionTab, setSessionTab] = useState<"upcoming" | "completed">("upcoming");
+  const [isVideoSession, setIsVideoSession] = useState(false);
+  const [connection, setConnection] = useState<any>(null);
+  const [sessionTab, setSessionTab] = useState<"upcoming" | "completed">(
+    "upcoming",
+  );
 
   const fetchSession = async () => {
     try {
@@ -40,14 +42,14 @@ const [connection,setConnection] = useState<any>(null);
   }, []);
 
   const filteredSessions = useMemo(() => {
-  if (!sessions) return [];
+    if (!sessions) return [];
 
-  if (sessionTab === "completed") {
-    return sessions.filter((item: any) => item?.status === "completed");
-  }
+    if (sessionTab === "completed") {
+      return sessions.filter((item: any) => item?.status === "completed");
+    }
 
-  return sessions.filter((item: any) => item?.status !== "completed");
-}, [sessions, sessionTab]);
+    return sessions.filter((item: any) => item?.status !== "completed");
+  }, [sessions, sessionTab]);
 
   const [checking, setChecking] = useState(false);
   const [status, setStatus] = useState<{
@@ -74,7 +76,6 @@ const [connection,setConnection] = useState<any>(null);
       });
 
       stream.getTracks().forEach((track) => track.stop());
-
     } catch (error) {
       console.error(error);
       setStatus({
@@ -85,22 +86,22 @@ const [connection,setConnection] = useState<any>(null);
       setChecking(false);
     }
   };
-const handleStartSession = async (id: string) => {
-  try {
-    const res = await dashboardApi.postSessionData("patient", { sessionId: id });
+  const handleStartSession = async (id: string) => {
+    try {
+      const res = await dashboardApi.postSessionData("patient", {
+        sessionId: id,
+      });
 
-    setIsVideoSession(true);
-    setConnection(res?.data?.connection || null);
-    toast.success("Session started successfully");
-  } catch (error: any) {
-    toast.error(
-      error?.message || "Failed to start session"
-    );
+      setIsVideoSession(true);
+      setConnection(res?.data?.connection || null);
+      toast.success("Session started successfully");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to start session");
+    }
+  };
+  if (isVideoSession) {
+    return <VideoCall connection={connection} />;
   }
-};
-if(isVideoSession) {
-  return <VideoCall connection={connection} />;
-}
   return (
     <div className="space-y-6 h-full">
       <div>
@@ -121,7 +122,7 @@ if(isVideoSession) {
               variant="secondary"
               disabled={!filteredSessions[0]?._id}
               className="mt-4 bg-white text-primary hover:bg-white/90"
-              onClick={()=>handleStartSession(filteredSessions[0]?._id??"")}
+              onClick={() => handleStartSession(filteredSessions[0]?._id ?? "")}
             >
               <Video className="size-4 mr-2" /> Join Session Now
             </Button>
@@ -139,29 +140,26 @@ if(isVideoSession) {
       <section className="space-y-4">
         <h2 className="text-lg font-medium">Sessions</h2>
 
-
-<div className="inline-flex rounded-full bg-muted p-1">
-  {(["upcoming", "completed"] as const).map((tabItem) => (
-    <button
-      key={tabItem}
-      onClick={() => setSessionTab(tabItem)}
-      className={cn(
-        "rounded-full px-5 py-1.5 text-sm capitalize transition-all",
-        tabItem === sessionTab
-          ? "bg-gradient-dash text-white"
-          : "text-muted-foreground hover:text-foreground"
-      )}
-    >
-      {tabItem}
-    </button>
-  ))}
-</div>
-
-
+        <div className="inline-flex rounded-full bg-muted p-1">
+          {(["upcoming", "completed"] as const).map((tabItem) => (
+            <button
+              key={tabItem}
+              onClick={() => setSessionTab(tabItem)}
+              className={cn(
+                "rounded-full px-5 py-1.5 text-sm capitalize transition-all",
+                tabItem === sessionTab
+                  ? "bg-gradient-dash text-white"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {tabItem}
+            </button>
+          ))}
+        </div>
 
         <div className="space-y-3">
-          {loading
-            ? Array(3)
+          {loading ? (
+            Array(3)
               .fill(0)
               .map((_, i) => (
                 <Card key={i} className="p-4 sm:p-5 animate-pulse">
@@ -181,7 +179,17 @@ if(isVideoSession) {
                   </div>
                 </Card>
               ))
-            : filteredSessions?.map((item: any) => {
+          ) : filteredSessions?.length === 0 ? (
+            <Card className="p-6 text-center text-muted-foreground">
+              <p className="text-base font-medium">
+                No {sessionTab === "upcoming" ? "upcoming" : "completed"} sessions found.
+              </p>
+              <p className="mt-2 text-sm">
+                Check back later or schedule a new session with your provider.
+              </p>
+            </Card>
+          ) : (
+            filteredSessions.map((item: any) => {
               const provider = item?.appointmentId?.providerId;
 
               return (
@@ -209,7 +217,7 @@ if(isVideoSession) {
                           <span className="inline-flex items-center gap-1.5">
                             <Calendar className="size-3.5" />
                             {new Date(
-                              item?.appointmentId?.date
+                              item?.appointmentId?.date,
                             ).toDateString()}
                           </span>
                           <span>•</span>
@@ -232,7 +240,8 @@ if(isVideoSession) {
                   </div>
                 </Card>
               );
-            })}
+            })
+          )}
         </div>
       </section>
 

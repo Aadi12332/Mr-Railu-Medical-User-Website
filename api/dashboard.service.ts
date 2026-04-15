@@ -67,6 +67,9 @@ export const dashboardApi = {
   getPaymentSummary: (role = "patient") => {
     return axios.get(`/v1/${role}/payments/summary`);
   },
+  getExercise: (role = "patient") => {
+    return axios.get(`/v1/${role}/breathing`);
+  },
   getPaymentById: (role = "patient", paymentId: string) => {
     return axios.get(`/v1/${role}/payments/${paymentId}`);
   },
@@ -95,5 +98,8 @@ export const dashboardApi = {
   },
   getMessageProvider: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/chat/start`, payload);
+  },
+  getAdminMessage: (role = "patient", payload: any) => {
+    return axios.post(`/v1/${role}/chat/start-admin`, payload);
   },
 };
