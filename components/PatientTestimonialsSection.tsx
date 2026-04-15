@@ -2,7 +2,7 @@ import { StarIcon } from "lucide-react";
 import { Container } from "./ui/container";
 import { SectionHeader } from "./ui/section-header";
 
-export default function PatientTestimonialsSection() {
+export default function PatientTestimonialsSection({data}: {data?: any}) {
   const stats = [
     { value: "4.9/5", label: "Average Provider Rating" },
     { value: "90%+", label: "Patients Report Excellent Care" },

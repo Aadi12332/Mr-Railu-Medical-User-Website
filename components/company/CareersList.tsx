@@ -217,7 +217,7 @@ const handleSubmit = async () => {
                   <Button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="w-full bg-[#E7000B] px-4 py-3 outline-none! h-12! col-span-2"
+                    className="bg-gradient-primary h-10 px-8 col-span-2"
                   >
                     {loading ? "Submitting..." : "Apply Now"}
                   </Button>

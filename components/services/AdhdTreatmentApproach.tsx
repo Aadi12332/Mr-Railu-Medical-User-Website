@@ -1,4 +1,4 @@
-import { Pill, MessageCircle, Heart, ArrowRight } from "lucide-react";
+import { Pill, MessageCircle, Heart, ArrowRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -25,24 +25,25 @@ const features = [
   },
 ];
 
-export default function AdhdTreatmentApproach() {
+export default function AdhdTreatmentApproach({data}: {data: any}) {
   return (
     <section className="py-12 bg-[#F9FAFB]">
       <Container>
         <div className="max-w-4xl mx-auto text-center">
           <SectionHeader
-            title="Our ADHD"
-            subtitle="treatment approach"
-            description="Comprehensive care that addresses every aspect of your wellbeing."
+            title={data?.treatmentTitle || "Our ADHD"}
+            subtitle={data?.treatmentSubtitle || "treatment approach"}
+            description={data?.treatmentDescription || "Comprehensive care that addresses every aspect of your wellbeing."}
             align="center"
           />
         </div>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-1 md:grid-cols-3 max-w-5xl mx-auto">
-          {features.map((f) => {
-            const Icon = f.icon;
+          {data?.treatmentCards.map((f:any,idx:any) => {
+                            const Icon = (f.icon && typeof f.icon === 'function') ? f.icon : features[idx]?.icon ?? Calendar;
+
             return (
-              <div key={f.id} className="rounded-xl bg-white p-5">
+              <div key={idx} className="rounded-xl bg-white p-5">
                 <div className="w-11 h-11 rounded-xl bg-[#CBFBF1] text-primary flex items-center justify-center mb-4">
                   <Icon className="w-5 h-5" />
                 </div>
@@ -51,7 +52,7 @@ export default function AdhdTreatmentApproach() {
                   {f.title}
                 </h3>
                 <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                  {f.desc}
+                  {f.description}
                 </p>
               </div>
             );
@@ -59,9 +60,9 @@ export default function AdhdTreatmentApproach() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <Link href="/onboarding?type=adhd">
+          <Link href={data?.treatmentCtaUrl || "/onboarding?type=adhd"}>
             <Button className="bg-gradient-primary h-10 w-44" size="lg">
-              Get Started
+              {data?.treatmentCtaLabel}
               <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </Link>

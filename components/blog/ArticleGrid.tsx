@@ -25,6 +25,7 @@ export default function ArticleGrid() {
       const res: any = await publicPageApi.getBlog({
         limit: itemsPerPage,
         page: page,
+        category: tag??"",
       });
 
       let posts = res?.data?.posts || [];

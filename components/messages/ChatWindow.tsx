@@ -17,21 +17,7 @@ export function ChatWindow({
   onCloseConversation,
   chatId
 }: ChatWindowProps) {
-  if (!activeConversation) {
-    return (
-      <section className="flex h-full min-h-155 items-center justify-center rounded-xl border bg-card p-6">
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <MessageSquare className="text-muted-foreground size-14" />
-          </div>
-          <p className="text-base font-medium">Select a conversation</p>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Choose a therapist from the list to start messaging
-          </p>
-        </div>
-      </section>
-    );
-  }
+ 
 
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,10 +45,10 @@ export function ChatWindow({
 
       setConversationData({
         ...activeConversation,
-        providerName: `${chat.providerId.firstName} ${chat.providerId.lastName}`,
-        specialty: chat.providerId.specialty,
-        image: chat.providerId.profileImageUrl,
-        avatarInitials: `${chat.providerId.firstName[0]}${chat.providerId.lastName[0]}`
+        providerName: `${chat?.providerId?.firstName} ${chat?.providerId?.lastName}`,
+        specialty: chat?.providerId?.specialty,
+        image: chat?.providerId?.profileImageUrl,
+        avatarInitials: `${chat?.providerId?.firstName[0]}${chat?.providerId?.lastName[0]}`
       });
       setMessages(formattedMessages);
     } catch (err: any) {
@@ -78,7 +64,21 @@ export function ChatWindow({
       fetchMessages();
     }
   }, [chatId]);
-
+ if (!activeConversation) {
+    return (
+      <section className="flex h-full min-h-155 items-center justify-center rounded-xl border bg-card p-6">
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <MessageSquare className="text-muted-foreground size-14" />
+          </div>
+          <p className="text-base font-medium">Select a conversation</p>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Choose a therapist from the list to start messaging
+          </p>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="w-full flex h-full min-h-155 flex-col rounded-xl border bg-card">
       <ChatHeader

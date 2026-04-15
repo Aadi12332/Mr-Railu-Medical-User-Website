@@ -36,7 +36,7 @@ export default function ValuesSection({ data, loading, error }: any) {
       <Container>
         <SectionHeader
           title={data?.valuesTitle || "Our Values"}
-          subtitle="Values"
+          subtitle=""
           description={
             data?.valuesDescription ||
             "These core principles guide everything we do"

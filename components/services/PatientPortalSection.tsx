@@ -12,7 +12,7 @@ import { Container } from "@/components/ui/container";
 import Link from "next/link";
 import portalImg from "@/assets/services/patient-portal.jpg";
 
-export default function PatientPortalSection() {
+export default function PatientPortalSection({data}: {data: any}) {
   const features = [
     { id: 1, icon: Calendar, title: "Book visits anytime" },
     { id: 2, icon: CalendarCheck, title: "Manage appointments easily" },
@@ -37,8 +37,8 @@ export default function PatientPortalSection() {
               />
 
               <div className="absolute -right-4 -bottom-4 bg-gradient-primary text-white rounded-lg shadow-lg px-3 py-3 flex flex-col items-center text-xs">
-                <div className="font-semibold text-2xl leading-none">24/7</div>
-                <div className="mt-0.5">Portal Access</div>
+                <div className="font-semibold text-2xl leading-none">{data?.patientPortalStatValue}</div>
+                <div className="mt-0.5">{data?.patientPortalStatLabel}</div>
               </div>
             </div>
           </div>
@@ -46,18 +46,16 @@ export default function PatientPortalSection() {
           {/* right: copy + list + CTA */}
           <div className="">
             <h2 className="text-3xl md:text-4xl font-semibold leading-tight">
-              <span className="text-primary">Your personal </span>
-              <span className="text-slate-900">patient portal</span>
+              <span className="text-primary">{data.patientPortalTitle}</span>
             </h2>
 
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Take control of your healthcare journey with a platform designed
-              for convenience and peace of mind.
+              {data.patientPortalSubtitle}
             </p>
 
             <div className="mt-6 space-y-3">
-              {features.map((f) => {
-                const Icon = f.icon;
+              {(data?.patientPortalFeatures??[]).map((f: any,idx:number) => {
+                const Icon = (f.icon && typeof f.icon === 'function') ? f.icon : features[idx]?.icon ?? Calendar;
                 return (
                   <div
                     key={f.id}

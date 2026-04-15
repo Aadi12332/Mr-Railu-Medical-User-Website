@@ -67,6 +67,20 @@ export default function SupportPage() {
 
       if (res?.data?.tickets) {
         setTickets(res.data.tickets.map(transformTicket));
+        setMessages(() => {
+          const msgMap: Record<string, Message[]> = {}
+
+          res.data.tickets.forEach((t: any) => {
+            msgMap[t._id] = [
+              ...(t.replies || []).map((r: any) => ({
+                sender: r.authorType === "patient" ? "me" : "other",
+                text: r.message,
+              })),
+            ]
+          })
+
+          return msgMap
+        })
       }
     } catch (err) {
       console.error("Error fetching tickets", err);
@@ -78,7 +92,22 @@ export default function SupportPage() {
   useEffect(() => {
     fetchTickets();
   }, []);
-
+  
+  const handleSendReply = async (ticketId: string) => {
+    try {
+      const res = await dashboardApi.sendSupportReply("patient", ticketId, { message: replyText[ticketId] });
+      if (res?.data) {
+        
+        setMessages((prev) => ({
+          ...prev,
+          [ticketId]: [...(prev[ticketId] || []), { sender: "me", text: replyText[ticketId] }],
+        }));
+        setReplyText((prev) => ({ ...prev, [ticketId]: "" }));
+      }
+    } catch (err) {
+      console.error("Error sending reply", err);
+    }
+  };
   const capitalize = (str: string) =>
     str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -120,21 +149,19 @@ export default function SupportPage() {
     setIsTicketDialogOpen(open);
   }
 
-    const handleChat = async () => {
-      try {
-        const role =
-          typeof localStorage !== "undefined"
-            ? localStorage.getItem("role")?.toLowerCase()
-            : "";
-            const res = await dashboardApi.getAdminMessage(role || "", {
-              "adminId": "69c12a4c3805d27d8844fdbd"
-            });
-            const adminId = res?.data?.data?.chat?.adminId;
-        router.push(`/dashboard/messages?chatId=${res?.data?.chat?._id}`)
-      } catch (error: any) {
-        console.error("Something went wrong:", error);
-      }
+  const handleChat = async () => {
+    try {
+      const role =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("role")?.toLowerCase()
+          : "";
+      const res = await dashboardApi.postAdminMessage(role || "");
+      const adminId = res?.data?.chat?.adminId;
+      router.push(`/dashboard/messages?chatId=${res?.data?.chat?._id}`)
+    } catch (error: any) {
+      console.error("Something went wrong:", error);
     }
+  }
 
   return (
     <>
@@ -203,131 +230,119 @@ export default function SupportPage() {
                 <p className="text-center text-sm text-gray-500 py-10">
                   No tickets found
                 </p>
-              ) : (
-                tickets.map((ticket) => {
-                  const isOpen = openReplyId === ticket.id;
-                  const ticketMessages = messages[ticket.id] || [];
-                  return (
-                    <div
-                      key={ticket.id}
-                      className="rounded-lg lg:rounded-xl p-3 lg:p-6 border bg-white"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-sm font-medium">
-                          {ticket.title}
-                        </div>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${statusColorMap[ticket.status]}`}
-                        >
-                          {ticket.status}
-                        </span>
-                      </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-700">
-                          {ticket.category}
-                        </span>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-md ${priorityColorMap[ticket.priority]}`}
-                        >
-                          {ticket.priority}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex items-end justify-between text-xs text-muted-foreground">
-                        <span>Created {ticket.createdDate}</span>
-                        <div className="flex items-center gap-4">
-                          <span>Updated {ticket.updatedAgo}</span>
-                          <button
-                            onClick={() =>
-                              setOpenReplyId(isOpen ? null : ticket.id)
-                            }
-                            className="flex items-center gap-1"
-                          >
-                            <MessageSquare className="size-3" />
-                            {ticket.messagesCount}
-                            <span className="ml-1">Message</span>
-                            <ChevronDown
-                              className={`size-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                      {isOpen && (
-                        <div className="mt-4 border-t pt-4 space-y-3">
-                          <div className="space-y-2 max-h-50 overflow-auto">
-                            {ticketMessages.map((msg, i) => (
-                              <div
-                                key={i}
-                                className={`flex items-start gap-2 ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
-                              >
-                                {msg.sender !== "me" && (
-                                  <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-[8px] font-semibold">
-                                    Admin
-                                  </div>
-                                )}
-                                <div
-                                  className={`px-3 py-2 rounded-lg text-sm max-w-[70%] ${msg.sender === "me" ? "bg-gradient-dash text-white" : "bg-gray-100 text-gray-800"}`}
-                                >
-                                  {msg.text}
-                                </div>
-                                {msg.sender === "me" && (
-                                  <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-[8px] font-semibold">
-                                    {"A".toUpperCase()}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex gap-1 items-center">
-                            <input
-                              value={replyText[ticket.id] || ""}
-                              onChange={(e) =>
-                                setReplyText((prev) => ({
-                                  ...prev,
-                                  [ticket.id]: e.target.value,
-                                }))
-                              }
-                              placeholder="Write your reply..."
-                              className="w-full flex-1 border rounded-lg p-2 text-sm outline-none"
-                            />
-                            <button
-                              onClick={() => {
-                                const message = replyText[ticket.id];
-                                if (!message) return;
-                                setMessages((prev) => ({
-                                  ...prev,
-                                  [ticket.id]: [
-                                    ...(prev[ticket.id] || []),
-                                    { sender: "me", text: message },
-                                  ],
-                                }));
-                                setTimeout(() => {
-                                  setMessages((prev) => ({
-                                    ...prev,
-                                    [ticket.id]: [
-                                      ...(prev[ticket.id] || []),
-                                      {
-                                        sender: "other",
-                                        text: "Thanks, we will check this.",
-                                      },
-                                    ],
-                                  }));
-                                }, 1000);
-                                setReplyText((prev) => ({
-                                  ...prev,
-                                  [ticket.id]: "",
-                                }));
-                              }}
-                              className="py-2 px-5 bg-gradient-dash text-white rounded-lg text-sm"
-                            >
-                              Send
-                            </button>
-                          </div>
-                        </div>
-                      )}
+              ) :
+                <div>
+                  {tickets.length === 0 && (
+                    <div className="text-sm text-gray-500 text-center py-2">
+                      Thanks, we will check this.
                     </div>
-                  );
-                })
-              )}
+                  )}
+
+
+                  {
+                    tickets.map((ticket) => {
+                      const isOpen = openReplyId === ticket.id;
+                      const ticketMessages = messages[ticket.id] || [];
+                      return (
+                        <div
+                          key={ticket.id}
+                          className="rounded-lg lg:rounded-xl p-3 lg:p-6 border bg-white"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="text-sm font-medium">
+                              {ticket.title}
+                            </div>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${statusColorMap[ticket.status]}`}
+                            >
+                              {ticket.status}
+                            </span>
+                          </div>
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-700">
+                              {ticket.category}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-md ${priorityColorMap[ticket.priority]}`}
+                            >
+                              {ticket.priority}
+                            </span>
+                          </div>
+                          <div className="mt-4 flex items-end justify-between text-xs text-muted-foreground">
+                            <span>Created {ticket.createdDate}</span>
+                            <div className="flex items-center gap-4">
+                              <span>Updated {ticket.updatedAgo}</span>
+                              <button
+                                onClick={() =>
+                                  setOpenReplyId(isOpen ? null : ticket.id)
+                                }
+                                className="flex items-center gap-1"
+                              >
+                                <MessageSquare className="size-3" />
+                                {ticket.messagesCount}
+                                <span className="ml-1">Message</span>
+                                <ChevronDown
+                                  className={`size-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                                />
+                              </button>
+                            </div>
+                          </div>
+                          {isOpen && (
+                            <div className="mt-4 border-t pt-4 space-y-3">
+                              <div className="space-y-2 max-h-50 overflow-auto">
+                                {ticketMessages.map((msg, i) => (
+                                  <div
+                                    key={i}
+                                    className={`flex items-start gap-2 ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
+                                  >
+                                    {msg.sender !== "me" && (
+                                      <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-[8px] font-semibold">
+                                        Admin
+                                      </div>
+                                    )}
+                                    <div
+                                      className={`px-3 py-2 rounded-lg text-sm max-w-[70%] ${msg.sender === "me" ? "bg-gray-100 text-gray-800" : "bg-gray-100 text-gray-800"}`}
+                                    >
+                                      {msg.text}
+                                    </div>
+                                    {msg.sender === "me" && (
+                                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-[8px] font-semibold">
+                                        {"A".toUpperCase()}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="flex gap-1 items-center mt-5">
+                                <input
+                                  value={replyText[ticket.id] || ""}
+                                  onChange={(e) =>
+                                    setReplyText((prev) => ({
+                                      ...prev,
+                                      [ticket.id]: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Write your reply..."
+                                  className="w-full flex-1 border rounded-lg p-2 text-sm outline-none"
+                                />
+                                <button
+                                  onClick={() => {
+                                    handleSendReply(ticket.id);
+
+                                  }}
+                                  className="py-2 px-5 bg-gradient-dash text-white rounded-lg text-sm"
+                                >
+                                  Send
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  }
+                </div>
+              }
             </CardContent>
           </Card>
 

@@ -48,11 +48,27 @@ export default function TreatmentsComparison({ data }: { data?: any }) {
     inPerson: { text: r.inPerson, positive: r.inPersonPositive, isText: typeof r.inPersonPositive !== 'boolean' }
   })) : rows;
 
-  const titleWords = (data?.comparisonTitle || "Why Online Medication Care Works Better For Many People").split(" ");
+  const titleWords = (data?.comparisonTitle || data?.whyOnlineCareTitle||"Why Online Medication Care Works Better For Many People").split(" ");
   const midIndex = Math.ceil(titleWords.length / 2);
   const title1 = titleWords.slice(0, midIndex).join(" ");
   const title2 = titleWords.slice(midIndex).join(" ");
+const formattedRows = (data?.whyOnlineCareComparison??[])
+  .sort((a:any, b:any) => a.displayOrder - b.displayOrder)
+  .map((item:any) => ({
+    feature: item.feature,
 
+    online: {
+      text: item.online,
+      positive: item.onlinePositive,
+      isText: true,
+    },
+
+    inPerson: {
+      text: item.inPerson,
+      positive: item.inPersonPositive,
+      isText: true,
+    },
+  }))
   return (
     <section className="py-16">
       <Container>
@@ -68,7 +84,7 @@ export default function TreatmentsComparison({ data }: { data?: any }) {
                 </span>
               </h2>
               <p className="mt-3 text-sm text-muted-foreground max-w-2xl mx-auto">
-                {data?.comparisonSubtitle || "Access To Mental Health Care Shouldn't Depend On Location, Mobility, Or Long Waiting Lists. If Visiting A Clinic Is Difficult Or Time-Consuming, Online Care Offers A Practical Alternative."}
+                {data?.comparisonSubtitle||data?.whyOnlineCareSubtitle || "Access To Mental Health Care Shouldn't Depend On Location, Mobility, Or Long Waiting Lists. If Visiting A Clinic Is Difficult Or Time-Consuming, Online Care Offers A Practical Alternative."}
               </p>
             </div>
 
@@ -83,7 +99,7 @@ export default function TreatmentsComparison({ data }: { data?: any }) {
                 </thead>
 
                 <tbody className="divide-y divide-gray-200">
-                  {currentRows.map((r: any) => (
+                  {(formattedRows??currentRows).map((r: any) => (
                     <tr key={r.feature} className="bg-white">
                       <td className="px-4 py-4 align-top text-sm text-slate-700 border-r border-gray-200">
                         {r.feature}
@@ -139,12 +155,12 @@ export default function TreatmentsComparison({ data }: { data?: any }) {
             </div>
 
             <div className="mt-6 text-center">
-              <Link href={data?.comparisonCtaUrl || "/appointment"}>
+              <Link href={data?.comparisonCtaUrl || data?.whyOnlineCareCtaUrl || "/appointment"}>
                 <Button
                   className="bg-gradient-primary inline-flex items-center gap-3"
                   size="lg"
                 >
-                  {data?.comparisonCtaLabel || "Begin Online Care"}
+                  {data?.comparisonCtaLabel||data?.whyOnlineCareCtaLabel || "Begin Online Care"}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>

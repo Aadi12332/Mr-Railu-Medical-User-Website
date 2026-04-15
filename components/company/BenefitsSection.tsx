@@ -54,34 +54,36 @@ const benefits = [
     image: administrativeAssistantImg,
   },
 ];
-export default function BenefitsSection() {
+export default function BenefitsSection({ careers }: { careers: any }) {
   return (
     <section className="py-16 bg-white">
       <Container>
         <SectionHeader
-          title="Meaningful Benefits"
-          subtitle="for Your Wellbeing"
-          description="We invest in our team members with comprehensive benefits that support your professional and personal growth."
+          title={careers?.benefitsTitle || "Meaningful Benefits"}
+          subtitle={""}
+          description={careers?.benefitsDescription || "We invest in our team members with comprehensive benefits that support your professional and personal growth."}
         />
 
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {benefits.map((b) => (
+          {careers?.benefits?.map((b: any) => (
             <Card key={b.id} className="overflow-hidden flex flex-col gap-0">
               <div className="h-40 w-full relative">
                 <Image
-                  src={b.image}
+                  src={b.imageUrl}
                   alt={b.title}
                   className="w-full h-full object-cover"
+                  width={400}
+                  height={160}
                 />
               </div>
 
               <div className="p-6 flex-1 flex flex-col">
                 <div className="size-11 bg-gradient-primary text-white rounded-xl flex items-center justify-center mb-4">
-                  <b.icon className="w-5 h-5" />
+                 {b.icon}
                 </div>
                 <h4 className="text-lg font-semibold">{b.title}</h4>
                 <p className="mt-2 text-sm text-muted-foreground flex-1">
-                  {b.desc}
+                  {b.description}
                 </p>
               </div>
             </Card>

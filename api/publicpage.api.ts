@@ -1,7 +1,7 @@
 import axios from "./axiosInstance";
 
 export const publicPageApi = {
-  getBlog: (params?: { limit?: number; page?: number }) => {
+  getBlog: (params?: { limit?: number; page?: number; category?: string }) => {
     return axios.get(`/v1/public/blog`, { params });
   },
   getBlogDetail: (slug: string) => {

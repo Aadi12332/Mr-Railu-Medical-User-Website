@@ -33,7 +33,6 @@ export default function page() {
   const pageContent = data?.pageContent || {};
   const providers = data?.providers || [];
   const faqs = data?.faqs || [];
-
   return (
     <>
       <ProvidersHero

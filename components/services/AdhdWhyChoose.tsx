@@ -5,6 +5,7 @@ import {
   Pill,
   Headphones,
   ArrowRight,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -64,8 +65,8 @@ export default function AdhdWhyChoose({data}: {data?: any}) {
         </div>
 
         <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {(data?.whyChooseCards?.length ? data.whyChooseCards : features).map((f: any) => {
-  const Icon = typeof f.icon === "string" ? iconMap[f.icon] : f.icon;
+          {(data?.whyChooseCards?.length ? data.whyChooseCards : features).map((f: any,idx:any) => {
+                const Icon = (f.icon && typeof f.icon === 'function') ? f.icon : features[idx]?.icon ?? Calendar;
 
   return (
     <div key={f.id} className="rounded-2xl bg-[#F9FAFB] p-5">

@@ -40,11 +40,11 @@ export const dashboardApi = {
   getMentalPlans: (role = "patient") => {
     return axios.get(`/v1/${role}/plans`);
   },
-  getMyProviders: (role = "patient") => {
-    return axios.get(`/v1/${role}/providers/my-providers`);
-  },
-  getProviders: (role = "patient") => {
-    return axios.get(`/v1/${role}/providers`);
+ getMyProviders: (role = "patient", params?: { page?: number; limit?: number }) => {
+  return axios.get(`/v1/${role}/providers/my-providers`, { params })
+},
+  getProviders: (role = "patient", params?: { page?: number; limit?: number }) => {
+    return axios.get(`/v1/${role}/providers`, { params })
   },
   getMoodOptions: (role = "patient") => {
     return axios.get(`/v1/${role}/mood/options`);
@@ -99,7 +99,11 @@ export const dashboardApi = {
   getMessageProvider: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/chat/start`, payload);
   },
-  getAdminMessage: (role = "patient", payload: any) => {
+  postAdminMessage: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/chat/start-admin`, payload);
+  },
+  
+  sendSupportReply: (role = "patient", ticketId: string, payload: any) => {
+    return axios.post(`/v1/${role}/support/${ticketId}/reply`, payload);
   },
 };

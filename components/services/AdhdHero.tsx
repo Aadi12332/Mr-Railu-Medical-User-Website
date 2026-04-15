@@ -42,9 +42,9 @@ export default function AdhdHero({data}:any) {
             <div className="md:col-span-6">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
                 <span className="block text-primary">{data?.heroTitle??''}</span>
-                <span className="block text-primary">
+                {/* <span className="block text-primary">
                   Care <span className="text-slate-900">100% Online</span>
-                </span>
+                </span> */}
               </h1>
 
               <p className="mt-4 max-w-xl  text-muted-foreground leading-relaxed">
@@ -54,12 +54,16 @@ export default function AdhdHero({data}:any) {
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Link href={data?.heroCTAUrl??'/onboarding'}>
                   <Button className="bg-gradient-primary" size="lg">
-                    {data?.heroCTALabel}
+                    <Link href={data?.heroCTAUrl??'/onboarding'}>
+                      {data?.heroCTALabel}
+                    </Link>
                   </Button>
                 </Link>
 
-                <Button variant="outline" size="lg">
-                  How it works
+                <Button variant="outline" size="lg" asChild>
+                  <Link href={data?.heroSecondaryCtaUrl??'/onboarding'}>
+                    {data?.heroSecondaryCtaLabel}
+                  </Link>
                 </Button>
               </div>
 
@@ -94,10 +98,10 @@ export default function AdhdHero({data}:any) {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-slate-900">
-                      500+ patients helped
+                      {data?.heroStatValue??'500+ patients helped'}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Join them today
+                      {data?.heroStatLabel??'Join them today'}
                     </div>
                   </div>
                 </div>

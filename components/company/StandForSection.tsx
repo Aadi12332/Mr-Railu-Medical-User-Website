@@ -15,7 +15,7 @@ import {
   Badge,
 } from "lucide-react";
 
-export default function StandForSection() {
+export default function StandForSection({ careers }: { careers: any }) {
   const items = [
     {
       id: "integrity",
@@ -65,9 +65,9 @@ export default function StandForSection() {
     <section className="py-16 md:py-20 bg-muted">
       <Container>
         <SectionHeader
-          title="What We"
-          subtitle="Stand For"
-          description="Our values guide every decision we make and shape the culture we build together."
+          title={careers?.valuesTitle || "What We"}
+          subtitle={""}
+          description={careers?.valuesSubtitle || ""}
         />
 
         <Accordion
@@ -75,16 +75,16 @@ export default function StandForSection() {
           collapsible
           className="mt-8 space-y-3 max-w-3xl mx-auto"
         >
-          {items.map((item) => (
+          {careers?.values?.map((item: any, idx: number) => (
             <AccordionItem
               className="p-3 py-2 bg-white rounded-xl shadow"
-              value={item.id}
-              key={item.id}
+              value={idx.toString()}
+              key={idx.toString()}
             >
               <AccordionTrigger>
                 <div className="flex items-center gap-3">
                   <div className="size-10 flex items-center justify-center bg-gradient-primary rounded-xl">
-                    <item.icon className="h-5 w-5 text-white" />
+                    {item.icon}
                   </div>
                   <span className="font-semibold">{item.title}</span>
                 </div>
