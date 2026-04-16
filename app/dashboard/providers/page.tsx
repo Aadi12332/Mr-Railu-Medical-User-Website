@@ -296,7 +296,7 @@ export default function page() {
                     </div>
 
                     <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
-                      Available Today
+                      {p?.availableToday ? "Available Today" : "Not Available Today"}
                     </Badge>
                   </div>
 

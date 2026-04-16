@@ -14,6 +14,7 @@ import { ErrorDisplay } from "@/components/ui/error-display";
 
 export default function Page() {
   const [data, setData] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
   
@@ -24,6 +25,7 @@ export default function Page() {
       try {
         const res = await publicPageApi.getAbout();
         setData(res?.data?.page || null);
+        setReviews(res?.data?.reviews || []);
       } catch (err: any) {
         setError(err?.message || "Something went wrong");
       } finally {
@@ -67,7 +69,7 @@ export default function Page() {
         subtitle="Team"
         description="Meet the passionate individuals driving our mission forward"
       />
-      <SuccessStoriesSection data={data} loading={loading} error={error} />
+      <SuccessStoriesSection data={reviews} loading={loading} error={error} />
       <ContactSection  data={data} loading={loading} error={error}/>
     </>
   );

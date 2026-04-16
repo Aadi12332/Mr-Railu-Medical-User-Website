@@ -10,6 +10,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
 import TherapistStep from "@/components/dashboard/steps/TherapistStep";
@@ -34,14 +35,24 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
   const [sessionType, setSessionType] = useState<string>("video");
   const [reason, setReason] = useState<string>("");
   const stepLabels = ["Therapist", "Date", "Time", "Details", "Confirm"];
+  const [providerData, setProviderData] = useState<any>(null);
+  const handleMyProviders =async (providerId:string) => {
+    try {
+    const awaitData = await patientApi.getProviderById(providerId);
+    setOpen(true)
+    setProviderData(awaitData);
+    } catch (error) {
+    }
+  }
   useEffect(() => {
     setSelectedTime(null);
   }, [date]);
   const handleBooking = async () => {
     try {
-      const parsed = dayjs(selectedTime, "hh:mm A");
+      const selectedTimeFromStorage = sessionStorage.getItem("selectedTime") || "";
+      const parsed = dayjs(selectedTimeFromStorage, "hh:mm A");
 
-      let time = selectedTime;
+      let time = selectedTimeFromStorage;
 
       if (parsed.isValid()) {
         let minutes = parsed.minute();
@@ -54,13 +65,12 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
 
         time = parsed.minute(minutes).format("HH:mm");
       }
-
+    const formattedDate = dayjs(date).format("YYYY-MM-DD")
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
-        date: date?.toISOString(),
-        time: time,
+        date: formattedDate,
+        time,
         type: sessionType,
-        // reason,
       });
       sessionStorage.setItem("providerAmount", provider?.sessionFee);
       setIsSuccess(true);
@@ -83,7 +93,10 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
   }, [open]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>      <DialogTrigger asChild>
-      <Button className="bg-gradient-dash w-full" onClick={() => setOpen(true)}>
+      <Button className="bg-gradient-dash w-full" onClick={() => {
+        
+        handleMyProviders(provider?._id);
+        }}>
         <Video className="size-4 mr-2" /> Book Now
       </Button>
     </DialogTrigger>
@@ -141,6 +154,7 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
               selectedTime={selectedTime}
               setSelectedTime={setSelectedTime}
               provider={provider}
+              providerData={providerData?.data?.provider}
             />
           )}
           {step === 4 && (

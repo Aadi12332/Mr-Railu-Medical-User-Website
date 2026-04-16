@@ -8,46 +8,38 @@ export default function TimeStep({
   date,
   selectedTime,
   setSelectedTime,
-  provider
+  provider,
+  providerData
 }: {
   date: Date | undefined;
   selectedTime: string | null;
   setSelectedTime: (s: string | null) => void;
   provider?: any;
+  providerData?: any;
 }) {
+  
   const slots: string[] = [];
+if (date && providerData?.availability?.length) {
+  const selectedDay = dayjs(date).format("dddd"); // Monday
+  const dayAvail = providerData.availability.find(
+    (a: any) => a.day.toLowerCase() === selectedDay.toLowerCase()
+  );
 
-  if (provider?.availability && provider.availability.length > 0 && date) {
-    const dayName = dayjs(date).format("dddd"); // e.g., "Monday"
-    const dayAvail = provider.availability.find((a: any) => a.day === dayName);
+  if (dayAvail?.slots?.length) {
+    dayAvail.slots.forEach((slot: any) => {
+      if (slot.startTime) {
+        const [hh, mm] = slot.startTime.split(":");
 
-    if (dayAvail && dayAvail.slots) {
-      dayAvail.slots.forEach((s: any) => {
-        if (s.startTime) {
-          const [hh, mm] = s.startTime.split(":");
-          const d = new Date(date);
-          d.setHours(parseInt(hh, 10), parseInt(mm || "0", 10), 0, 0);
-          slots.push(
-            d.toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "2-digit",
-            }),
-          );
-        }
-      });
-    }
-  } else {
-    for (let h = 9; h <= 17; h++) {
-      const d = date ? new Date(date) : new Date();
-      d.setHours(h, 0, 0, 0);
-      slots.push(
-        d.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-        }),
-      );
-    }
+        const d = new Date(date);
+        d.setHours(Number(hh), Number(mm), 0, 0);
+
+        slots.push(
+          dayjs(d).format("hh:mm A") // better formatting
+        );
+      }
+    });
   }
+}
 
   return (
     <div className="w-full">
@@ -67,7 +59,10 @@ export default function TimeStep({
               <Button
                 key={slot}
                 variant={active ? undefined : "outline"}
-                onClick={() => setSelectedTime(slot)}
+                onClick={() => {
+                  sessionStorage.setItem("selectedTime", slot);
+                  setSelectedTime(slot);
+                }}
                 className={`w-full rounded-md py-4 text-sm ${active ? "bg-gradient-dash text-white" : ""
                   }`}
               >
