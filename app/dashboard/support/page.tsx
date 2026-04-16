@@ -17,6 +17,7 @@ import { settingApi } from "@/api/setting.api";
 import EmergencyButton from "@/components/dashboard/EmergencyButton";
 import { dashboardApi } from "@/api/dashboard.service";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/context/auth.context";
 
 type Ticket = {
   id: string;
@@ -46,6 +47,7 @@ export default function SupportPage() {
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState<boolean>(false);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
+const { user } = useAuth();
 
   type Message = {
     sender: "me" | "other";
@@ -322,8 +324,8 @@ const timeAgo = (date: string) => {
                                       {msg.text}
                                     </div>
                                     {msg.sender === "me" && (
-                                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-[8px] font-semibold">
-                                        {"A".toUpperCase()}
+                                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-semibold">
+                                        {user?.firstName?.charAt(0) || ""}{user?.lastName?.charAt(0) || ""}
                                       </div>
                                     )}
                                   </div>

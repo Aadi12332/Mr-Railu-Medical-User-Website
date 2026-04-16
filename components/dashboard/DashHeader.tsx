@@ -38,7 +38,7 @@ export default function DashHeader() {
 
           <div className="flex items-center gap-3 cursor-pointer" onClick={()=>router.push("/dashboard/settings")}>
             <Avatar className="size-10 border border-slate-100 bg-white">
-              <AvatarFallback>{user?.firstName?.charAt(0) || "U"}{user?.lastName?.charAt(0) || "U"}</AvatarFallback>
+              <AvatarFallback>{user?.firstName?.charAt(0) || ""}{user?.lastName?.charAt(0) || ""}</AvatarFallback>
             </Avatar>
 
             <div className="hidden sm:flex flex-col">

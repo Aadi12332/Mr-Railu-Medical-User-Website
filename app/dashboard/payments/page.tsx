@@ -264,9 +264,9 @@ const [summary, setSummary] = useState<any>(null);
         {error && <p className="text-center text-red-500">{error}</p>}
 
         {!loading && !error && filteredPayments.length === 0 && (
-          <p className="text-center text-muted-foreground">
-            No payments to show.
-          </p>
+          <Card className="p-6 text-center text-muted-foreground">
+              No payments to show.
+              </Card>
         )}
 
         {!loading &&
