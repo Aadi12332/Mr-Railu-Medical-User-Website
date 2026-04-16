@@ -321,11 +321,12 @@ export default function page() {
                       <BookAppointmentDialog provider={p} />
                     </div>
 
-                    <PaymentDialog>
+                    {/* <PaymentDialog>
                       <Button
                         variant="outline"
                         className="w-full flex-1"
                         onClick={() => {
+                          console.log("Provider amount:", p);
                           sessionStorage.setItem(
                             "providerAmount",
                             p?.sessionFee,
@@ -334,7 +335,7 @@ export default function page() {
                       >
                         Pay
                       </Button>
-                    </PaymentDialog>
+                    </PaymentDialog> */}
                   </div>
                 </div>
               </Card>

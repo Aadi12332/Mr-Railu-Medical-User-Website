@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { stripeApi } from "@/api/stripe.api";
 import { stripePromise } from "@/lib/stripe";
 import { usePathname } from "next/navigation";
+import { toast } from "react-toastify";
 
 function PaymentDialogWrapper({
   children,
@@ -38,48 +39,102 @@ function PaymentDialogWrapper({
   const [cardNumberError, setCardNumberError] = useState("");
   const [cardExpiryError, setCardExpiryError] = useState("");
   const [cardCvcError, setCardCvcError] = useState("");
-  const handlePayment = async () => {
-    if (!stripe || !elements) return;
+//   const handlePayment = async () => {
+//     if (!stripe || !elements) return;
 
-    const card = elements.getElement(CardNumberElement);
+//     const card = elements.getElement(CardNumberElement);
 
-    if (!card) {
-      console.error("Card not found");
-      return;
-    }
+//     if (!card) {
+//       console.error("Card not found");
+//       return;
+//     }
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card,
+//     const { error, paymentMethod } = await stripe.createPaymentMethod({
+//       type: "card",
+//       card,
+//     });
+
+//     if (error) {
+//       console.error(error.message);
+//       return;
+//     }
+//     try {
+//       const res = await stripeApi.stripeWebhook({
+//         type: "payment_intent.succeeded",
+//         data: {
+//           object: {
+//             id: paymentMethod.id,
+//             amount: sessionStorage.getItem("providerAmount") || 0,
+//             currency: "usd",
+//             status: "succeeded",
+//           },
+//         },
+//       });
+//       //"69e12127442ba8a9bc6cf934"
+
+//       const app = await stripeApi.createPaymentIntent({
+//         appointmentId: sessionStorage.getItem("appointmentId") || ""
+//       });
+      
+//       const a =await stripe.confirmCardPayment(app.data.clientSecret)
+//       console.log({a})
+//       setIsSuccess(true)
+
+
+//     } catch (err) {
+//       console.error(err);
+//       setIsSuccess(false)
+//   const app = await stripeApi.createPaymentIntent({
+//         appointmentId: sessionStorage.getItem("appointmentId") || ""
+//       });
+      
+//       const result = await stripe.confirmCardPayment(app.data.clientSecret, {
+//   payment_method: {
+//     card: elements.getElement(CardNumberElement),
+//   },
+// });
+//       console.log({result})
+//     }
+//     console.log(paymentMethod);
+//   };
+const handlePayment = async () => {
+  if (!stripe || !elements) return;
+
+  const card = elements.getElement(CardNumberElement);
+
+  if (!card) {
+    console.error("Card not found");
+    return;
+  }
+
+  try {
+    const res = await stripeApi.createPaymentIntent({
+      appointmentId: sessionStorage.getItem("appointmentId") || ""
     });
 
-    if (error) {
-      console.error(error.message);
+    const clientSecret = res.data.clientSecret;
+
+    const result = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card,
+      },
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+      setIsSuccess(false);
       return;
     }
-    try {
-      const res = await stripeApi.stripeWebhook({
-        type: "payment_intent.succeeded",
-        data: {
-          object: {
-            id: paymentMethod.id,
-            amount: sessionStorage.getItem("providerAmount") || 0,
-            currency: "usd",
-            status: "succeeded",
-          },
-        },
-      });
-      setIsSuccess(true)
 
-
-    } catch (err) {
-      console.error(err);
-      setIsSuccess(false)
-
+    if (result.paymentIntent?.status === "succeeded") {
+      setIsSuccess(true);
     }
-    console.log(paymentMethod);
-  };
 
+  } catch (err) {
+    toast.error(err as string);
+    setIsSuccess(false);
+  }
+};
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogTrigger asChild>{children}</DialogTrigger>

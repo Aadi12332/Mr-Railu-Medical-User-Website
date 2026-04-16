@@ -15,7 +15,6 @@ export default function SuccessStoriesSection(props: any) {
   const [page, setPages] = useState(1);
 
   const itemsPerPage = 12;
-
   const fetchReviews = async (page: number) => {
     setLoading(true);
     setError(null);

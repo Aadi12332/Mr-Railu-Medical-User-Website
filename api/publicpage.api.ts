@@ -34,9 +34,12 @@ export const publicPageApi = {
   getReview: (p0: { limit: number; offset: number; }) => {
     return axios.get(`/v1/public/reviews/?page=${p0.offset}&limit=${p0.limit}`);
   },
-  getProviders: () => {
-    return axios.get(`/v1/public/providers/`);
-  },
+    getProviders: () => {
+      return axios.get(`/v1/public/providers/`);
+    },
+      getProviderById: (id: string) => {
+      return axios.get(`/v1/public/providers/${id}`);
+    },
   getSiteMap: () => {
     return axios.get(`/v1/public/pages/sitemap/`);
   },
@@ -87,6 +90,7 @@ export const publicPageApi = {
   getProviderBySlug: (slug: string) => {
     return axios.get(`/v1/public/providers?condition=${slug}`);
   },
+  
   getServiceBySlug: (slug: string) => {
     return axios.get(`/v1/public/services/${slug}`);
   },

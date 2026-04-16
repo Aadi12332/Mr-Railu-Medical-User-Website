@@ -65,6 +65,9 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
 
         time = parsed.minute(minutes).format("HH:mm");
       }
+      {
+  
+}
     const formattedDate = dayjs(date).format("YYYY-MM-DD")
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
@@ -73,6 +76,7 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
         type: sessionType,
       });
       sessionStorage.setItem("providerAmount", provider?.sessionFee);
+      sessionStorage.setItem("appointmentId", res?.data?.appointment?._id);
       setIsSuccess(true);
 
       toast.success(res?.data?.message || "Appointment booked successfully");

@@ -19,7 +19,7 @@ export default function HeroSection() {
   const location = usePathname()
   const slug = location.split("/")[2]
   const { data: service, loading: serviceLoading, error: serviceError } = useFetch(publicPageApi.getServiceBySlug,slug) as any;
-
+  console.log({service})
   const pageData = service?.page;
   const providers = service?.providers;
   const testimonials = service?.testimonials;
@@ -190,7 +190,7 @@ export default function HeroSection() {
       <TreatmentsSteps data={pageData} />
       <TreatmentsPrescriptions data={pageData?.contentBlocks?.[0]} />
       <MedicationsSupported data={pageData} />
-      <TreatmentsPricing data={pageData} title={pageData?.pricingTitle} />
+      {pageData?.pricingTiers?.length>0 && <TreatmentsPricing data={pageData} title={pageData?.pricingTitle} />}
       <TreatmentsComparison data={pageData} />
       <TrustedProvidersSection data={providers} />
       <PrescribingLimits data={pageData?.contentBlocks?.[1]} />

@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
+import dayjs from "dayjs";
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -33,4 +34,33 @@ export const getRandomSlot = () => {
     start: start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     end: end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   };
+};
+export const generateSlotsFromAvailability = (
+  availability: any[],
+  selectedDate: Date
+) => {
+  const dayName = dayjs(selectedDate).format("dddd");
+
+  const dayAvail = availability.find(
+    (d) => d.day.toLowerCase() === dayName.toLowerCase()
+  );
+
+  if (!dayAvail) return [];
+
+  return dayAvail.slots.map((range: any) => {
+  const fullStart = dayjs(
+    `${dayjs(selectedDate).format("YYYY-MM-DD")} ${range.startTime}`
+  );
+
+  const fullEnd = dayjs(
+    `${dayjs(selectedDate).format("YYYY-MM-DD")} ${range.endTime}`
+  );
+
+  return {
+    id: range.startTime,
+    date: dayjs(selectedDate).format("YYYY-MM-DD"),
+    start: fullStart.format("hh:mm A"),
+    end: fullEnd.format("hh:mm A"),
+  };
+});
 };

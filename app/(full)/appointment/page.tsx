@@ -12,7 +12,9 @@ import dateTodayIcon from "@/assets/icons/date-today.svg";
 import Image from "next/image";
 import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
-import { generateTodaySlots, getRandomSlot } from "@/lib/utils";
+import { generateSlotsFromAvailability, generateTodaySlots, getRandomSlot } from "@/lib/utils";
+import { patientApi } from "@/api/patient.api";
+import dayjs from "dayjs";
 
 export default function AppointmentPage() {
   const {
@@ -23,6 +25,7 @@ export default function AppointmentPage() {
   const data = bookingFlow?.appointmentStep ?? {};
   const modes = data?.modes || [];
   const router = useRouter();
+  const providerId = sessionStorage.getItem("providerData")?JSON.parse(sessionStorage.getItem("providerData") || "") : "";
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [allSlots, setAllSlots] = useState<any[]>([]);
 const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -35,32 +38,46 @@ const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   ];
 
   const [slots, setSlots] = useState(initialSlots);
+const [providerData, setProviderData] = useState<any>(null);
+  const handleMyProviders =async () => {
+    try {
 
-  // const removeSlot = (id: number) =>
-  //   setSlots((s) => s.filter((x) => x.id !== id));
-
+    const awaitData = await publicPageApi.getProviderById(providerId?._id || "");
+    setProviderData(awaitData?.data?.provider?.availability);
+    } catch (error) {
+    }
+  }
+  console.log({providerData})
 useEffect(() => {
-  if (!allSlots.length) return;
+ handleMyProviders()
+}, []);
+useEffect(() => {
+  if (!providerData) return;
+
+  let generatedSlots: any[] = [];
 
   if (mode === "any_time_today") {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date();
 
-    const todaySlots = allSlots.filter(
-      (s) => s.date === today
+    generatedSlots = generateSlotsFromAvailability(
+      providerData,
+      today
     );
 
-    setSlots(todaySlots);
+    // ❗ optional: past time remove (recommended)
+    generatedSlots = generatedSlots.filter((slot) =>
+      dayjs(`${slot.date} ${slot.start}`, "YYYY-MM-DD hh:mm A").isAfter(dayjs())
+    );
+
   } else if (mode === "pick_time_range" && selectedDate) {
-    const selected = selectedDate.toISOString().split("T")[0];
-
-    const filtered = allSlots.filter(
-      (s) => s.date === selected
+    generatedSlots = generateSlotsFromAvailability(
+      providerData,
+      selectedDate
     );
-
-    setSlots(filtered);
   }
-}, [mode, selectedDate, allSlots]);
 
+  setSlots(generatedSlots);
+}, [mode, selectedDate, providerData]);
   const handleNext = () => {
     let selectedSlot;
 
@@ -175,32 +192,31 @@ useEffect(() => {
     No slots available
   </div>
 ) : (
-    slots.map((slot) => (
+  <div className="flex gap-3 flex-wrap">
+    {slots.map((slot) => (
       <div
         key={slot.id}
         onClick={() => setSelectedSlotId(slot.id)}
-        className={`flex items-center gap-4 cursor-pointer ${
+        className={`flex flex-row items-center gap-4 cursor-pointer ${
           selectedSlotId === slot.id ? "ring-2 ring-[#4A7C7E]" : ""
         }`}
       >
-        <div className="px-4 py-3 bg-[#F4F9F8] rounded-md text-sm text-slate-700 w-28 text-left">
-          {slot.date}
-        </div>
-
-        <div className="flex items-center gap-3 flex-1">
+     
+        <div className="">
           <div className="px-4 py-3 bg-[#F4F9F8] rounded-md text-sm text-slate-700 flex-1 text-center">
             {slot.start}
           </div>
 
-          <div className="text-slate-400 font-semibold">—</div>
+          {/* <div className="text-slate-400 font-semibold">—</div> */}
 
-          <div className="px-4 py-3 bg-[#F4F9F8] rounded-md text-sm text-slate-700 flex-1 text-center">
+          {/* <div className="px-4 py-3 bg-[#F4F9F8] rounded-md text-sm text-slate-700 flex-1 text-center">
             {slot.end}
-          </div>
+          </div> */}
         </div>
       </div>
-    ))
-  )}
+    ))}
+  </div>
+)}
 
 </div>
 

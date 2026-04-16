@@ -52,7 +52,7 @@ export default function TreatmentsComparison({ data }: { data?: any }) {
   const midIndex = Math.ceil(titleWords.length / 2);
   const title1 = titleWords.slice(0, midIndex).join(" ");
   const title2 = titleWords.slice(midIndex).join(" ");
-const formattedRows = (data?.whyOnlineCareComparison??[])
+const formattedRows = (data?.whyOnlineCareComparison??data?.comparisonRows??[])
   .sort((a:any, b:any) => a.displayOrder - b.displayOrder)
   .map((item:any) => ({
     feature: item.feature,
