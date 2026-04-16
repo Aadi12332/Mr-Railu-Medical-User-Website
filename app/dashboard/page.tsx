@@ -576,7 +576,7 @@ export default function page() {
                   <th className="text-left py-4 px-2">Date</th>
                   <th className="text-left py-4 px-2">Time</th>
                   <th className="text-left py-4 px-2">Status</th>
-                  <th className="text-left py-4 px-2 pr-4"> </th>
+                  {/* <th className="text-left py-4 px-2 pr-4"> </th> */}
                 </tr>
               </thead>
               {dashboardData?.nextAppointmentLoading ? (
@@ -595,9 +595,9 @@ export default function page() {
                       <td className="py-4 px-2">
                         <div className="h-5 w-20 bg-gray-200 rounded" />
                       </td>
-                      <td className="py-4 px-2 pr-4">
+                      {/* <td className="py-4 px-2 pr-4">
                         <div className="h-3 w-10 bg-gray-200 rounded" />
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -621,11 +621,11 @@ export default function page() {
                         </Badge>
                       </td>
 
-                      <td className="py-4 px-2 pr-4">
+                      {/* <td className="py-4 px-2 pr-4">
                         <Link href="#" className="text-primary">
                           View
                         </Link>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
