@@ -25,7 +25,7 @@ export default function AppointmentPage() {
   const data = bookingFlow?.appointmentStep ?? {};
   const modes = data?.modes || [];
   const router = useRouter();
-  const providerId = sessionStorage.getItem("providerData")?JSON.parse(sessionStorage.getItem("providerData") || "") : "";
+  const [providerId, setProviderId] = useState<any>("");
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [allSlots, setAllSlots] = useState<any[]>([]);
 const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -39,6 +39,14 @@ const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const [slots, setSlots] = useState(initialSlots);
 const [providerData, setProviderData] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("providerData");
+      setProviderId(stored ? JSON.parse(stored || "") : "");
+    }
+  }, []);
+
   const handleMyProviders =async () => {
     try {
 
@@ -92,7 +100,9 @@ useEffect(() => {
       return;
     }
 
-    sessionStorage.setItem("selectedSlot", JSON.stringify(selectedSlot));
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("selectedSlot", JSON.stringify(selectedSlot));
+    }
 
     router.push("/appointment/confirm");
   };
