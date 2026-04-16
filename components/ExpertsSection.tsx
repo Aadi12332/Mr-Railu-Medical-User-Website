@@ -78,11 +78,11 @@ export default function ExpertsSection({ data }: any) {
                 }),
               ]}
             >
-              <CarouselContent className="gap-6 -mx-2">
+              <CarouselContent className=" -mx-2">
                 {(experts.length ? experts : new Array(5).fill(null)).map(
                   (ex: any, i: number) => {
                     const Card = (
-                      <div className="pl-4 shrink-0 w-65 md:w-60 lg:w-[320px] bg-white rounded-2xl border border-slate-100 shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <div className="first:ml-6 pl-4 shrink-0 w-65 md:w-60 lg:w-[320px] bg-white rounded-2xl border border-slate-100 shadow-sm p-3 hover:shadow-md transition-shadow">
                         <div className="overflow-hidden rounded-xl aspect-square mb-3">
                           {ex ? (
                             <Image

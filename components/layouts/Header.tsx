@@ -173,9 +173,9 @@ export function Header() {
 
   return (
     <header>
-      <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">
+      <div className="container mx-auto flex flex-row-reverse lg:flex-row items-center justify-between gap-6 px-4 py-4">
         {/* mobile hamburger */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="p-2">
@@ -245,7 +245,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden md:flex flex-1 items-center justify-center gap-4">
+        <nav className="hidden lg:flex flex-1 items-center justify-center xl:gap-4 gap-1">
 
           {navItems.map((nav: any) => {
             const navActive = pathname?.startsWith(nav.to);
@@ -283,7 +283,7 @@ export function Header() {
           })}
         </nav>
 
-        <div className="ml-auto hidden md:flex items-center gap-2">
+        <div className="ml-auto hidden lg:flex items-center gap-2">
           <Link href={headerData?.header?.secondaryCta?.url ?? "/login"}>
             <Button className="bg-accent ">
               <Image src={userIcon} alt="User Icon" className="size-4" />
