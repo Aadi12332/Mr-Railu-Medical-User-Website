@@ -7,11 +7,13 @@ import dayjs from "dayjs";
 export default function DateStep({
   date,
   setDate,
-  provider
+  provider,
+  minDate
 }: {
   date: Date | undefined;
   setDate: (d: Date | undefined) => void;
   provider: any;
+  minDate?: Date;
 }) {
 
     const isPastDate =
@@ -23,8 +25,11 @@ export default function DateStep({
         <Calendar
           mode="single"
           selected={date}
-          disabled={{ before: dayjs().startOf("day").toDate() }}
-          onSelect={(d) => setDate(d as Date | undefined)}
+          disabled={{ before: minDate ? dayjs(minDate).startOf("day").toDate() : dayjs().add(1, "day").startOf("day").toDate() }}
+          onSelect={(d) => {
+            console.log('DateStep: Date selected:', d);
+            setDate(d as Date | undefined);
+          }}
         />
       </div>
     </div>

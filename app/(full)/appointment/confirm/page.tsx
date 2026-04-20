@@ -21,7 +21,7 @@ export default function ConfirmAppointmentPage() {
           variant="ghost"
           size="icon-sm"
           className="-ml-2"
-          onClick={() => typeof window !== 'undefined' && window.history.back()}
+          onClick={() => typeof window !== 'undefined' && router.push("/appointment")}
         >
           <ArrowLeft className="h-4 w-4 text-[#4A7C7E]" />
         </Button>
@@ -66,7 +66,7 @@ export default function ConfirmAppointmentPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-slate-500" />
-                <div>{selectedPlan?.start} - {selectedPlan?.end}</div>
+                <div>{selectedPlan?.start} </div>
               </div>
             </div>
           </div>

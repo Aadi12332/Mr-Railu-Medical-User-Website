@@ -45,14 +45,7 @@ export default function OnboardingPage() {
   };
   const handleContinue = () => {
     // Replace with real navigation / API call later
-    console.log(
-      "Selected state:",
-      selectedState,
-      "Selected treatments:",
-      selectedTreatments,
-      "plan:",
-      selectedPlan,
-    );
+   
   };
 
   const isStep1Ready = !!selectedState;
@@ -96,7 +89,6 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (step === 3) {
       publicPageApi.getProviderBySlug(selectedTreatments[0]).then((res) => {
-        console.log({ res })
         setProviderData(res.data)
       })
     }

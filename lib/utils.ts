@@ -57,7 +57,7 @@ export const generateSlotsFromAvailability = (
   );
 
   return {
-    id: range.startTime,
+    id: `${dayjs(selectedDate).format("YYYY-MM-DD")}-${range.startTime}`,
     date: dayjs(selectedDate).format("YYYY-MM-DD"),
     start: fullStart.format("hh:mm A"),
     end: fullEnd.format("hh:mm A"),

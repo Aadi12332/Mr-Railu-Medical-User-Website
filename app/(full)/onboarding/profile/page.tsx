@@ -42,18 +42,63 @@ function PatientProfileContent() {
   const [agreeTerms, setAgreeTerms] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("patiendDetailState");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.firstName) setFirstName(parsed.firstName);
+        if (parsed.lastName) setLastName(parsed.lastName);
+        if (parsed.zip) setZip(parsed.zip);
+        if (parsed.dob) setDob(parsed.dob);
+        if (parsed.mobile) setMobile(parsed.mobile);
+        if (parsed.email) setEmail(parsed.email);
+        if (parsed.marketingOptIn !== undefined) setMarketingOptIn(parsed.marketingOptIn);
+        if (parsed.agreeTerms !== undefined) setAgreeTerms(parsed.agreeTerms);
+      } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    const payload = { firstName, lastName, zip, dob, mobile, email, marketingOptIn, agreeTerms };
+    sessionStorage.setItem("patiendDetailState", JSON.stringify(payload));
+  }, [firstName, lastName, zip, dob, mobile, email, marketingOptIn, agreeTerms]);
+
+  const isMinimumAge = (dateString: string) => {
+    if (!dateString) return false;
+    const birthDate = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(birthDate.getTime())) return false;
+    
+    const today = new Date();
+    const ageDiff = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+    
+    const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) 
+      ? ageDiff - 1 
+      : ageDiff;
+    
+    return actualAge >= 18;
+  };
   const fields = bookingFlow?.profileStep?.fields || [];
   const getLabel = (key: string) =>
     fields.find((f: any) => f.key === key)?.label || "";
 
+  const isEmailValid = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  const isMobileValid = (m: string) => /^(\+1[-.\s]?)?(\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/.test(m.trim());
+  const isZipValid = (z: string) => /^\d{5}(-\d{4})?$/.test(z.trim());
 
   const isFormValid =
-    firstName.trim() &&
-    lastName.trim() &&
-    zip.trim() &&
-    dob.trim() &&
-    mobile.trim() &&
-    email.includes("@") &&
+    !!firstName.trim() &&
+    !!lastName.trim() &&
+    isZipValid(zip) &&
+    !!dob.trim() &&
+    isMinimumAge(dob) &&
+    isMobileValid(mobile) &&
+    isEmailValid(email) &&
     agreeTerms;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -180,8 +225,8 @@ function PatientProfileContent() {
                   onChange={(e) => setFirstName(e.target.value)}
                 />
                 {submitted && !firstName.trim() && (
-                  <div className="text-red-500 text-xs">
-                    Required
+                  <div className="text-red-500 text-xs mt-1">
+                    Please enter your first name.
                   </div>
                 )}
               </div>
@@ -194,8 +239,8 @@ function PatientProfileContent() {
                   onChange={(e) => setLastName(e.target.value)}
                 />
                 {submitted && !lastName.trim() && (
-                  <div className="text-red-500 text-xs">
-                    Required
+                  <div className="text-red-500 text-xs mt-1">
+                    Please enter your last name.
                   </div>
                 )}
               </div>
@@ -213,8 +258,13 @@ function PatientProfileContent() {
                   </InputGroupAddon>
                 </InputGroup>
                 {submitted && !zip.trim() && (
-                  <div className="text-red-500 text-xs">
-                    Required
+                  <div className="text-red-500 text-xs mt-1">
+                    Please enter your zip code.
+                  </div>
+                )}
+                {submitted && zip.trim() && !isZipValid(zip) && (
+                  <div className="text-red-500 text-xs mt-1">
+                    Please enter a valid 5-digit zip code.
                   </div>
                 )}
               </div>
@@ -228,8 +278,13 @@ function PatientProfileContent() {
                   onChange={(e) => setDob(e.target.value)}
                 />
                 {submitted && !dob.trim() && (
-                  <div className="text-red-500 text-xs">
-                    Required
+                  <div className="text-red-500 text-xs mt-1">
+                    Please enter your date of birth.
+                  </div>
+                )}
+                {dob.trim() && !isMinimumAge(dob) && (
+                  <div className="text-red-500 text-xs mt-1">
+                    Must be at least 18 years old
                   </div>
                 )}
               </div>
@@ -244,8 +299,13 @@ function PatientProfileContent() {
                 onChange={(e) => setMobile(e.target.value)}
               />
               {submitted && !mobile.trim() && (
-                <div className="text-red-500 text-xs">
-                  Required
+                <div className="text-red-500 text-xs mt-1">
+                  Please enter your mobile number.
+                </div>
+              )}
+              {submitted && mobile.trim() && !isMobileValid(mobile) && (
+                <div className="text-red-500 text-xs mt-1">
+                  Please enter a valid US mobile number (e.g., (555) 555-5555).
                 </div>
               )}
             </div>
@@ -258,9 +318,14 @@ function PatientProfileContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              {submitted && !email.includes("@") && (
-                <div className="text-red-500 text-xs">
-                  Invalid email
+              {submitted && !email.trim() && (
+                <div className="text-red-500 text-xs mt-1">
+                  Please enter your email address.
+                </div>
+              )}
+              {submitted && email.trim() && !isEmailValid(email) && (
+                <div className="text-red-500 text-xs mt-1">
+                  Please enter a valid email address.
                 </div>
               )}
             </div>
@@ -299,7 +364,6 @@ function PatientProfileContent() {
               type="submit"
               className="w-full mt-2 h-12 bg-gradient-primary"
               size="lg"
-              disabled={!isFormValid}
             >
               Create My Patient Profile
               <ArrowRightIcon className="ml-2 h-4 w-4" />

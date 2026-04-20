@@ -150,7 +150,7 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
         <div className="mt-4">
           {step === 1 && <TherapistStep provider={provider} />}
           {step === 2 && (
-            <DateStep date={date} setDate={setDate} provider={provider} />
+            <DateStep minDate={new Date()} date={date} setDate={setDate} provider={provider} />
           )}
           {step === 3 && (
             <TimeStep
