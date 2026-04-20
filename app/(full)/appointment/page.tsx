@@ -94,12 +94,10 @@ export default function AppointmentPage() {
     });
   }, [mode, selectedDate, providerAvailability]);
 
-  // ─── Persist mode ──────────────────────────────────────────────────────────
   useEffect(() => {
     sessionStorage.setItem("appointmentMode", mode);
   }, [mode]);
 
-  // ─── Persist selected date ─────────────────────────────────────────────────
   useEffect(() => {
     if (!selectedDate) return;
     const str = [
@@ -110,10 +108,8 @@ export default function AppointmentPage() {
     sessionStorage.setItem("selectedDate", str);
   }, [selectedDate]);
 
-  // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleModeChange = (key: string) => {
     setMode(key);
-    // DO NOT clear selectedSlotId here — the useEffect validation handles it
   };
 
   const handleSlotClick = (slot: any) => {
@@ -124,24 +120,15 @@ export default function AppointmentPage() {
 
   const handleNext = () => {
     let selectedSlot: any;
-
-    if (mode === "any_time_today") {
-      // Use first available slot for today (deterministic)
-      selectedSlot = slots[0];
-    } else {
       selectedSlot = slots.find((s) => s.id === selectedSlotId);
-    }
-
     if (!selectedSlot) {
       alert("Please select a slot");
       return;
     }
-
     sessionStorage.setItem("selectedSlot", JSON.stringify(selectedSlot));
     router.push("/appointment/confirm");
   };
 
-  // ─── Loading skeleton ──────────────────────────────────────────────────────
   if (bookingFlowLoading) {
     return (
       <Card className="shadow-lg gap-0 max-w-lg mx-auto w-full p-6">
@@ -213,12 +200,10 @@ export default function AppointmentPage() {
           ))}
         </div>
 
-        {/* Date picker — only for pick_time_range */}
         {mode === "pick_time_range" && (
           <DateStep date={selectedDate} setDate={setSelectedDate} provider={null} />
         )}
 
-        {/* Slots */}
         <div className="space-y-3">
           {mode === "pick_time_range" && !selectedDate ? (
             <p className="text-center text-sm text-gray-500 py-6">
@@ -251,7 +236,6 @@ export default function AppointmentPage() {
           )}
         </div>
 
-        {/* Next button */}
         <div className="flex justify-end">
           <Button
             onClick={handleNext}
