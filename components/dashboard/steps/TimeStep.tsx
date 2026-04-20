@@ -17,29 +17,29 @@ export default function TimeStep({
   provider?: any;
   providerData?: any;
 }) {
-  
+
   const slots: string[] = [];
-if (date && providerData?.availability?.length) {
-  const selectedDay = dayjs(date).format("dddd"); // Monday
-  const dayAvail = providerData.availability.find(
-    (a: any) => a.day.toLowerCase() === selectedDay.toLowerCase()
-  );
+  if (date && providerData?.availability?.length) {
+    const selectedDay = dayjs(date).format("dddd"); // Monday
+    const dayAvail = providerData.availability.find(
+      (a: any) => a.day.toLowerCase() === selectedDay.toLowerCase()
+    );
 
-  if (dayAvail?.slots?.length) {
-    dayAvail.slots.forEach((slot: any) => {
-      if (slot.startTime) {
-        const [hh, mm] = slot.startTime.split(":");
+    if (dayAvail?.slots?.length) {
+      dayAvail.slots.forEach((slot: any) => {
+        if (slot.startTime) {
+          const [hh, mm] = slot.startTime.split(":");
 
-        const d = new Date(date);
-        d.setHours(Number(hh), Number(mm), 0, 0);
+          const d = new Date(date);
+          d.setHours(Number(hh), Number(mm), 0, 0);
 
-        slots.push(
-          dayjs(d).format("hh:mm A") // better formatting
-        );
-      }
-    });
+          slots.push(
+            dayjs(d).format("hh:mm A") // better formatting
+          );
+        }
+      });
+    }
   }
-}
 
   return (
     <div className="w-full">

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Calendar } from "@/components/ui/calendar";
+import dayjs from "dayjs";
 
 export default function DateStep({
   date,
@@ -12,12 +13,17 @@ export default function DateStep({
   setDate: (d: Date | undefined) => void;
   provider: any;
 }) {
+
+    const isPastDate =
+  date && dayjs(date).isBefore(dayjs(), "day");
+
   return (
     <div className="flex flex-col items-center w-full">
       <div className="border">
         <Calendar
           mode="single"
           selected={date}
+          disabled={{ before: dayjs().startOf("day").toDate() }}
           onSelect={(d) => setDate(d as Date | undefined)}
         />
       </div>

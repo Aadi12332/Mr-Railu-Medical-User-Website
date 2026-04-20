@@ -49,8 +49,7 @@ export default function ResetPasswordCard({
 
       await authApi.resetPassword({
         token,
-        newPassword,
-        role: role as "Patient" | "Provider",
+        newPassword
       });
 
       setSuccess("Password reset successfully");

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -17,19 +18,22 @@ import { Menu } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import Link from "next/link";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 import userIcon from "@/assets/icons/user-icon.svg";
 import { useEffect, useState } from "react";
 import { publicPageApi } from "@/api/publicpage.api";
 import { useFetch } from "@/hooks/useFetch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
+import { useAuth } from "../context/auth.context";
 
 export function Header() {
   const { data: headerData, loading: headerLoading, error: headerError } = useFetch(publicPageApi.getDashboardAPI) as any;
+  const patientToken = typeof window !== 'undefined' ? localStorage.getItem('patientToken') : null;
+const { user } = useAuth();
+  const router=useRouter()
 
-
-
+console.log({patientToken})
   const navItems =
     headerData?.header?.navItems
       ?.slice()
@@ -117,7 +121,7 @@ export function Header() {
             <Image
               src={logo}
               alt="Mental Health Tele logo"
-              className="sm:h-9 h-6 w-auto"
+              className="sm:h-9 h-6 w-auto object-contain"
             />
           </Link>
           <nav className="hidden md:flex flex-1 items-center justify-center gap-4">
@@ -151,7 +155,20 @@ export function Header() {
             <AlertCircle className="size-4" />
             <span>Failed to load navigation. Please refresh.</span>
           </div>
-          <div className="ml-auto hidden md:flex items-center gap-2">
+          {
+            patientToken ? <div className="ml-auto hidden lg:flex items-center gap-3 cursor-pointer" onClick={()=>router.push("/dashboard")}>
+            <Avatar className="size-10 border border-slate-100 bg-white">
+              <AvatarFallback>{user?.firstName?.charAt(0) || ""}{user?.lastName?.charAt(0) || ""}</AvatarFallback>
+            </Avatar>
+
+            <div className="hidden sm:flex flex-col">
+              <span className="text-sm font-semibold">{user?.firstName} {user?.lastName}</span>
+              <span className="text-xs text-muted-foreground">
+                {user?.email}
+              </span>
+            </div>
+          </div> :
+          <div className="ml-auto hidden lg:flex items-center gap-2">
             <Link href="/login">
               <Button className="bg-accent ">
                 <Image src={userIcon} alt="User Icon" className="size-4" />
@@ -164,7 +181,7 @@ export function Header() {
                 <ArrowRight className="ml-2 size-4" />
               </Button>
             </Link>
-          </div>
+          </div>}
         </div>
         <Separator />
       </header>
@@ -220,6 +237,19 @@ export function Header() {
                   );
                 })}
               </nav>
+               {
+            patientToken ? <div className="flex items-center gap-3 cursor-pointer" onClick={()=>router.push("/dashboard")}>
+            <Avatar className="size-10 border border-slate-100 bg-white">
+              <AvatarFallback>{user?.firstName?.charAt(0) || ""}{user?.lastName?.charAt(0) || ""}</AvatarFallback>
+            </Avatar>
+
+            <div className="hidden sm:flex flex-col">
+              <span className="text-sm font-semibold">{user?.firstName} {user?.lastName}</span>
+              <span className="text-xs text-muted-foreground">
+                {user?.email}
+              </span>
+            </div>
+          </div> :
               <div className="mt-6 flex flex-col gap-2">
                 <Link href={headerData?.header?.primaryCta?.url ?? "/login"} onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-accent text-primary">
@@ -232,7 +262,7 @@ export function Header() {
                     {headerData?.header?.secondaryCta?.label ?? "Get Started"}
                   </Button>
                 </Link>
-              </div>
+              </div>}
             </SheetContent>
           </Sheet>
         </div>
@@ -283,7 +313,21 @@ export function Header() {
           })}
         </nav>
 
-        <div className="ml-auto hidden lg:flex items-center gap-2">
+
+        {
+            patientToken ? <div className="ml-auto hidden lg:flex items-center gap-3 cursor-pointer" onClick={()=>router.push("/dashboard")}>
+            <Avatar className="size-10 border border-slate-100 bg-white">
+              <AvatarFallback>{user?.firstName?.charAt(0) || ""}{user?.lastName?.charAt(0) || ""}</AvatarFallback>
+            </Avatar>
+
+            <div className="hidden sm:flex flex-col">
+              <span className="text-sm font-semibold">{user?.firstName} {user?.lastName}</span>
+              <span className="text-xs text-muted-foreground">
+                {user?.email}
+              </span>
+            </div>
+          </div> :
+          <div className="ml-auto hidden lg:flex items-center gap-2">
           <Link href={headerData?.header?.secondaryCta?.url ?? "/login"}>
             <Button className="bg-accent ">
               <Image src={userIcon} alt="User Icon" className="size-4" />
@@ -298,7 +342,7 @@ export function Header() {
               <ArrowRight />
             </Button>
           </Link>
-        </div>
+        </div>}
       </div>
       <Separator />
     </header>
