@@ -206,7 +206,7 @@ export default function AppointmentPage() {
 
         <div className="space-y-3">
           {mode === "pick_time_range" && !selectedDate ? (
-            <p className="text-center text-sm text-gray-500 py-6">
+            <p className="text-center text-sm text-gray-500 py-3">
               Please select a date to see available slots
             </p>
           ) : slotsLoading ? (
@@ -214,7 +214,7 @@ export default function AppointmentPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A7C7E]" />
             </div>
           ) : slots.length === 0 ? (
-            <p className="text-center text-sm text-gray-500 py-6">
+            <p className="text-center text-sm text-gray-500 py-3">
               No slots available{mode === "any_time_today" ? " for today" : " on this date"}
             </p>
           ) : (
