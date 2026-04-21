@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { AlertCircle, Pill, RefreshCcw } from "lucide-react";
 import { PrescriptionItem } from "@/components/dashboard/types";
 import { PrescriptionCard } from "@/components/dashboard/PrescriptionCard";
@@ -23,7 +23,7 @@ interface PrescriptionSummaryCard {
 
 
 
-export default function PrescriptionsPage() {
+function PrescriptionsContent() {
     const searchParams = useSearchParams();
   const query = searchParams.get("q");
   const search = useDebounce(query, 500);
@@ -191,5 +191,13 @@ export default function PrescriptionsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PrescriptionsPage() {
+  return (
+    <Suspense fallback={<div>Loading prescriptions...</div>}>
+      <PrescriptionsContent />
+    </Suspense>
   );
 }

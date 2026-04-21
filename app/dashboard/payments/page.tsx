@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { DollarSign, Clock, CheckCircle } from "lucide-react";
 import AddPaymentMethodDialog from "@/components/dashboard/AddPaymentMethodDialog";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ interface SummaryCard {
 
 type Tab = "upcoming" | "history";
 
-export default function PaymentsPage() {
+function PaymentsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q");
   const search = useDebounce(query, 500);
@@ -281,5 +281,13 @@ const [summary, setSummary] = useState<any>(null);
           ))}
       </div>
     </div>
+  );
+}
+
+export default function PaymentsPage() {
+  return (
+    <Suspense fallback={<div>Loading payments...</div>}>
+      <PaymentsContent />
+    </Suspense>
   );
 }

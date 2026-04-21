@@ -28,7 +28,7 @@ import {
 import { useSearchParams } from "next/navigation";
 
 import { useAuth } from "@/components/context/auth.context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
 import dayjs from "dayjs";
 import { RatingStars } from "@/components/ui/rating";
@@ -44,7 +44,7 @@ const VideoCall = dynamic(() => import("./video-sessions/video"), {
   loading: () => <div>Loading video session...</div>
 });
 
-export default function page() {
+function DashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams();
 const query = searchParams.get("q");
@@ -726,5 +726,13 @@ const search = useDebounce(query, 500);
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function page() {
+  return (
+    <Suspense fallback={<div>Loading dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

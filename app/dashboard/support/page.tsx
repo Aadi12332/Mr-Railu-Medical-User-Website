@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +43,7 @@ const priorityColorMap: Record<Ticket["priority"], string> = {
   Low: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
-export default function SupportPage() {
+function SupportContent() {
   const router = useRouter();
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState<boolean>(false);
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -419,5 +419,13 @@ const timeAgo = (date: string) => {
         onSuccess={fetchTickets}
       />
     </>
+  );
+}
+
+export default function SupportPage() {
+  return (
+    <Suspense fallback={<div>Loading support...</div>}>
+      <SupportContent />
+    </Suspense>
   );
 }

@@ -8,12 +8,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, Search } from "lucide-react";
 import { SidebarTrigger } from "../ui/sidebar";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import NotificationDrawer from "./NotificationDrawer";
 import { useAuth } from "../context/auth.context";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-export default function DashHeader() {
+function DashHeaderContent() {
   const { user } = useAuth();
   const router=useRouter();
   const pathName=usePathname();
@@ -74,5 +74,13 @@ export default function DashHeader() {
         </div>
       </div>
     </header>
+  );
+}
+
+export default function DashHeader() {
+  return (
+    <Suspense fallback={<div className="w-full h-16 bg-muted animate-pulse" />}>
+      <DashHeaderContent />
+    </Suspense>
   );
 }

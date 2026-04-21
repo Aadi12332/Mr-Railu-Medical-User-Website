@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, Clock3, Video } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
@@ -18,7 +18,7 @@ const VideoCall = dynamic(() => import("./video"), {
   loading: () => <div>Loading video session...</div>,
 });
 
-export default function page() {
+function VideoSessionsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q");
   const search = useDebounce(query, 500);
@@ -280,5 +280,13 @@ export default function page() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function page() {
+  return (
+    <Suspense fallback={<div>Loading video sessions...</div>}>
+      <VideoSessionsContent />
+    </Suspense>
   );
 }
