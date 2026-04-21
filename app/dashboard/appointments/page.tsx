@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import {
   AppointmentCard,
@@ -17,7 +17,7 @@ const VideoCall = dynamic(() => import("../video-sessions/video"), {
   loading: () => <div>Loading video session...</div>
 });
 
-export default function AppointmentsPage() {
+function AppointmentsContent() {
     const searchParams = useSearchParams();
   const query = searchParams.get("q");
   const search = useDebounce(query, 500);
@@ -167,5 +167,13 @@ export default function AppointmentsPage() {
           ))}
       </div>
     </div>
+  );
+}
+
+export default function AppointmentsPage() {
+  return (
+    <Suspense fallback={<div>Loading appointments...</div>}>
+      <AppointmentsContent />
+    </Suspense>
   );
 }
