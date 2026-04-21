@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
+import { patientApi } from "@/api/patient.api";
 
 function PatientProfileContent() {
   const { data: bookingFlow, loading, error } = useFetch(publicPageApi.getBookingFlow) as any;
@@ -30,7 +31,9 @@ function PatientProfileContent() {
   const searchParams = useSearchParams();
   const providerId = searchParams.get("providerId");
   const router = useRouter();
-
+  const storedProviderData = sessionStorage.getItem("providerData");
+  const parsedProviderData = storedProviderData ? JSON.parse(storedProviderData) : null;
+console.log({parsedProviderData})
   const fields = bookingFlow?.profileStep?.fields || [];
 
 const createSchema = (fields: any[]) => {
@@ -157,10 +160,17 @@ const createSchema = (fields: any[]) => {
       });
       console.log({res})
       if(res?.status==="success") {
+        const res = await patientApi.bookAppointment({
+                providerId: provider._id,
+                date: formattedDate,
+                time,
+                type: sessionType,
+              });
         toast.success("Patient profile created successfully");
         sessionStorage.setItem("patiendDetail", JSON.stringify(payload))
         sessionStorage.setItem("providerData", JSON.stringify(providerData?.suggestedProvider))
-  
+          sessionStorage.setItem("patientToken", JSON.stringify(res?.data?.token))
+
         router.push("/appointment");
       }
     } catch (err) {
