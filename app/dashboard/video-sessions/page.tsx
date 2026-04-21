@@ -10,6 +10,8 @@ import { toast } from "react-toastify";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const VideoCall = dynamic(() => import("./video"), {
   ssr: false,
@@ -17,6 +19,9 @@ const VideoCall = dynamic(() => import("./video"), {
 });
 
 export default function page() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q");
+  const search = useDebounce(query, 500);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVideoSession, setIsVideoSession] = useState(false);
@@ -28,7 +33,7 @@ export default function page() {
   const fetchSession = async () => {
     try {
       setLoading(true);
-      const res = await dashboardApi.getSessionData("patient");
+      const res = await dashboardApi.getSessionData("patient",search||"");
       setSessions(res?.data?.sessions || []);
     } catch (error) {
       console.error("Error fetching video sessions:", error);
@@ -39,7 +44,7 @@ export default function page() {
 
   useEffect(() => {
     fetchSession();
-  }, []);
+  }, [search]);
 
   const filteredSessions = useMemo(() => {
     if (!sessions) return [];

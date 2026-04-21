@@ -15,8 +15,9 @@ export const settingApi = {
   updatePrivacy: (payload: any, role: string) => {
     return axios.put(`/v1/${role}/settings/privacy`, payload);
   },
-  getSupport: (role: string) => {
-    return axios.get(`/v1/${role}/support`);
+  getSupport: (role: string, search: string = "") => {
+    const params = search ? `/search?q=${search}` : "";
+    return axios.get(`/v1/${role}/support${params}`);
   },
   getChatList: (role: string, search: string = "") => {
     const endPoint = `/v1/${role}/chat`;

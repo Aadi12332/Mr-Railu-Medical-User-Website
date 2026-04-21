@@ -14,6 +14,8 @@ import {
   PaymentItem,
 } from "@/components/dashboard/PaymentItemCard";
 import { dashboardApi } from "@/api/dashboard.service";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface SummaryCard {
   id: string;
@@ -27,6 +29,9 @@ interface SummaryCard {
 type Tab = "upcoming" | "history";
 
 export default function PaymentsPage() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q");
+  const search = useDebounce(query, 500);
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
 const [summary, setSummary] = useState<any>(null);
   const [tab, setTab] = useState<Tab>("upcoming");
@@ -56,7 +61,7 @@ const [summary, setSummary] = useState<any>(null);
       setLoading(true);
       setError("");
 
-      const res = await dashboardApi.getPayments("patient");
+      const res = await dashboardApi.getPayments("patient", search || "");
       setPayments(res?.data?.payments || []);
     } catch (err) {
       console.error("Payment error:", err);
@@ -97,7 +102,7 @@ const [summary, setSummary] = useState<any>(null);
     try {
       setLoading(true);
       setError("");
-      const resSummary = await dashboardApi.getPaymentSummary("patient");
+      const resSummary = await dashboardApi.getPaymentSummary("patient",search||"");
       setSummary(resSummary);
     } catch (err) {
       console.error("Payment summary error:", err);
@@ -111,7 +116,7 @@ const [summary, setSummary] = useState<any>(null);
     handleCards();
     fetchPayments();
     fetchPaymentSummary();
-  }, []);
+  }, [search]);
 
   const summaryCards: SummaryCard[] = [
   {

@@ -25,17 +25,29 @@ export const dashboardApi = {
   getNotificationReadAll: () => {
     return axios.put(`/v1/patient/notifications/read-all`);
   },
-  getSessionData: (role = "patient") => {
-    return axios.get(`/v1/${role}/sessions`);
+  getSessionData: (role = "patient", search?: string) => {
+    return axios.get(`/v1/${role}/sessions`, {
+      params: {
+        search: search,
+      },
+    });
   },
   postSessionData: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/sessions/${payload.sessionId}/join`, payload);
   },
-  getAppointments: (role = "patient") => {
-    return axios.get(`/v1/${role}/appointments`);
+  getAppointments: (role = "patient", search?: string) => {
+    return axios.get(`/v1/${role}/appointments`, {
+      params: {
+        search: search,
+      },
+    });
   },
-  getActivePrescriptions: (role = "patient") => {
-    return axios.get(`/v1/${role}/prescriptions`);
+  getActivePrescriptions: (role = "patient", search?: string) => {
+    return axios.get(`/v1/${role}/prescriptions`, {
+      params: {
+        search,
+      },
+    });
   },
   getMentalPlans: (role = "patient") => {
     return axios.get(`/v1/${role}/plans`);
@@ -58,14 +70,22 @@ export const dashboardApi = {
       payload,
     );
   },
-  getPayments: (role = "patient") => {
-    return axios.get(`/v1/${role}/payments`);
+  getPayments: (role = "patient", search?: string) => {
+    return axios.get(`/v1/${role}/payments`, {
+      params: {
+        search,
+      },
+    });
   },
   postMoodApi: (role = "patient", payload: any) => {
     return axios.post(`/v1/${role}/mood`, payload);
   },
-  getPaymentSummary: (role = "patient") => {
-    return axios.get(`/v1/${role}/payments/summary`);
+  getPaymentSummary: (role = "patient", search?: string) => {
+    return axios.get(`/v1/${role}/payments/summary`, {
+      params: {
+        search,
+      },
+    });
   },
   getExercise: (role = "patient") => {
     return axios.get(`/v1/${role}/breathing`);

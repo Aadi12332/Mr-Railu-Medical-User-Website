@@ -9,6 +9,8 @@ import { Calendar } from "lucide-react";
 import { dashboardApi } from "@/api/dashboard.service";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const VideoCall = dynamic(() => import("../video-sessions/video"), {
   ssr: false,
@@ -16,6 +18,10 @@ const VideoCall = dynamic(() => import("../video-sessions/video"), {
 });
 
 export default function AppointmentsPage() {
+    const searchParams = useSearchParams();
+  const query = searchParams.get("q");
+  const search = useDebounce(query, 500);
+  
   const [tab, setTab] = useState<"upcoming" | "past" | "cancelled">("upcoming");
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +31,7 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const res = await dashboardApi.getAppointments("patient");
+      const res = await dashboardApi.getAppointments("patient", search || "");
       setAppointments(res?.data?.appointments || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -36,7 +42,7 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [search]);
   const handleCancelApp = () => {
     setAppointments([]);
 

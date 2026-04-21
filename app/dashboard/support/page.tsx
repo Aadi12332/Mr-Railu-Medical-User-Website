@@ -16,8 +16,9 @@ import { useEffect } from "react";
 import { settingApi } from "@/api/setting.api";
 import EmergencyButton from "@/components/dashboard/EmergencyButton";
 import { dashboardApi } from "@/api/dashboard.service";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/context/auth.context";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type Ticket = {
   id: string;
@@ -48,7 +49,9 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
 const { user } = useAuth();
-
+  const searchParams = useSearchParams();
+const query = searchParams.get("q");
+const search = useDebounce(query, 500);
   type Message = {
     sender: "me" | "other";
     text: string;
@@ -65,7 +68,7 @@ const { user } = useAuth();
     setLoading(true);
 
     try {
-      const res = await settingApi.getSupport("patient");
+      const res = await settingApi.getSupport("patient", search || "");
 
       if (res?.data?.tickets) {
         setTickets(res.data.tickets.map(transformTicket));
@@ -93,7 +96,7 @@ const { user } = useAuth();
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [search]);
   
   const handleSendReply = async (ticketId: string) => {
     try {

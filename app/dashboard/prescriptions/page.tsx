@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { dashboardApi } from "@/api/dashboard.service";
 import dayjs from "dayjs";
+import { useSearchParams } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type PrescriptionTab = "active" | "history";
 
@@ -22,6 +24,9 @@ interface PrescriptionSummaryCard {
 
 
 export default function PrescriptionsPage() {
+    const searchParams = useSearchParams();
+  const query = searchParams.get("q");
+  const search = useDebounce(query, 500);
   const [tab, setTab] = useState<PrescriptionTab>("active");
   const [prescriptionsData, setPrescriptionsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +36,7 @@ export default function PrescriptionsPage() {
       setLoading(true);
       setError("");
 
-      const res = await dashboardApi.getActivePrescriptions("patient"); // apni API call
+      const res = await dashboardApi.getActivePrescriptions("patient", search || ""); // apni API call
       setPrescriptionsData(res?.data?.prescriptions || []);
     } catch (err) {
       console.error(err);
@@ -44,7 +49,7 @@ export default function PrescriptionsPage() {
   useEffect(() => {
 
     fetchPrescriptions();
-  }, []);
+  }, [search]);
   const mappedPrescriptions: PrescriptionItem[] = useMemo(() => {
     return prescriptionsData.map((item: any) => {
       const med = item.medications?.[0];

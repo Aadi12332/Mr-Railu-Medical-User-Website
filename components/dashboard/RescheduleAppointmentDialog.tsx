@@ -60,7 +60,6 @@ export default function RescheduleAppointmentDialog({
 
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
 
-  console.log({ selectedSlot, selectedDate })
   const fetchSlots = async (id: string) => {
     setSlotsLoading(true);
     try {
@@ -97,7 +96,7 @@ export default function RescheduleAppointmentDialog({
     }
   };
   useEffect(() => {
-    if (appointment?.providerId && appointment?.date) {
+    if (appointment?.providerId && appointment?.date&&openReschedule) {
       fetchSlots(appointment.providerId);
     }
   }, [appointment, selectedDate]);

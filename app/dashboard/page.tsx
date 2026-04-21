@@ -25,6 +25,8 @@ import {
   RefreshCcw,
   Clipboard,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+
 import { useAuth } from "@/components/context/auth.context";
 import { useEffect, useState } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
@@ -35,6 +37,7 @@ import RequestRefillDialog from "@/components/dashboard/RequestRefillDialog";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import BreathingExercise from "@/components/company/BreathingExercise";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const VideoCall = dynamic(() => import("./video-sessions/video"), {
   ssr: false,
@@ -43,6 +46,9 @@ const VideoCall = dynamic(() => import("./video-sessions/video"), {
 
 export default function page() {
   const router = useRouter()
+  const searchParams = useSearchParams();
+const query = searchParams.get("q");
+const search = useDebounce(query, 500);
   const [isVideoSession, setIsVideoSession] = useState(false);
   const [connection, setConnection] = useState<any>(null);
 
@@ -112,8 +118,8 @@ export default function page() {
       const [dashboardRes, sessionRes, appointmentsRes, activeRes, mentalPlansRes] = await Promise.allSettled([
         dashboardApi.getDashboardData(role ?? ""),
         dashboardApi.getSessionData(role ?? ""),
-        dashboardApi.getAppointments(role ?? ""),
-        dashboardApi.getActivePrescriptions(role ?? ""),
+        dashboardApi.getAppointments(role ?? "", search || ""),
+        dashboardApi.getActivePrescriptions(role ?? "", search || ""),
         dashboardApi.getMentalPlans(role ?? "")
       ]);
 
@@ -240,6 +246,10 @@ export default function page() {
     handleMoodHistory();
     handleDashboard()
   }, []);
+   useEffect(() => {
+   
+    handleDashboard()
+  }, [search]);
 
   const handleStartSession = async (id: string) => {
     try {

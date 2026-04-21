@@ -33,7 +33,6 @@ export function Header() {
 const { user } = useAuth();
   const router=useRouter()
 
-console.log({patientToken})
   const navItems =
     headerData?.header?.navItems
       ?.slice()

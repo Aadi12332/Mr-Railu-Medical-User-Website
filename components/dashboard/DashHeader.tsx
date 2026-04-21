@@ -11,17 +11,38 @@ import { SidebarTrigger } from "../ui/sidebar";
 import { useState } from "react";
 import NotificationDrawer from "./NotificationDrawer";
 import { useAuth } from "../context/auth.context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export default function DashHeader() {
   const { user } = useAuth();
-  const router=useRouter()
+  const router=useRouter();
+  const pathName=usePathname();
+  const hidePath=["/dashboard/messages","/dashboard/providers","/dashboard/settings"]
+  const searchParams = useSearchParams();
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (value) {
+      params.set("q", value);
+    } else {
+      params.delete("q");
+    }
+
+    router.push(`?${params.toString()}`);
+  };
+
   return (
     <header className="w-full">
       <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">
         <div className="flex-1 flex items-center gap-4">
           <SidebarTrigger className="md:hidden" />
-          <InputGroup className=" max-w-sm h-10 border bg-muted/70 shadow-none">
+        {hidePath.includes(pathName) ? null : <InputGroup className=" max-w-sm h-10 border bg-muted/70 shadow-none">
             <InputGroupAddon className="pl-4">
               <Search className="size-4 text-muted-foreground" />
             </InputGroupAddon>
@@ -29,8 +50,10 @@ export default function DashHeader() {
             <InputGroupInput
               placeholder="Search therapist, appointment, prescription..."
               className="pr-4"
+              value={search}
+              onChange={handleSearch}
             />
-          </InputGroup>
+          </InputGroup>}
         </div>
 
         <div className="flex items-center gap-5">
