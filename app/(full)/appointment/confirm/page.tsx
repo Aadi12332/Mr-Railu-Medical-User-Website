@@ -6,14 +6,15 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import export1Img from "@/assets/landing/expert-1.png";
+import dayjs from "dayjs";
 
 export default function ConfirmAppointmentPage() {
   const router = useRouter();
   const patiendDetail = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("patiendDetail") || "{}") : ""
   const providerData = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("providerData") || "{}") : ""
   const selectedPlan = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("selectedSlot") || "{}") : ""
+  const selectedDate = typeof window !== 'undefined' ? sessionStorage.getItem("selectedDate") : ""
   const fees = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("planFees") || "{}") : ""
-
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
       <CardHeader className="border-b-0">
@@ -62,7 +63,7 @@ export default function ConfirmAppointmentPage() {
             <div className="mt-3 flex items-center gap-4 text-sm text-slate-600">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-500" />
-                <div>{selectedPlan?.date}</div>
+                <div>{selectedDate?dayjs(selectedDate).format("DD MMM YYYY"):""}</div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-slate-500" />

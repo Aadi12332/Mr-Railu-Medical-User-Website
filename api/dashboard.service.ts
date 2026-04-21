@@ -106,4 +106,7 @@ export const dashboardApi = {
   sendSupportReply: (role = "patient", ticketId: string, payload: any) => {
     return axios.post(`/v1/${role}/support/${ticketId}/reply`, payload);
   },
+  getProviderAvailability: (providerId: string, date: string) => {
+    return axios.get(`/v1/public/providers/${providerId}/availability?date=${date}`);
+  },
 };

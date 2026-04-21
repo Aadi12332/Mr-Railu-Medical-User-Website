@@ -12,7 +12,8 @@ import dateTodayIcon from "@/assets/icons/date-today.svg";
 import Image from "next/image";
 import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
-import { generateSlotsFromAvailability } from "@/lib/utils";
+import dayjs from "dayjs";
+import { dashboardApi } from "@/api/dashboard.service";
 
 export default function AppointmentPage() {
   const {
@@ -26,7 +27,6 @@ export default function AppointmentPage() {
   const router = useRouter();
 
   const [providerId, setProviderId] = useState<any>("");
-  const [providerAvailability, setProviderAvailability] = useState<any[] | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [mode, setMode] = useState<string>("any_time_today");
@@ -51,61 +51,67 @@ export default function AppointmentPage() {
     if (storedSlotId) setSelectedSlotId(storedSlotId);
   }, []);
 
-  // ─── 2. Fetch provider availability once we have providerId ────────────────
+  // ─── 2. Fetch slots from API ───────────────────────────────────────────────
+  const fetchSlots = async (id: string, date: string) => {
+    setSlotsLoading(true);
+    try {
+      const res = await dashboardApi.getProviderAvailability(id, date);
+      const apiSlots = res?.data?.slots ?? [];
+
+      // Map API slots → display format
+      const mapped = apiSlots.map((slot: { startTime: string; endTime: string }) => ({
+        id: `${slot.startTime}-${slot.endTime}`,
+        start: formatTo12Hour(slot.startTime),
+        end: formatTo12Hour(slot.endTime),
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+      }));
+
+      setSlots(mapped);
+
+      // Validate previously selected slot still exists
+      setSelectedSlotId((prev) => {
+        if (!prev) return null;
+        const stillValid = mapped.some((s: any) => s.id === prev);
+        if (!stillValid) {
+          sessionStorage.removeItem("selectedSlotId");
+          return null;
+        }
+        return prev;
+      });
+    } catch (e) {
+      console.error("Failed to fetch slots", e);
+      setSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  // ─── 3. Trigger slot fetch when mode / date / provider changes ─────────────
   useEffect(() => {
     if (!providerId?._id) return;
-    const fetchProvider = async () => {
-      try {
-        const res = await publicPageApi.getProviderById(providerId._id);
-        setProviderAvailability(res?.data?.provider?.availability ?? []);
-      } catch (e) {
-        console.error("Failed to fetch provider", e);
-      }
-    };
-    fetchProvider();
-  }, [providerId]);
-
-  // ─── 3. Derive slots whenever mode / selectedDate / availability changes ───
-  useEffect(() => {
-    if (!providerAvailability) return;
-
-    setSlotsLoading(true);
-
-    let generated: any[] = [];
 
     if (mode === "any_time_today") {
-      generated = generateSlotsFromAvailability(providerAvailability, new Date());
+      // Always use today for "any time today"
+      const today = dayjs().format("YYYY-MM-DD");
+      fetchSlots(providerId._id, today);
     } else if (mode === "pick_time_range" && selectedDate) {
-      generated = generateSlotsFromAvailability(providerAvailability, selectedDate);
+      const dateStr = dayjs(selectedDate).format("YYYY-MM-DD");
+      fetchSlots(providerId._id, dateStr);
+    } else {
+      // pick_time_range but no date selected yet
+      setSlots([]);
     }
+  }, [mode, selectedDate, providerId]);
 
-    setSlots(generated);
-    setSlotsLoading(false);
-
-    // Keep selected slot if it still exists in the new list, otherwise clear it
-    setSelectedSlotId((prev) => {
-      if (!prev) return null;
-      const stillValid = generated.some((s) => s.id === prev);
-      if (!stillValid) {
-        sessionStorage.removeItem("selectedSlotId");
-        return null;
-      }
-      return prev;
-    });
-  }, [mode, selectedDate, providerAvailability]);
-
+  // ─── 4. Persist mode & date to sessionStorage ──────────────────────────────
   useEffect(() => {
     sessionStorage.setItem("appointmentMode", mode);
   }, [mode]);
 
   useEffect(() => {
     if (!selectedDate) return;
-    const str = [
-      selectedDate.getFullYear(),
-      String(selectedDate.getMonth() + 1).padStart(2, "0"),
-      String(selectedDate.getDate()).padStart(2, "0"),
-    ].join("-");
-    sessionStorage.setItem("selectedDate", str);
+    sessionStorage.setItem("selectedDate", dayjs(selectedDate).format("YYYY-MM-DD"));
   }, [selectedDate]);
 
   const handleModeChange = (key: string) => {
@@ -119,8 +125,7 @@ export default function AppointmentPage() {
   };
 
   const handleNext = () => {
-    let selectedSlot: any;
-      selectedSlot = slots.find((s) => s.id === selectedSlotId);
+    const selectedSlot = slots.find((s) => s.id === selectedSlotId);
     if (!selectedSlot) {
       alert("Please select a slot");
       return;
@@ -155,7 +160,6 @@ export default function AppointmentPage() {
     );
   }
 
-  // ─── Main render ───────────────────────────────────────────────────────────
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
       <CardHeader className="border-b-0">
@@ -200,10 +204,12 @@ export default function AppointmentPage() {
           ))}
         </div>
 
+        {/* Date picker — only for pick_time_range */}
         {mode === "pick_time_range" && (
           <DateStep date={selectedDate} setDate={setSelectedDate} provider={null} />
         )}
 
+        {/* Slots */}
         <div className="space-y-3">
           {mode === "pick_time_range" && !selectedDate ? (
             <p className="text-center text-sm text-gray-500 py-3">
@@ -249,4 +255,13 @@ export default function AppointmentPage() {
       </CardContent>
     </Card>
   );
+}
+
+// ─── Helper: "10:00" → "10:00 AM" ─────────────────────────────────────────
+function formatTo12Hour(time: string): string {
+  const [hourStr, minute] = time.split(":");
+  let hour = parseInt(hourStr, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return `${hour}:${minute} ${ampm}`;
 }

@@ -36,11 +36,11 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
   const [reason, setReason] = useState<string>("");
   const stepLabels = ["Therapist", "Date", "Time", "Details", "Confirm"];
   const [providerData, setProviderData] = useState<any>(null);
-  const handleMyProviders =async (providerId:string) => {
+  const handleMyProviders = async (providerId: string) => {
     try {
-    const awaitData = await patientApi.getProviderById(providerId);
-    setOpen(true)
-    setProviderData(awaitData);
+      const awaitData = await patientApi.getProviderById(providerId);
+      setOpen(true)
+      setProviderData(awaitData);
     } catch (error) {
     }
   }
@@ -66,9 +66,9 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
         time = parsed.minute(minutes).format("HH:mm");
       }
       {
-  
-}
-    const formattedDate = dayjs(date).format("YYYY-MM-DD")
+
+      }
+      const formattedDate = dayjs(date).format("YYYY-MM-DD")
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
         date: formattedDate,
@@ -95,12 +95,13 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
       setIsSuccess(false);
     }
   }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>      <DialogTrigger asChild>
       <Button className="bg-gradient-dash w-full" onClick={() => {
-        
+
         handleMyProviders(provider?._id);
-        }}>
+      }}>
         <Video className="size-4 mr-2" /> Book Now
       </Button>
     </DialogTrigger>
