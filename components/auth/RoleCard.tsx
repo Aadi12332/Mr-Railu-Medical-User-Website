@@ -18,10 +18,13 @@ export default function RoleCard({ role, path }: Props) {
     ? "Access your, appointments, and prescriptions"
     : "Manage appointments, patients, and consultations";
 
-  const handleClick = () => {
-    // prefer explicit path prop but fall back to convention when missing
+const handleClick = () => {
+  if (role === "provider") {
+    router.push("https://tele-health-provider-integration.vercel.app/provider-login");
+  } else {
     router.push(path || `/${role}-login`);
-  };
+  }
+};
 
   const Icon = isPatient ? Heart : Stethoscope;
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/api/auth.api";
+import { useSearchParams } from "next/navigation";
 
 type Props = {
   role: "Patient" | "Provider";
@@ -13,18 +14,18 @@ export default function ResetPasswordCard({
   loginPath = "/login",
 }: Props) {
   const router = useRouter();
-  const [token, setToken] = useState("");
+  const [otp, setOtp] = useState("");
   const [newPassword, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
-    if (!token) return "Reset token is required";
+    if (!otp) return "OTP is required";
     if (!newPassword) return "Password is required";
     if (newPassword.length < 8) return "Minimum 8 characters required";
     if (!/[A-Z]/.test(newPassword)) return "Add at least one uppercase letter";
@@ -46,9 +47,10 @@ export default function ResetPasswordCard({
       setLoading(true);
       setError(null);
       setSuccess(null);
-
+const email = searchParams.get("email") || "";
       await authApi.resetPassword({
-        token,
+        otp,
+        email,
         newPassword
       });
 
@@ -91,13 +93,13 @@ export default function ResetPasswordCard({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block mb-2 text-sm font-medium">
-              Reset Token
+              OTP
             </label>
             <input
               type="text"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Enter reset token"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
               className="w-full h-12 px-4 rounded-[14px] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>

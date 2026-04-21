@@ -39,8 +39,8 @@ export default function ForgotPasswordCard({
 
       await authApi.forgotPassword({ email });
 
-      setSuccess("Reset link sent to your email");
-      router.push("/reset-password");
+      setSuccess("OTP sent to your email");
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (e: any) {
       setError(e?.message || "Something went wrong");
     } finally {

@@ -29,7 +29,7 @@ export const authApi = {
   forgotPassword: (payload: { email: string }) =>
     axios.post("/v1/auth/patient/forgot-password", payload),
 
-  resetPassword: (payload: { token: string; newPassword: string; }) =>
+  resetPassword: (payload: { email: string; otp: string; newPassword: string }) =>
     axios.post(`/v1/auth/patient/reset-password`, payload),
 
 
