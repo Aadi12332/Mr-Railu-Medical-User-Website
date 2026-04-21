@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -18,6 +18,9 @@ import type { Appointment } from "./AppointmentCard";
 import { patientApi } from "@/api/patient.api";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import DateStep from "./steps/DateStep";
+import { dashboardApi } from "@/api/dashboard.service";
+import { formatTo12Hour } from "@/lib/utils";
 
 interface Slot {
   id: string;
@@ -26,6 +29,8 @@ interface Slot {
   start: string;
   end: string;
   time24: string;
+  startTime: string;
+  endTime: string;
 }
 
 interface RescheduleAppointmentDialogProps {
@@ -34,7 +39,7 @@ interface RescheduleAppointmentDialogProps {
   handleCloseReschedule: () => void;
   openReschedule: boolean;
   setOpenReschedule: (open: boolean) => void;
-  fetchAppointments:any;
+  fetchAppointments: any;
 }
 
 export default function RescheduleAppointmentDialog({
@@ -46,73 +51,63 @@ export default function RescheduleAppointmentDialog({
   fetchAppointments
 }: RescheduleAppointmentDialogProps) {
   const router = useRouter();
-  const handleCancel = async () => {
-    try {
-      const res = await patientApi.cancelAppointment(appointment.id);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [slots, setSlots] = useState<any[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  console.log({ appointment })
 
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  const generateSlots = () => {
-    const slots: Slot[] = [];
-    let baseDate = new Date();
-    if (appointment?.date) {
-      const parsed = dayjs(appointment.date);
-      if (parsed.isValid()) {
-        baseDate = parsed.toDate();
-      }
-    }
 
-    for (let d = 0; d < 1; d++) {
-      const date = new Date(baseDate);
-      date.setDate(baseDate.getDate() + d);
-
-      const rawDate = dayjs(date).format("YYYY-MM-DD");
-
-      for (let h = 9; h < 17; h++) {
-        for (let m = 0; m < 60; m += 20) {
-          const startDate = new Date(date);
-          startDate.setHours(h, m);
-
-          const endDate = new Date(startDate);
-          endDate.setMinutes(startDate.getMinutes() + 20);
-
-          const format12 = (dt: Date) =>
-            dt.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-          const format24 = (dt: Date) => dt.toTimeString().slice(0, 5);
-
-          slots.push({
-            id: `${rawDate}-${h}-${m}`,
-            date: dayjs(date).format("DD MMM YYYY"),
-            rawDate,
-            start: format12(startDate),
-            end: format12(endDate),
-            time24: format24(startDate),
-          });
-        }
-      }
-    }
-
-    return slots;
-  };
-
-  const [slots, setSlots] = useState<Slot[]>(generateSlots());
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
 
-  const removeSlot = (id: string) =>
-    setSlots((s) => s.filter((x) => x.id !== id));
-  const handleSchedule = async () => {
-    if (!selectedSlot) return;
+  console.log({ selectedSlot, selectedDate })
+  const fetchSlots = async (id: string) => {
+    setSlotsLoading(true);
+    try {
+      const date = dayjs(selectedDate).format("YYYY-MM-DD");
+      const res = await dashboardApi.getProviderAvailability(id, date);
+      const apiSlots = res?.data?.slots ?? [];
 
-    const payload = {
-      date: selectedSlot.rawDate,
-      time: selectedSlot.time24,
+      // Map API slots → display format
+      const mapped = apiSlots.map((slot: { startTime: string; endTime: string }) => ({
+        id: `${slot.startTime}-${slot.endTime}`,
+        start: formatTo12Hour(slot.startTime),
+        end: formatTo12Hour(slot.endTime),
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+      }));
+
+      setSlots(mapped);
+
+      // Validate previously selected slot still exists
+      setSelectedSlotId((prev) => {
+        if (!prev) return null;
+        const stillValid = mapped.some((s: any) => s.id === prev);
+        if (!stillValid) {
+          sessionStorage.removeItem("selectedSlotId");
+          return null;
+        }
+        return prev;
+      });
+    } catch (e) {
+      console.error("Failed to fetch slots", e);
+      setSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (appointment?.providerId && appointment?.date) {
+      fetchSlots(appointment.providerId);
+    }
+  }, [appointment, selectedDate]);
+  const handleSchedule = async () => {
+    console.log({ selectedSlot })
+    if (!selectedSlot || !selectedDate) return toast.error("Please select a date and time");
+
+    const payload: any = {
+      date: selectedDate ? dayjs(selectedDate).format("YYYY-MM-DD") : undefined,
+      time: selectedSlot.startTime,
     };
 
     try {
@@ -130,23 +125,23 @@ export default function RescheduleAppointmentDialog({
   };
 
   return (
-<Dialog open={openReschedule} onOpenChange={setOpenReschedule}>
-  <DialogTrigger asChild>
-    <div
-      onClick={() => setOpenReschedule(true)}
-      className="w-full flex-1"
-    >
-      {trigger || (
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full border-emerald-500 text-emerald-500"
+    <Dialog open={openReschedule} onOpenChange={setOpenReschedule}>
+      <DialogTrigger asChild>
+        <div
+          onClick={() => setOpenReschedule(true)}
+          className="w-full flex-1"
         >
-          <SquarePen className="size-4 mr-1" /> Reschedule
-        </Button>
-      )}
-    </div>
-  </DialogTrigger>
+          {trigger || (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full border-emerald-500 text-emerald-500"
+            >
+              <SquarePen className="size-4 mr-1" /> Reschedule
+            </Button>
+          )}
+        </div>
+      </DialogTrigger>
 
       <DialogContent className="w-full max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -167,55 +162,46 @@ export default function RescheduleAppointmentDialog({
               {appointment.date} at {appointment.time}
             </div>
           </div>
-
-          <div className="space-y-3 max-h-100 overflow-y-auto">
-            {slots.map((slot) => (
-              <div
-                key={slot.id}
-                onClick={() => setSelectedSlot(slot)}
-                className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${
-                  selectedSlot?.id === slot.id
-                    ? "border border-emerald-500 rounded-md"
-                    : ""
-                }`}
-              >
-                <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-28 text-left">
-                  {slot.date}
-                </div>
-
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-32 text-center">
-                    {slot.start}
-                  </div>
-
-                  <div className="text-slate-400 font-semibold">—</div>
-
-                  <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-32 text-center">
-                    {slot.end}
-                  </div>
-                </div>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeSlot(slot.id);
-                  }}
-                  className="bg-slate-50 py-3!"
+          <DateStep minDate={new Date()} date={selectedDate} setDate={setSelectedDate} provider={null} />
+          {slotsLoading ? (
+            <div className="flex justify-center py-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A7C7E]" />
+            </div>) : slots.length === 0 ? (
+              <p className="text-center text-sm text-gray-500 py-3">
+                No slots available
+              </p>
+            ) : (
+            <div className="max-h-100 overflow-y-auto flex gap-2 items-center flex-wrap">
+              {slots.map((slot) => (
+                <div
+                  key={slot.id}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`flex flex-col md:flex-row md:items-center items-center gap-4 cursor-pointer ${selectedSlot?.id === slot.id
+                      ? "border border-emerald-500 rounded-md"
+                      : ""
+                    }`}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
 
-          <p className="text-xs text-muted-foreground">
-            You&apos;ll be redirected to select a new date and time from
-            available slots.
-          </p>
+
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="px-4 py-3 bg-slate-50 rounded-md text-sm text-slate-700 w-32 text-center">
+                      {slot.start}
+                    </div>
+
+
+
+                  </div>
+
+                </div>
+              ))}
+
+
+            </div>)}
         </div>
-
+        <p className="text-xs text-muted-foreground">
+          You&apos;ll be redirected to select a new date and time from
+          available slots.
+        </p>
         <DialogFooter className="border-0 bg-transparent">
           <DialogClose asChild>
             <Button variant="outline" className="mr-2">

@@ -2,161 +2,187 @@
 
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { ArrowRightIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import export1Img from "@/assets/landing/expert-1.png";
-import export2Img from "@/assets/landing/expert-2.png";
-import export3Img from "@/assets/landing/expert-3.png";
 import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
+import { authApi } from "@/api/auth.api";
+
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
 
 function PatientProfileContent() {
-  const { data: bookingFlow, loading: bookingFlowLoading, error: bookingFlowError } = useFetch(publicPageApi.getBookingFlow) as any;
+  const { data: bookingFlow, loading, error } = useFetch(publicPageApi.getBookingFlow) as any;
   const [providerData, setProviderData] = useState<any>(null);
   const [providerLoading, setProviderLoading] = useState(false);
   const [providerError, setProviderError] = useState(false);
   const searchParams = useSearchParams();
-  const providerId = searchParams.get("providerId")
+  const providerId = searchParams.get("providerId");
   const router = useRouter();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [zip, setZip] = useState("");
-  const [dob, setDob] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [email, setEmail] = useState("");
-  const [marketingOptIn, setMarketingOptIn] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => {
-    const saved = sessionStorage.getItem("patiendDetailState");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.firstName) setFirstName(parsed.firstName);
-        if (parsed.lastName) setLastName(parsed.lastName);
-        if (parsed.zip) setZip(parsed.zip);
-        if (parsed.dob) setDob(parsed.dob);
-        if (parsed.mobile) setMobile(parsed.mobile);
-        if (parsed.email) setEmail(parsed.email);
-        if (parsed.marketingOptIn !== undefined) setMarketingOptIn(parsed.marketingOptIn);
-        if (parsed.agreeTerms !== undefined) setAgreeTerms(parsed.agreeTerms);
-      } catch (e) {}
-    }
-  }, []);
-
-  useEffect(() => {
-    const payload = { firstName, lastName, zip, dob, mobile, email, marketingOptIn, agreeTerms };
-    sessionStorage.setItem("patiendDetailState", JSON.stringify(payload));
-  }, [firstName, lastName, zip, dob, mobile, email, marketingOptIn, agreeTerms]);
-
-  const isMinimumAge = (dateString: string) => {
-    if (!dateString) return false;
-    const birthDate = new Date(dateString);
-    
-    // Check if the date is valid
-    if (isNaN(birthDate.getTime())) return false;
-    
-    const today = new Date();
-    const ageDiff = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    const dayDiff = today.getDate() - birthDate.getDate();
-    
-    const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) 
-      ? ageDiff - 1 
-      : ageDiff;
-    
-    return actualAge >= 18;
-  };
   const fields = bookingFlow?.profileStep?.fields || [];
-  const getLabel = (key: string) =>
-    fields.find((f: any) => f.key === key)?.label || "";
 
-  const isEmailValid = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-  const isMobileValid = (m: string) => /^(\+1[-.\s]?)?(\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/.test(m.trim());
-  const isZipValid = (z: string) => /^\d{5}(-\d{4})?$/.test(z.trim());
+const createSchema = (fields: any[]) => {
+  const shape: any = {};
 
-  const isFormValid =
-    !!firstName.trim() &&
-    !!lastName.trim() &&
-    isZipValid(zip) &&
-    !!dob.trim() &&
-    isMinimumAge(dob) &&
-    isMobileValid(mobile) &&
-    isEmailValid(email) &&
-    agreeTerms;
+  fields.forEach((field) => {
+    let schema;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    if (!isFormValid) return;
+    // ✅ BOOLEAN (checkbox)
+    if (field.type === "boolean") {
+      if (field.required) {
+        schema = z.boolean().refine((val) => val === true, {
+          message: "Please accept to continue",
+        });
+      } else {
+        schema = z.boolean().optional();
+      }
+    } else {
+      schema = z.string().trim();
 
-    const payload = {
-      firstName,
-      lastName,
-      zip,
-      dob,
-      mobile,
-      email,
-      marketingOptIn,
-    };
+      // ✅ REQUIRED
+      if (field.required) {
+        schema = schema.min(1, `${field.label} is required`);
+      }
 
-    // replace with real API / navigation
-    console.log("Create patient profile:", payload);
-    sessionStorage.setItem("patiendDetail", JSON.stringify(payload))
-    sessionStorage.setItem("providerData", JSON.stringify(providerData?.suggestedProvider))
+      // ✅ EMAIL
+      if (field.key === "email") {
+        schema = schema
+          .min(1, "Email is required")
+          .email("Please enter a valid email address");
+      }
 
-    router.push("/appointment");
-  };
+      // ✅ PASSWORD
+      if (field.key === "password") {
+        schema = schema
+          .min(1, "Password is required")
+          .min(8, "Password must be at least 8 characters long");
+      }
+
+      if (field.key === "zipCode") {
+        schema = schema
+          .min(1, "Zip code is required")
+          .regex(/^\d{5}(-\d{4})?$/, "Enter a valid 5-digit zip code");
+      }
+
+      if (field.key === "mobileNumber") {
+        schema = schema
+          .min(1, "Mobile number is required")
+          .regex(
+            /^(\+1[-.\s]?)?(\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
+            "Enter a valid US mobile number"
+          );
+      }
+
+      if (field.key === "dateOfBirth") {
+        schema = schema
+          .min(1, "Date of birth is required")
+          .refine((val) => {
+            const dob = new Date(val);
+            if (isNaN(dob.getTime())) return false;
+
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+              age--;
+            }
+
+            return age >= 18;
+          }, {
+            message: "You must be at least 18 years old",
+          });
+      }
+    }
+
+    shape[field.key] = schema;
+  });
+
+  return z.object(shape);
+};
+
+  const schema = createSchema(fields);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  // ✅ provider fetch
   useEffect(() => {
     if (providerId) {
       setProviderLoading(true);
       publicPageApi.getProviderBySlug(providerId).then((res) => {
-        setProviderData(res.data)
+        setProviderData(res.data);
       }).catch(() => setProviderError(true))
         .finally(() => setProviderLoading(false));
     }
-  }, []);
+  }, [providerId]);
 
-  if (bookingFlowLoading || providerLoading) {
+  // ✅ submit
+  const onSubmit = async (data: any) => {
+    try {
+      const payload = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      zip: data.zipCode,
+      dob: data.dateOfBirth,
+      mobile: data.mobileNumber,
+      email: data.email,
+      marketingOptIn: data.marketingOptIn,
+    };
+
+    const res:any=  await authApi.patientRegister({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+      });
+      console.log({res})
+      if(res?.status==="success") {
+        toast.success("Patient profile created successfully");
+        sessionStorage.setItem("patiendDetail", JSON.stringify(payload))
+        sessionStorage.setItem("providerData", JSON.stringify(providerData?.suggestedProvider))
+  
+        router.push("/appointment");
+      }
+    } catch (err) {
+      alert((err as any)?.message)
+
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="max-w-lg mx-auto py-8 px-4 w-full">
-        <Card className="shadow-lg gap-0 p-6 space-y-6">
-          <Skeleton className="h-8 w-1/2 mx-auto" />
-          <div className="space-y-4">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-          <Skeleton className="h-12 w-full mt-4" />
+      <div className="max-w-lg mx-auto py-8 px-4">
+        <Card className="p-6 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
         </Card>
       </div>
     );
   }
 
-  if (bookingFlowError || providerError) {
-    return (
-      <div className="max-w-lg mx-auto py-8 px-4 w-full">
-        <Card className="shadow-lg gap-0 p-8 text-center text-red-500">
-           <p>Something went wrong loading data. Please try again.</p>
-        </Card>
-      </div>
-    );
+  if (error) {
+    return <div className="text-center text-red-500">Something went wrong</div>;
   }
   const providers = (providerData?.providers || [])
     .filter((p: any) => p.isFeatured)
@@ -203,204 +229,84 @@ function PatientProfileContent() {
                 </div>
               )}
             </div>
-
-            <p className="text-sm text-slate-600 max-w-xl">
+  <p className="text-sm text-slate-600 max-w-xl">
               {providerData?.pageContent?.heroTitle ?? "Over 50 Experienced Providers Specializing In ADHD Are Ready To Help"}
             </p>
 
-            <h1 className="text-2xl font-semibold text-[#2F6F6A]">
-              Set Up Your Patient Profile
-            </h1>
-          </div>
+          <h1 className="text-xl font-semibold text-center">
+            Set Up Your Patient Profile
+          </h1>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* ✅ FORM */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {fields.map((field: any) => {
+              if (field.type === "boolean") {
+                return (
+                  <div key={field.key} className="flex items-start gap-2">
+                    <Checkbox
+                      checked={watch(field.key) || false}
+                      onCheckedChange={(v) =>
+                        setValue(field.key, !!v)
+                      }
+                    />
+                    <Label>{field.label}</Label>
 
-              <div className="space-y-2">
-                <Label htmlFor="firstName">{getLabel("firstName")}</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-                {submitted && !firstName.trim() && (
-                  <div className="text-red-500 text-xs mt-1">
-                    Please enter your first name.
+                    {errors[field.key] && (
+                      <p className="text-red-500 text-xs">
+                        {errors[field.key]?.message as string}
+                      </p>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              }
 
-              <div className="space-y-2">
-                <Label htmlFor="lastName">{getLabel("lastName")}</Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-                {submitted && !lastName.trim() && (
-                  <div className="text-red-500 text-xs mt-1">
-                    Please enter your last name.
-                  </div>
-                )}
-              </div>
+              return (
+                <div key={field.key} className="space-y-2">
+                  <Label>{field.label}</Label>
 
-              <div className="space-y-2">
-                <Label htmlFor="zip">{getLabel("zipCode")}</Label>
-                <InputGroup>
-                  <InputGroupInput
-                    id="zip"
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
+                  <Input
+                    type={
+                      field.key === "dateOfBirth"
+                        ? "date"
+                        : field.type || "text"
+                    }
+                    {...register(field.key)}
                   />
-                  <InputGroupAddon align="inline-end">
-                    <Info className="text-muted-foreground" />
-                  </InputGroupAddon>
-                </InputGroup>
-                {submitted && !zip.trim() && (
-                  <div className="text-red-500 text-xs mt-1">
-                    Please enter your zip code.
-                  </div>
-                )}
-                {submitted && zip.trim() && !isZipValid(zip) && (
-                  <div className="text-red-500 text-xs mt-1">
-                    Please enter a valid 5-digit zip code.
-                  </div>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dob">{getLabel("dateOfBirth")}</Label>
-                <Input
-                  id="dob"
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                />
-                {submitted && !dob.trim() && (
-                  <div className="text-red-500 text-xs mt-1">
-                    Please enter your date of birth.
-                  </div>
-                )}
-                {dob.trim() && !isMinimumAge(dob) && (
-                  <div className="text-red-500 text-xs mt-1">
-                    Must be at least 18 years old
-                  </div>
-                )}
-              </div>
-
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="mobile">{getLabel("mobileNumber")}</Label>
-              <Input
-                id="mobile"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-              />
-              {submitted && !mobile.trim() && (
-                <div className="text-red-500 text-xs mt-1">
-                  Please enter your mobile number.
+                  {errors[field.key] && (
+                    <p className="text-red-500 text-xs">
+                      {errors[field.key]?.message as string}
+                    </p>
+                  )}
                 </div>
-              )}
-              {submitted && mobile.trim() && !isMobileValid(mobile) && (
-                <div className="text-red-500 text-xs mt-1">
-                  Please enter a valid US mobile number (e.g., (555) 555-5555).
-                </div>
-              )}
-            </div>
+              );
+            })}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">{getLabel("email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {submitted && !email.trim() && (
-                <div className="text-red-500 text-xs mt-1">
-                  Please enter your email address.
-                </div>
-              )}
-              {submitted && email.trim() && !isEmailValid(email) && (
-                <div className="text-red-500 text-xs mt-1">
-                  Please enter a valid email address.
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="marketing"
-                  checked={marketingOptIn}
-                  onCheckedChange={(v) => setMarketingOptIn(!!v)}
-                />
-                <Label htmlFor="marketing" className="text-sm">
-                  {getLabel("marketingMessages")}
-                </Label>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="terms"
-                  checked={agreeTerms}
-                  onCheckedChange={(v) => setAgreeTerms(!!v)}
-                />
-                <Label htmlFor="terms" className="text-sm">
-                  {getLabel("termsAccepted")}
-                </Label>
-              </div>
-
-              {submitted && !agreeTerms && (
-                <div className="text-red-500 text-xs">
-                  You must agree to continue
-                </div>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full mt-2 h-12 bg-gradient-primary"
-              size="lg"
-            >
+            <Button type="submit"               className="w-full mt-2 h-12 bg-gradient-primary"
+>
               Create My Patient Profile
               <ArrowRightIcon className="ml-2 h-4 w-4" />
             </Button>
 
-            <div className="text-center pt-3 text-sm text-gray-500">
-              Already Have An Account?{" "}
-              <Link href="/login" className="text-[#4A7C7E] hover:underline">
+            <div className="text-center text-sm">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-600">
                 Sign In
               </Link>
             </div>
 
           </form>
-
         </CardContent>
       </Card>
     </div>
   );
 }
 
-export default function PatientProfilePage() {
+export default function Page() {
   return (
-    <Suspense
-      fallback={
-        <div className="max-w-lg mx-auto py-8 px-4 w-full">
-          <Card className="shadow-lg gap-0 p-6 space-y-6">
-            <Skeleton className="h-8 w-1/2 mx-auto" />
-            <div className="space-y-4">
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-            <Skeleton className="h-12 w-full mt-4" />
-          </Card>
-        </div>
-      }
-    >
+    <Suspense fallback={<div>Loading...</div>}>
       <PatientProfileContent />
     </Suspense>
   );

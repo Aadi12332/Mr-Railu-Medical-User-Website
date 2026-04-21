@@ -47,6 +47,7 @@ export default function AppointmentsPage() {
 
     return {
       id: item?._id,
+      providerId: provider?._id,
       providerName: `${provider?.firstName || ""} ${provider?.lastName || ""}`,
       specialty: provider?.specialty || "",
       initials: `${provider?.firstName?.[0] || ""}${provider?.lastName?.[0] || ""}`,

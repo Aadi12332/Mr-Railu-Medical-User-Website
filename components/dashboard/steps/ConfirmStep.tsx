@@ -12,7 +12,6 @@ export default function ConfirmStep({
   date: Date | undefined;
   selectedTime: string | null;
 }) {
-
   return (
     <div className="w-full">
       <div className="rounded-lg border border-green-200 bg-green-50/60 p-6 mb-6">

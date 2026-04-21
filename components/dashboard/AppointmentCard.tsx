@@ -21,6 +21,7 @@ export interface Appointment {
   duration: number; // minutes
   type: "Video Call" | "Phone Call" | "video" | any;
   status: "Confirmed" | "Pending" | "Cancelled" | "Past" | any;
+  providerId: string;
 }
 
 export function statusVariants(status: Appointment["status"]) {
@@ -49,7 +50,6 @@ export function AppointmentCard({ appointment: app, handleCancelApp, handleStart
   const [openReschedule, setOpenReschedule] = React.useState(false);
   const handleCloseReschedule = () => setOpenReschedule(false);
 
-  console.log(app)
   const handleCancel = async (id: any) => {
     try {
       const res: any = await patientApi.cancelAppointment(id);

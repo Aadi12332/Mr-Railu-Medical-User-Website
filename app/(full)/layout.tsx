@@ -2,6 +2,8 @@ import Image from "next/image";
 import logo from "@/assets/medical-health-tele-logo.png";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
 import Link from "next/link";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AuthLayout({
   children,
@@ -42,6 +44,8 @@ export default function AuthLayout({
           </Link>
         </div>
         {children}
+      <ToastContainer />
+
       </div>
     </div>
   );
