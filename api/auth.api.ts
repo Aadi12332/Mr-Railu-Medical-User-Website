@@ -9,7 +9,7 @@ export const authApi = {
     return res
   },
 
-  patientLogin: async (payload: LoginPayload): Promise<AuthResponse> => {
+  patientLogin: async (payload: LoginPayload & { rememberMe?: boolean }): Promise<AuthResponse> => {
     const res = await axios.post("/v1/auth/patient/login", payload)
     if (res.data?.token) localStorage.setItem("patientToken", res.data.token)
     return res

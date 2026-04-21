@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import { patientApi } from "@/api/patient.api";
 import { useState } from "react";
 import PaymentDialog from "@/components/dashboard/PaymentDialog";
+import { toast } from "react-toastify";
 
 export default function ConfirmAppointmentPage() {
   const router = useRouter();
@@ -31,10 +32,10 @@ export default function ConfirmAppointmentPage() {
       setIsSuccess(true);
 
       
-    } catch (error) {
+    } catch (error:any) {
 
 
-      console.log(error);
+      toast.error(error?.message || "Something went wrong");
     }
 
   }
