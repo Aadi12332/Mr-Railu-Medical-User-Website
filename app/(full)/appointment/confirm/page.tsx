@@ -7,14 +7,37 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import export1Img from "@/assets/landing/expert-1.png";
 import dayjs from "dayjs";
+import { patientApi } from "@/api/patient.api";
+import { useState } from "react";
+import PaymentDialog from "@/components/dashboard/PaymentDialog";
 
 export default function ConfirmAppointmentPage() {
   const router = useRouter();
+    const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  
   const patiendDetail = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("patiendDetail") || "{}") : ""
   const providerData = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("providerData") || "{}") : ""
   const selectedPlan = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("selectedSlot") || "{}") : ""
   const selectedDate = typeof window !== 'undefined' ? sessionStorage.getItem("selectedDate") : ""
   const fees = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("planFees") || "{}") : ""
+  const handleAppointment = async () => {
+    try {
+      const res = await patientApi.bookAppointment({
+        providerId: providerData._id,
+        date: selectedDate ? dayjs(selectedDate).format("YYYY-MM-DD") : "", time: selectedPlan?.startTime,
+        type: "video",
+      });
+      sessionStorage.setItem("appointmentId", res?.data?.appointment?._id);
+      setIsSuccess(true);
+
+      
+    } catch (error) {
+
+
+      console.log(error);
+    }
+
+  }
   return (
     <Card className="shadow-lg gap-0 max-w-lg mx-auto">
       <CardHeader className="border-b-0">
@@ -63,7 +86,7 @@ export default function ConfirmAppointmentPage() {
             <div className="mt-3 flex items-center gap-4 text-sm text-slate-600">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-500" />
-                <div>{selectedDate?dayjs(selectedDate).format("DD MMM YYYY"):""}</div>
+                <div>{selectedDate ? dayjs(selectedDate).format("DD MMM YYYY") : ""}</div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-slate-500" />
@@ -105,21 +128,25 @@ export default function ConfirmAppointmentPage() {
 
         <div className="flex gap-4">
           <Button
-            className="h-12 w-44 bg-gradient-primary"
+            className="h-12 w-44 bg-gradient-primary flex-1"
             onClick={() => router.push("/appointment")}
           >
             Edit Appointment
           </Button>
 
-          <Button
-            size="lg"
-            className="h-12 w-44 bg-gradient-primary text-white hover:opacity-95 ml-auto"
-            onClick={() => {
-              router.push("/appointment/payment")
-            }}
-          >
-            Confirm
-          </Button>
+           <PaymentDialog
+                open={isSuccess}
+                onClose={() => setIsSuccess(false)}
+                onReturnUrl={() => router.push("/appointment/payment")}
+              >
+                <Button
+                  size="lg"
+                  className="flex-1 h-12 w-44 bg-gradient-primary text-white hover:opacity-95 ml-auto"
+                  onClick={() => handleAppointment()}
+                >
+                  confirm
+                </Button>
+              </PaymentDialog>
         </div>
       </CardContent>
     </Card>

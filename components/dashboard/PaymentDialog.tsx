@@ -24,11 +24,13 @@ import { toast } from "react-toastify";
 function PaymentDialogWrapper({
   children,
   open,
-  onClose
+  onClose,
+  onReturnUrl
 }: {
   children: React.ReactNode;
   open?: boolean
   onClose?: () => void
+  onReturnUrl?: () => void
 }) {
   const pathname = usePathname()
   const stripe = useStripe();
@@ -128,6 +130,7 @@ const handlePayment = async () => {
 
     if (result.paymentIntent?.status === "succeeded") {
       setIsSuccess(true);
+      onReturnUrl?.()
     }
 
   } catch (err) {
@@ -338,10 +341,10 @@ const handlePayment = async () => {
     </Dialog>
   );
 }
-const PaymentDialog = ({ children, open, onClose }: { children: any, open?: boolean, onClose?: () => void }) => {
+const PaymentDialog = ({ children, open, onClose, onReturnUrl }: { children: any, open?: boolean, onClose?: () => void, onReturnUrl?: () => void }) => {
   return (
     <Elements stripe={stripePromise}>
-      <PaymentDialogWrapper open={open} onClose={onClose}>
+      <PaymentDialogWrapper open={open} onClose={onClose} onReturnUrl={onReturnUrl}>
         {children}
       </PaymentDialogWrapper>
     </Elements>
