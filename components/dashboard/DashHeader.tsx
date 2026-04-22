@@ -8,7 +8,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, Search } from "lucide-react";
 import { SidebarTrigger } from "../ui/sidebar";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import NotificationDrawer from "./NotificationDrawer";
 import { useAuth } from "../context/auth.context";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -19,6 +19,7 @@ function DashHeaderContent() {
   const pathName=usePathname();
   const hidePath=["/dashboard/messages","/dashboard/providers","/dashboard/settings"]
   const searchParams = useSearchParams();
+const [prevPath, setPrevPath] = useState(pathName);
 
   const [search, setSearch] = useState(searchParams.get("q") || "");
 
@@ -36,7 +37,19 @@ function DashHeaderContent() {
 
     router.push(`?${params.toString()}`);
   };
+useEffect(() => {
+  if (prevPath !== pathName) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("q");
 
+    router.replace(pathName);
+    setSearch("");
+    setPrevPath(pathName);
+  }
+}, [pathName]);
+useEffect(() => {
+  setSearch(searchParams.get("q") || "");
+}, [searchParams]);
   return (
     <header className="w-full">
       <div className="container mx-auto flex items-center justify-between gap-6 px-4 py-4">

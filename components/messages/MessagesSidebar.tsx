@@ -33,6 +33,7 @@ export function MessagesSidebar({
   searchQuery,
   setSearchQuery,
 }: MessagesSidebarProps) {
+  console.log({chatList})
   return (
     <aside className="h-full rounded-xl border bg-card">
       <div className="border-b p-3">

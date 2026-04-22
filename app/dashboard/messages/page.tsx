@@ -38,7 +38,7 @@ function MessagesContent() {
 
       const res = await settingApi.getChatList("patient", search);
 
-      const normalizedChats = (res?.data?.chats || []).map((chat: any) => ({
+      const normalizedChats = (res?.data?.chats || []).filter((i:any)=>i?.providerId).map((chat: any) => ({
         ...chat,
         id: chat.id || chat._id,
       }));

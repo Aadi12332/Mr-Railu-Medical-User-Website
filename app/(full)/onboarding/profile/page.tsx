@@ -16,7 +16,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
 import { authApi } from "@/api/auth.api";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
@@ -26,6 +26,8 @@ function PatientProfileContent() {
   const { data: bookingFlow, loading, error } = useFetch(publicPageApi.getBookingFlow) as any;
   const [providerData, setProviderData] = useState<any>(null);
   const [providerLoading, setProviderLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+
   const [providerError, setProviderError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -34,7 +36,6 @@ function PatientProfileContent() {
   const router = useRouter();
   const storedProviderData = sessionStorage.getItem("providerData");
   const parsedProviderData = storedProviderData ? JSON.parse(storedProviderData) : null;
-console.log({parsedProviderData})
   const fields = bookingFlow?.profileStep?.fields || [];
 
   const getMaxDOB = () => {
@@ -142,6 +143,7 @@ console.log({parsedProviderData})
     formState: { errors },
     setValue,
     watch,
+    control
   } = useForm({
     resolver: zodResolver(schema),
   });
@@ -158,6 +160,7 @@ console.log({parsedProviderData})
 
   const onSubmit = async (data: any) => {
     try {
+      setFormLoading(true)
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -183,7 +186,9 @@ console.log({parsedProviderData})
         router.push("/appointment");
       }
     } catch (err) {
-      alert((err as any)?.message);
+      toast.error((err as any)?.message || "Failed to create patient profile");
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -258,17 +263,27 @@ console.log({parsedProviderData})
               if (field.type === "boolean") {
                 return (
                   <div key={field.key} className="flex items-start gap-2 sm:col-span-2">
-                    <Checkbox
-                      checked={watch(field.key) || false}
-                      onCheckedChange={(v) => setValue(field.key, !!v)}
-                    />
-                    <Label>{field.label}</Label>
 
-                    {errors[field.key] && (
-                      <p className="text-red-500 text-xs">
-                        {errors[field.key]?.message as string}
-                      </p>
-                    )}
+                    <Controller
+                      name={field.key}
+                      control={control}
+                      defaultValue={false}
+                      render={({ field: ctrl }) => (
+                        <div className="flex items-start gap-2 sm:col-span-2">
+                          <Checkbox
+                            checked={ctrl.value}
+                            onCheckedChange={(v) => ctrl.onChange(!!v)}
+                          />
+                          <Label>{field.label}</Label>
+
+                          {errors[field.key] && (
+                            <p className="text-red-500 text-xs">
+                              {errors[field.key]?.message as string}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    />
                   </div>
                 );
               }
@@ -291,8 +306,8 @@ console.log({parsedProviderData})
                             ? "text"
                             : "password"
                           : isDOB
-                          ? "date"
-                          : field.type || "text"
+                            ? "date"
+                            : field.type || "text"
                       }
                       max={isDOB ? getMaxDOB() : undefined}
                       {...register(field.key, {
@@ -324,7 +339,7 @@ console.log({parsedProviderData})
               );
             })}
 
-            <Button type="submit" className="w-full mt-2 h-12 bg-gradient-primary sm:col-span-2">
+            <Button disabled={formLoading} type="submit" className="w-full mt-2 h-12 bg-gradient-primary sm:col-span-2">
               Create My Patient Profile
               <ArrowRightIcon className="ml-2 h-4 w-4" />
             </Button>

@@ -14,6 +14,7 @@ import { useFetch } from "@/hooks/useFetch";
 import { publicPageApi } from "@/api/publicpage.api";
 import dayjs from "dayjs";
 import { dashboardApi } from "@/api/dashboard.service";
+import { toast } from "react-toastify";
 
 export default function AppointmentPage() {
   const {
@@ -116,6 +117,9 @@ export default function AppointmentPage() {
 
   const handleModeChange = (key: string) => {
     setMode(key);
+    if(key === "any_time_today") {
+      setSelectedDate(new Date());
+    }
   };
 
   const handleSlotClick = (slot: any) => {
@@ -127,7 +131,7 @@ export default function AppointmentPage() {
   const handleNext = () => {
     const selectedSlot = slots.find((s) => s.id === selectedSlotId);
     if (!selectedSlot) {
-      alert("Please select a slot");
+      toast.error("Please select a slot");
       return;
     }
     sessionStorage.setItem("selectedSlot", JSON.stringify(selectedSlot));
