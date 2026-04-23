@@ -138,7 +138,7 @@ export default function ConfirmAppointmentPage() {
            <PaymentDialog
                 open={isSuccess}
                 onClose={() => setIsSuccess(false)}
-                onReturnUrl={() => router.push("/appointment/payment")}
+                onReturnUrl={() => router.push("/appointment/payment/confirmation")}
               >
                 <Button
                   size="lg"

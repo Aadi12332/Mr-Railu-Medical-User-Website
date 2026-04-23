@@ -13,6 +13,7 @@ export default function PaymentConfirmationPage() {
   const router = useRouter();
   const sessionData = typeof window !== "undefined" ? sessionStorage.getItem("providerData") ? JSON.parse(sessionStorage.getItem("providerData") ?? "") : "" : null;
   const selectedPlan = typeof window !== "undefined" ? sessionStorage.getItem("selectedSlot") ? JSON.parse(sessionStorage.getItem("selectedSlot") ?? "") : "" : null;
+  const selectedDate = typeof window !== "undefined" ? sessionStorage.getItem("selectedDate") ? sessionStorage.getItem("selectedDate") : "" : null;
   const fees = typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem("planFees") || "{}") : ""
 
   return (
@@ -26,11 +27,11 @@ export default function PaymentConfirmationPage() {
           </div>
           <div className="flex justify-between text-sm text-slate-600">
             <span>Date:</span>
-            <span>{selectedPlan?.date}</span>
+            <span>{selectedDate}</span>
           </div>
           <div className="flex justify-between text-sm text-slate-600">
             <span>Time:</span>
-            <span>{selectedPlan?.time ? selectedPlan.time : `${selectedPlan?.start} - ${selectedPlan?.end}`}</span>
+            <span>{selectedPlan?.time ? selectedPlan.time : `${selectedPlan?.start} `}</span>
           </div>
           <div className="flex justify-between font-medium">
             <span>Consultation Fee:</span>
