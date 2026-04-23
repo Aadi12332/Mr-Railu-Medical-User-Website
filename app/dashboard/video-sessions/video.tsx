@@ -121,7 +121,7 @@ export default function VideoCall({ connection }: Props) {
   };
 
   return (
-    <div className="h-screen bg-black relative text-white">
+    <div className="h-[calc(100vh-120px)] bg-black relative text-white">
       
       <div ref={remoteRef} className="w-full h-full flex items-center justify-center">
         {!remoteUser && (

@@ -261,7 +261,6 @@ export default function AppointmentPage() {
   );
 }
 
-// ─── Helper: "10:00" → "10:00 AM" ─────────────────────────────────────────
 function formatTo12Hour(time: string): string {
   const [hourStr, minute] = time.split(":");
   let hour = parseInt(hourStr, 10);

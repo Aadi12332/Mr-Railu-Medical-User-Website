@@ -33,7 +33,7 @@ export default function DetailsStep({
           <SelectContent>
             <SelectItem value="video">Video Call</SelectItem>
             <SelectItem value="chat">Chat</SelectItem>
-            <SelectItem value="call">Phone</SelectItem>
+            <SelectItem value="audio">Audio</SelectItem>
           </SelectContent>
         </Select>
       </div>
