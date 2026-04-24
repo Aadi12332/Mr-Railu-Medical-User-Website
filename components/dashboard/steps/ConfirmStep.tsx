@@ -7,10 +7,12 @@ export default function ConfirmStep({
   provider,
   date,
   selectedTime,
+  selectedSession,
 }: {
   provider: any;
   date: Date | undefined;
   selectedTime: string | null;
+  selectedSession: any;
 }) {
   return (
     <div className="w-full">
@@ -25,6 +27,11 @@ export default function ConfirmStep({
             {provider.firstName} {provider.lastName}
           </div>
 
+          <div>Specialties:</div>
+          <div className="text-right font-medium text-foreground">
+            {provider.specialty}
+          </div>
+
           <div>Date:</div>
           <div className="text-right font-medium text-foreground">
             {date ? date.toLocaleDateString() : ""}
@@ -37,7 +44,7 @@ export default function ConfirmStep({
 
           <div>Session Fee:</div>
           <div className="text-right font-medium text-foreground">
-            $ {provider.sessionFee ?? 0}
+            $ {selectedSession?.fee ?? 0}
           </div>
         </div>
       </div>

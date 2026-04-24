@@ -10,9 +10,9 @@ const nextConfig: any = {
       },
     ],
   },
-  experimental: {
-    turbo: false
-  },
+  // experimental: {
+  //   turbo: false
+  // },
   reactStrictMode: false
 
 };

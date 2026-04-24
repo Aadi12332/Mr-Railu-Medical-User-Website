@@ -10,7 +10,7 @@ export default function TherapistStep({ provider }: { provider: any }) {
     <div className="">
       <div className="flex items-center gap-4 bg-accent rounded-lg p-2">
         <Avatar className="size-16 border border-slate-100 bg-white shadow-sm">
-          <AvatarFallback>{provider.firstName?provider.firstName?.[0]:""}{provider.lastName?provider.lastName?.[0]:""}</AvatarFallback>
+          <AvatarFallback>{provider.firstName ? provider.firstName?.[0] : ""}{provider.lastName ? provider.lastName?.[0] : ""}</AvatarFallback>
         </Avatar>
 
         <div className="flex-1">
@@ -28,16 +28,27 @@ export default function TherapistStep({ provider }: { provider: any }) {
         </div>
       </div>
 
-      <div className="mt-6 w-full flex items-center gap-8 text-sm ">
+      <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
         <div className="space-y-1">
-          <div className="font-semibold">Experience</div>
-          <div className="font-semibold">Specialties</div>
-          <div className="font-semibold">Session Fee</div>
+          <div className="text-start">Experience</div>
+          <div className="text-start">Specialties</div>
+
+          {provider?.sessionTypes?.map((s: any) => (
+            <div key={s._id} className="text-start">{s.name}</div>
+          ))}
         </div>
-        <div className="space-y-1">
-          <div className="">{provider?.experience??"0 year"} </div>
-          <div className="">{provider?.specialty??"Specialist"}</div>
-          <div className="">${provider?.sessionFee??0}</div>
+
+        <div className="text-right space-y-1">
+          <div className="font-medium">
+            {provider?.experience ? `${provider.experience} years` : "-"}
+          </div>
+          <div className="font-medium">{provider?.specialty ?? "Specialist"}</div>
+
+          {provider?.sessionTypes?.map((s: any) => (
+            <div key={s._id} className="font-medium text-end">
+              ${s?.fee ?? "N/A"}
+            </div>
+          ))}
         </div>
       </div>
     </div>

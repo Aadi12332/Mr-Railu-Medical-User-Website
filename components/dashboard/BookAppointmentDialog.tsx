@@ -96,14 +96,30 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
     }
   }, [open]);
 
+const isValidFee =
+  Array.isArray(provider?.sessionTypes) &&
+  provider.sessionTypes.some(
+    (s: any) => typeof s?.fee === "number" && s.fee > 0
+  );
+
+  const selectedSession = provider?.sessionTypes?.find(
+  (s: any) => s._id === sessionType
+);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>      <DialogTrigger asChild>
-      <Button className="bg-gradient-dash w-full" onClick={() => {
 
-        handleMyProviders(provider?._id);
-      }}>
-        <Video className="size-4 mr-2" /> Book Now
-      </Button>
+      <button
+  disabled={!isValidFee}
+  className="bg-gradient-dash w-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 justify-center px-3 py-2 rounded-lg text-white"
+  onClick={() => {
+    if (!isValidFee) return;
+    handleMyProviders(provider?._id);
+  }}
+>
+  <Video className="size-4" />
+  Book Now
+</button>
     </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg">
@@ -111,7 +127,6 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
           <DialogTitle className="font-semibold">Book Appointment</DialogTitle>
           <DialogDescription />
 
-          {/* Stepper */}
           <div className="mt-4 relative h-14">
             <div className="absolute max-w-[92%] left-0 right-0 top-4 -translate-y-1/2 h-1 bg-muted rounded-full" />
 
@@ -168,6 +183,7 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
               setSessionType={setSessionType}
               reason={reason}
               setReason={setReason}
+              provider={provider}
             />
           )}
           {step === 5 && (
@@ -175,6 +191,7 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
               provider={provider}
               date={date}
               selectedTime={selectedTime}
+              selectedSession={selectedSession}
             />
           )}
         </div>

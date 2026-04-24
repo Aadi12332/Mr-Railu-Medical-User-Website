@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
+import RatingModal from "@/components/ui/ratingModal";
 
 const VideoCall = dynamic(() => import("./video"), {
   ssr: false,
@@ -26,6 +27,7 @@ function VideoSessionsContent() {
   const [loading, setLoading] = useState(true);
   const [isVideoSession, setIsVideoSession] = useState(false);
   const [connection, setConnection] = useState<any>(null);
+  const [openRating, setOpenRating] = useState(false);
   const [sessionTab, setSessionTab] = useState<"upcoming" | "completed">(
     "upcoming",
   );
@@ -33,7 +35,7 @@ function VideoSessionsContent() {
   const fetchSession = async () => {
     try {
       setLoading(true);
-      const res = await dashboardApi.getSessionData("patient",search||"");
+      const res = await dashboardApi.getSessionData("patient", search || "");
       setSessions(res?.data?.sessions || []);
     } catch (error) {
       console.error("Error fetching video sessions:", error);
@@ -229,13 +231,25 @@ function VideoSessionsContent() {
                           <span>{item?.appointmentId?.time}</span>
                         </div>
 
-                        <Button
-                          variant="outline"
-                          onClick={() => handleStartSession(item?._id)}
-                          className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-                        >
-                          <Video className="size-4 mr-2" /> Join Session
-                        </Button>
+                        {item?.status === "completed" ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={() => setOpenRating(true)}
+                              className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                            >
+                              Rate for this session
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            onClick={() => handleStartSession(item?._id)}
+                            className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                          >
+                            <Video className="size-4 mr-2" /> Join Session
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -249,6 +263,12 @@ function VideoSessionsContent() {
           )}
         </div>
       </section>
+
+
+      <RatingModal
+        open={openRating}
+        onClose={() => setOpenRating(false)}
+      />
 
       <Card className="rounded-lg border border-sky-200 bg-sky-50 p-6">
         <div className="flex flex-col items-start justify-between gap-4">

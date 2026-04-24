@@ -26,17 +26,11 @@ export function StartChatModal({ fetchChatList }: { fetchChatList?: () => void }
       setLoading(true);
 
       const response: any = await dashboardApi.getProviders("patient");
-
-      console.log("API RESPONSE 👉", response);
-
       const fetchedProviders =
         response?.providers ||
         response?.data?.data?.providers ||
         response?.data?.providers ||
         [];
-
-      console.log("PROVIDERS 👉", fetchedProviders);
-
       setProviders(fetchedProviders);
     } catch (err: any) {
       console.log("Error fetching providers:", err);
@@ -76,11 +70,11 @@ export function StartChatModal({ fetchChatList }: { fetchChatList?: () => void }
 
   const [search, setSearch] = useState("");
 
-const filteredProviders = providers.filter((item: any) =>
-  `${item.firstName} ${item.lastName} ${item.specialty}`
-    .toLowerCase()
-    .includes(search.toLowerCase())
-);
+  const filteredProviders = providers.filter((item: any) =>
+    `${item.firstName} ${item.lastName} ${item.specialty}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   return (
     <>
@@ -95,52 +89,52 @@ const filteredProviders = providers.filter((item: any) =>
           </DialogHeader>
 
           <div className="flex flex-col">
-  <div className="p-3 border-b">
-    <input
-      type="text"
-      placeholder="Search providers..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="w-full px-3 py-2 text-sm border rounded-md outline-none"
-    />
-  </div>
+            <div className="p-3 border-b">
+              <input
+                type="text"
+                placeholder="Search providers..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full px-3 py-2 text-sm border rounded-md outline-none"
+              />
+            </div>
 
-  <div className="max-h-120 overflow-y-auto divide-y">
-    {loading ? (
-      <p className="p-4 text-sm min-h-20 flex items-center justify-center">
-        Loading...
-      </p>
-    ) : filteredProviders.length === 0 ? (
-      <p className="p-4 text-sm min-h-20 flex items-center justify-center">
-        No providers found
-      </p>
-    ) : (
-      filteredProviders.map((item: any) => (
-        <button
-          key={item._id}
-          onClick={() => handleChat(item._id)}
-          className="w-full flex items-center gap-3 p-4 hover:bg-muted transition"
-        >
-          <Avatar className="size-10">
-            <AvatarFallback>
-              {item.firstName?.[0]}
-              {item.lastName?.[0]}
-            </AvatarFallback>
-          </Avatar>
+            <div className="max-h-120 overflow-y-auto divide-y">
+              {loading ? (
+                <p className="p-4 text-sm min-h-20 flex items-center justify-center">
+                  Loading...
+                </p>
+              ) : filteredProviders.length === 0 ? (
+                <p className="p-4 text-sm min-h-20 flex items-center justify-center">
+                  No providers found
+                </p>
+              ) : (
+                filteredProviders.map((item: any) => (
+                  <button
+                    key={item._id}
+                    onClick={() => handleChat(item._id)}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-muted transition"
+                  >
+                    <Avatar className="size-10">
+                      <AvatarFallback>
+                        {item.firstName?.[0]}
+                        {item.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
 
-          <div className="text-left flex-1">
-            <p className="text-sm font-medium">
-              {item.firstName} {item.lastName}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {item.specialty}
-            </p>
+                    <div className="text-left flex-1">
+                      <p className="text-sm font-medium">
+                        {item.firstName} {item.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.specialty}
+                      </p>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </button>
-      ))
-    )}
-  </div>
-</div>
         </DialogContent>
       </Dialog>
     </>

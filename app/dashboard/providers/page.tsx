@@ -14,8 +14,8 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
-import { Star, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Star, Search, ChevronLeft, ChevronRight, Video, MessageCircle } from "lucide-react";
 import BookAppointmentDialog from "@/components/dashboard/BookAppointmentDialog";
 import PaymentDialog from "@/components/dashboard/PaymentDialog";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
 import { RatingStars } from "@/components/ui/rating";
 import { cn } from "@/lib/utils";
+import { settingApi } from "@/api/setting.api";
 
 const SkeletonCard = () => (
   <Card className="p-4 animate-pulse">
@@ -64,10 +65,12 @@ export default function page() {
   const [specialty, setSpecialty] = useState("all");
   const [rating, setRating] = useState("any");
   const [priceRange, setPriceRange] = useState("any");
+    const router = useRouter();
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const [sessionTab, setSessionTab] = useState<"All Providers" | "My Providers">(
     "All Providers",
   );
+  const [chatList, setChatList] = useState<any[]>([]);
   const [page, setPage] = useState(1)
   const [limit] = useState(9)
   const [total, setTotal] = useState(0)
@@ -132,7 +135,6 @@ export default function page() {
   const handleClick = (page: number) => {
     setPage(page);
   };
-  console.log("page", page, totalPages);
   useEffect(() => {
     setRole(localStorage.getItem("role") || "");
   }, []);
@@ -172,6 +174,52 @@ export default function page() {
       matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange
     );
   });
+
+    const fetchChatList = async () => {
+      try {
+        setLoading(true);
+        setError("");
+  
+        const res = await settingApi.getChatList("patient", search);
+  
+        const normalizedChats = (res?.data?.chats || []).filter((i:any)=>i?.providerId).map((chat: any) => ({
+          ...chat,
+          id: chat.id || chat._id,
+        }));
+  
+        setChatList(normalizedChats);
+      } catch (err: any) {
+        console.error("Chat list error:", err);
+        setError("Failed to load chats");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      fetchChatList();
+    }, [search]);
+
+    const handleChat = async (providerId: string) => {
+    try {
+      const role =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("role")?.toLowerCase()
+          : "";
+
+      const res: any = await dashboardApi.getMessageProvider(role || "", {
+        providerId,
+      });
+
+      router.push(
+        `/dashboard/messages?chatId=${res?.chat?._id || res?.data?.chat?._id}`,
+      );
+      fetchChatList && fetchChatList();
+    } catch (error) {
+      console.error("Chat error:", error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -270,8 +318,9 @@ export default function page() {
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : filteredProviders.map((p: any) => (
               <Card key={p._id} className="p-4">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
+                <div className="flex flex-col items-center text-center justify-between w-full h-full">
+                  <div className="flex flex-col items-center text-center w-full flex-1">
+                    <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
                     <AvatarFallback>
                       {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
                     </AvatarFallback>
@@ -302,23 +351,35 @@ export default function page() {
 
                   <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
                     <div className="space-y-1">
-                      <div>Experience</div>
-                      <div>Session Fee</div>
+                      <div className="text-start">Experience</div>
+                      {p?.sessionTypes?.map((s: any) => (
+                        <div key={s._id} className="text-start">{s.name}</div>
+                      ))}
                     </div>
 
                     <div className="text-right space-y-1">
                       <div className="font-medium">
                         {p?.experience ? `${p.experience} years` : "-"}
                       </div>
-                      <div className="font-medium">
-                        ${p?.sessionFee ?? "N/A"}
-                      </div>
+                      {p?.sessionTypes?.map((s: any) => (
+                        <div key={s._id} className="font-medium text-end">
+                          ${s?.fee ?? "N/A"}
+                        </div>
+                      ))}
                     </div>
+                  </div>
                   </div>
 
                   <div className="mt-6 w-full flex gap-2">
-                    <div className="flex-1">
+                    <div className="flex-1 flex items-center gap-2">
                       <BookAppointmentDialog provider={p} />
+                            <button
+                              className="bg-gradient-dash w-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 justify-center px-3 py-2 rounded-lg text-white"
+                        onClick={() => handleChat(p._id)}
+                        >
+                          <MessageCircle className="size-3" />
+                          Chat
+                        </button>
                     </div>
 
                     {/* <PaymentDialog>
@@ -349,7 +410,7 @@ export default function page() {
         </p>
       )}
 
-   {totalPages>1&&   <nav className="mt-12 flex justify-center items-center space-x-2">
+      {totalPages > 1 && <nav className="mt-12 flex justify-center items-center space-x-2">
         <button
           disabled={page === 1}
           onClick={() => handleClick(page - 1)}

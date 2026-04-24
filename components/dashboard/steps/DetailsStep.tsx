@@ -16,11 +16,13 @@ export default function DetailsStep({
   setSessionType,
   reason,
   setReason,
+  provider,
 }: {
   sessionType: string;
   setSessionType: (v: string) => void;
   reason: string;
   setReason: (r: string) => void;
+  provider: any;
 }) {
   return (
     <div className="w-full">
@@ -30,10 +32,13 @@ export default function DetailsStep({
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select session type" />
           </SelectTrigger>
+
           <SelectContent>
-            <SelectItem value="video">Video Call</SelectItem>
-            <SelectItem value="chat">Chat</SelectItem>
-            <SelectItem value="audio">Audio</SelectItem>
+            {provider?.sessionTypes?.map((s: any) => (
+              <SelectItem key={s._id} value={s._id}>
+                {s.name} {s.fee ? `- $${s.fee}` : ""}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

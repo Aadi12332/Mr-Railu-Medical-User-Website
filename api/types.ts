@@ -1,4 +1,5 @@
 export interface AuthResponse {
+  token?: string
   data?: {
     token?: string
   }
