@@ -13,11 +13,43 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import RatingModal from "@/components/ui/ratingModal";
+import { patientApi } from "@/api/patient.api";
 
 const VideoCall = dynamic(() => import("./video"), {
   ssr: false,
   loading: () => <div>Loading video session...</div>,
 });
+
+const reviewedSessionsStatic = [
+  {
+    _id: "r1",
+    status: "reviewed",
+    appointmentId: {
+      date: "2026-04-20",
+      time: "10:00 AM",
+      providerId: {
+        _id: "p1",
+        firstName: "Amit",
+        lastName: "Sharma",
+        specialty: "Psychologist",
+      },
+    },
+  },
+  {
+    _id: "r2",
+    status: "reviewed",
+    appointmentId: {
+      date: "2026-04-18",
+      time: "02:30 PM",
+      providerId: {
+        _id: "p2",
+        firstName: "Neha",
+        lastName: "Verma",
+        specialty: "Therapist",
+      },
+    },
+  },
+];
 
 function VideoSessionsContent() {
   const searchParams = useSearchParams();
@@ -28,9 +60,12 @@ function VideoSessionsContent() {
   const [isVideoSession, setIsVideoSession] = useState(false);
   const [connection, setConnection] = useState<any>(null);
   const [openRating, setOpenRating] = useState(false);
-  const [sessionTab, setSessionTab] = useState<"upcoming" | "completed">(
-    "upcoming",
+  const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
+    null,
   );
+  const [sessionTab, setSessionTab] = useState<
+    "upcoming" | "completed" | "reviewed"
+  >("upcoming");
 
   const fetchSession = async () => {
     try {
@@ -49,13 +84,20 @@ function VideoSessionsContent() {
   }, [search]);
 
   const filteredSessions = useMemo(() => {
+    if (sessionTab === "reviewed") {
+      return reviewedSessionsStatic;
+    }
+
     if (!sessions) return [];
 
     if (sessionTab === "completed") {
       return sessions.filter((item: any) => item?.status === "completed");
     }
 
-    return sessions.filter((item: any) => item?.status !== "completed");
+    return sessions.filter(
+      (item: any) =>
+        item?.status !== "completed" && item?.status !== "reviewed",
+    );
   }, [sessions, sessionTab]);
 
   const [checking, setChecking] = useState(false);
@@ -93,6 +135,7 @@ function VideoSessionsContent() {
       setChecking(false);
     }
   };
+
   const handleStartSession = async (id: string) => {
     try {
       const res = await dashboardApi.postSessionData("patient", {
@@ -106,6 +149,7 @@ function VideoSessionsContent() {
       toast.error(error?.message || "Failed to start session");
     }
   };
+
   if (isVideoSession) {
     return <VideoCall connection={connection} />;
   }
@@ -148,7 +192,7 @@ function VideoSessionsContent() {
         <h2 className="text-lg font-medium">Sessions</h2>
 
         <div className="inline-flex rounded-full bg-muted p-1">
-          {(["upcoming", "completed"] as const).map((tabItem) => (
+          {(["upcoming", "completed", "reviewed"] as const).map((tabItem) => (
             <button
               key={tabItem}
               onClick={() => setSessionTab(tabItem)}
@@ -189,7 +233,8 @@ function VideoSessionsContent() {
           ) : filteredSessions?.length === 0 ? (
             <Card className="p-6 text-center text-muted-foreground">
               <p className="text-base font-medium">
-                No {sessionTab === "upcoming" ? "upcoming" : "completed"} sessions found.
+                No {sessionTab === "upcoming" ? "upcoming" : "completed"}{" "}
+                sessions found.
               </p>
               <p className="mt-2 text-sm">
                 Check back later or schedule a new session with your provider.
@@ -223,25 +268,24 @@ function VideoSessionsContent() {
                         <div className="flex items-center gap-3 text-sm text-muted-foreground">
                           <span className="inline-flex items-center gap-1.5">
                             <Calendar className="size-3.5" />
-                            {new Date(
-                              item?.appointmentId?.date,
-                            ).toDateString()}
+                            {new Date(item?.appointmentId?.date).toDateString()}
                           </span>
                           <span>•</span>
                           <span>{item?.appointmentId?.time}</span>
                         </div>
 
                         {item?.status === "completed" ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              onClick={() => setOpenRating(true)}
-                              className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-                            >
-                              Rate for this session
-                            </Button>
-                          </>
-                        ) : (
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedProviderId(provider?._id);
+                              setOpenRating(true);
+                            }}
+                            className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                          >
+                            Rate for this session
+                          </Button>
+                        ) : item?.status === "reviewed" ? null : (
                           <Button
                             variant="outline"
                             onClick={() => handleStartSession(item?._id)}
@@ -264,10 +308,11 @@ function VideoSessionsContent() {
         </div>
       </section>
 
-
       <RatingModal
         open={openRating}
         onClose={() => setOpenRating(false)}
+        providerId={selectedProviderId || ""}
+        onSuccess={fetchSession}
       />
 
       <Card className="rounded-lg border border-sky-200 bg-sky-50 p-6">

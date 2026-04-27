@@ -13,6 +13,12 @@ import AutoScroll from "embla-carousel-auto-scroll";
 import { Container } from "./ui/container";
 import { SectionHeader } from "./ui/section-header";
 import Link from "next/link";
+import expert2 from "../assets/landing/expert-1.png";
+import expert1 from "../assets/landing/expert-2.png";
+import expert4 from "../assets/landing/expert-3.png";
+import expert3 from "../assets/landing/expert-4.png";
+
+const ExpertImages = [expert1, expert2, expert3, expert4];
 
 const features = [
   { id: 1, title: "Proven, Research-Backed Care Approaches" },
@@ -79,47 +85,47 @@ export default function ExpertsSection({ data }: any) {
               ]}
             >
               <CarouselContent className=" -mx-2">
-                {(experts.length ? experts : new Array(5).fill(null)).map(
-                  (ex: any, i: number) => {
-                    const Card = (
-                      <div className="first:ml-6 pl-4 shrink-0 w-65 md:w-60 lg:w-[320px] bg-white rounded-2xl border border-slate-100 shadow-sm p-3 hover:shadow-md transition-shadow">
-                        <div className="overflow-hidden rounded-xl aspect-square mb-3">
-                          {ex ? (
-                            <Image
-                              src={ex.imageUrl || "/placeholder.png"}
-                              alt={ex.fullName}
-                              width={320}
-                              height={320}
-                              className="object-cover rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-linear-to-br from-gray-100 to-gray-50 rounded-lg" />
-                          )}
-                        </div>
+              {(experts.length ? experts : new Array(5).fill(null)).map(
+  (ex: any, i: number) => {
+    const imageSrc =
+      ex?.imageUrl || ExpertImages[i % ExpertImages.length];
 
-                        <div className="text-sm font-semibold text-slate-900">
-                          {ex?.fullName}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
-                          {ex?.specialty}
-                          {ex?.experienceYears
-                            ? ` • ${ex.experienceYears} yrs exp`
-                            : ""}
-                        </p>
-                      </div>
-                    );
+    const Card = (
+      <div className="first:ml-6 pl-4 shrink-0 w-65 md:w-60 lg:w-[320px] bg-white rounded-2xl border border-slate-100 shadow-sm p-3 hover:shadow-md transition-shadow">
+        <div className="overflow-hidden rounded-xl aspect-square mb-3">
+          <Image
+            src={imageSrc}
+            alt={ex?.fullName || "expert"}
+            width={320}
+            height={320}
+            className="object-cover rounded-lg"
+          />
+        </div>
 
-                    return (
-                      <div key={ex?.id ?? i}>
-                        {ex?.destinationUrl ? (
-                          <Link href={ex.destinationUrl}>{Card}</Link>
-                        ) : (
-                          Card
-                        )}
-                      </div>
-                    );
-                  }
-                )}
+        <div className="text-sm font-semibold text-slate-900">
+          {ex?.fullName || "Expert Name"}
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
+          {ex?.specialty || "Specialist"}
+          {ex?.experienceYears
+            ? ` • ${ex.experienceYears} yrs exp`
+            : ""}
+        </p>
+      </div>
+    );
+
+    return (
+      <div key={ex?.id ?? i}>
+        {ex?.destinationUrl ? (
+          <Link href={ex.destinationUrl}>{Card}</Link>
+        ) : (
+          Card
+        )}
+      </div>
+    );
+  }
+)}
               </CarouselContent>
 
               <CarouselPrevious className="left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border" size="icon-sm" />

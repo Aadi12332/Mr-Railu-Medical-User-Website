@@ -28,6 +28,15 @@ export const patientApi = {
   rescheduleAppointment: (id: string, data: { date: string; time: string }) =>
     axios.put(`/v1/patient/appointments/${id}/reschedule`, data),
 
+  rateProvider: (
+  providerId: string,
+  data: { rating: number; description: string }
+) =>
+  axios.post(
+    `/v1/patient/providers/${providerId}/rating`,
+    data
+  ),
+
   cancelAppointment: (id: string) =>
     axios.put(`/v1/patient/appointments/${id}/cancel`),
 

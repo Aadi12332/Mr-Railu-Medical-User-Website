@@ -99,7 +99,7 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
 const isValidFee =
   Array.isArray(provider?.sessionTypes) &&
   provider.sessionTypes.some(
-    (s: any) => typeof s?.fee === "number" && s.fee > 0
+    (s: any) => typeof s?.price === "number" && s.price > 0
   );
 
   const selectedSession = provider?.sessionTypes?.find(

@@ -22,7 +22,7 @@ export default function TherapistStep({ provider }: { provider: any }) {
           <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Star className="size-4 text-amber-400 fill-current" />
-              <span className="font-semibold text-sm">{provider.rating}</span>
+              <span className="font-semibold text-sm">{provider.rating} ({provider.reviewCount})</span>
             </div>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function TherapistStep({ provider }: { provider: any }) {
 
           {provider?.sessionTypes?.map((s: any) => (
             <div key={s._id} className="font-medium text-end">
-              ${s?.fee ?? "N/A"}
+              ${s?.price ?? "N/A"}
             </div>
           ))}
         </div>

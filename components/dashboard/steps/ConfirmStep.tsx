@@ -44,7 +44,7 @@ export default function ConfirmStep({
 
           <div>Session Fee:</div>
           <div className="text-right font-medium text-foreground">
-            $ {selectedSession?.fee ?? 0}
+            $ {selectedSession?.price ?? 0}
           </div>
         </div>
       </div>

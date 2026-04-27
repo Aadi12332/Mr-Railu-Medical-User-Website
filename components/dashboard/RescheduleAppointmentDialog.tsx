@@ -77,8 +77,6 @@ export default function RescheduleAppointmentDialog({
       }));
 
       setSlots(mapped);
-
-      // Validate previously selected slot still exists
       setSelectedSlotId((prev) => {
         if (!prev) return null;
         const stillValid = mapped.some((s: any) => s.id === prev);

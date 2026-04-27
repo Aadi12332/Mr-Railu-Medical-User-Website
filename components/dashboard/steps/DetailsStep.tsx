@@ -25,7 +25,7 @@ export default function DetailsStep({
   provider: any;
 }) {
   return (
-    <div className="w-full">
+    <div className="">
       <div className="mb-4">
         <Label className="block mb-2">Session Type</Label>
         <Select value={sessionType} onValueChange={(v) => setSessionType(v)}>
@@ -35,8 +35,8 @@ export default function DetailsStep({
 
           <SelectContent>
             {provider?.sessionTypes?.map((s: any) => (
-              <SelectItem key={s._id} value={s._id}>
-                {s.name} {s.fee ? `- $${s.fee}` : ""}
+              <SelectItem key={s._id} value={s._id} >
+                {s.name} {s.price ? `- $${s.price}` : ""}
               </SelectItem>
             ))}
           </SelectContent>

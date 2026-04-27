@@ -338,8 +338,8 @@ export default function page() {
                     <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
                       <div className="flex items-center gap-2">
                         <RatingStars rating={p?.rating ?? 0} />
-                        <span className="font-semibold text-sm">
-                          {p?.rating ?? 0}
+                        <span className="font-semibold text-sm flex items-center gap-1">
+                          {p?.rating ?? 0} <span className="text-[10px]">({p?.reviewCount} reviews)</span>
                         </span>
                       </div>
                     </div>
@@ -352,8 +352,8 @@ export default function page() {
                   <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
                     <div className="space-y-1">
                       <div className="text-start">Experience</div>
-                      {p?.sessionTypes?.map((s: any) => (
-                        <div key={s._id} className="text-start">{s.name}</div>
+                      {p?.sessionTypes?.map((s: any, idx: number) => (
+                        <p key={idx} className="text-start">{s.name}</p>
                       ))}
                     </div>
 
@@ -361,9 +361,9 @@ export default function page() {
                       <div className="font-medium">
                         {p?.experience ? `${p.experience} years` : "-"}
                       </div>
-                      {p?.sessionTypes?.map((s: any) => (
-                        <div key={s._id} className="font-medium text-end">
-                          ${s?.fee ?? "N/A"}
+                      {p?.sessionTypes?.map((s: any, idx: number) => (
+                        <div key={idx} className="font-medium text-end">
+                          ${s?.price ?? "N/A"}
                         </div>
                       ))}
                     </div>
