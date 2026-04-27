@@ -28,14 +28,18 @@ export default function DetailsStep({
     <div className="">
       <div className="mb-4">
         <Label className="block mb-2">Session Type</Label>
-        <Select value={sessionType} onValueChange={(v) => setSessionType(v)}>
+        <Select   value={sessionType || undefined}
+ onValueChange={(v) => {
+
+          setSessionType(v)
+        }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select session type" />
           </SelectTrigger>
 
           <SelectContent>
             {provider?.sessionTypes?.map((s: any) => (
-              <SelectItem key={s._id} value={s._id} >
+              <SelectItem key={s.name} value={s.name}>
                 {s.name} {s.price ? `- $${s.price}` : ""}
               </SelectItem>
             ))}

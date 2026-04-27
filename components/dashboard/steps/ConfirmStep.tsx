@@ -8,12 +8,17 @@ export default function ConfirmStep({
   date,
   selectedTime,
   selectedSession,
+  sessionType,
 }: {
   provider: any;
   date: Date | undefined;
   selectedTime: string | null;
   selectedSession: any;
+  sessionType: string;
 }) {
+  const data = provider?.sessionTypes?.find(
+    (s: any) => s.name === sessionType
+  );
   return (
     <div className="w-full">
       <div className="rounded-lg border border-green-200 bg-green-50/60 p-6 mb-6">
@@ -41,11 +46,19 @@ export default function ConfirmStep({
           <div className="text-right font-medium text-foreground">
             {selectedTime || ""}
           </div>
-
+ <div>Session Name:</div>
+          <div className="text-right font-medium text-foreground">
+            {data?.name ?? ""}
+          </div>
+           <div>Session Type:</div>
+          <div className="text-right font-medium text-foreground">
+            {data?.type ?? ""}
+          </div>
           <div>Session Fee:</div>
           <div className="text-right font-medium text-foreground">
-            $ {selectedSession?.price ?? 0}
+            $ {data?.price ?? 0}
           </div>
+          
         </div>
       </div>
 

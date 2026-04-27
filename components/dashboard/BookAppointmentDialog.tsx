@@ -65,15 +65,15 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
 
         time = parsed.minute(minutes).format("HH:mm");
       }
-      {
-
-      }
+       const data = provider?.sessionTypes?.find(
+    (s: any) => s.name === sessionType
+  );
       const formattedDate = dayjs(date).format("YYYY-MM-DD")
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
         date: formattedDate,
         time,
-        type: sessionType,
+        type: data?.type || "",
       });
       sessionStorage.setItem("providerAmount", provider?.sessionFee);
       sessionStorage.setItem("appointmentId", res?.data?.appointment?._id);
@@ -192,6 +192,7 @@ const isValidFee =
               date={date}
               selectedTime={selectedTime}
               selectedSession={selectedSession}
+              sessionType={sessionType}
             />
           )}
         </div>
