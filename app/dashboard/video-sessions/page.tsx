@@ -20,37 +20,6 @@ const VideoCall = dynamic(() => import("./video"), {
   loading: () => <div>Loading video session...</div>,
 });
 
-const reviewedSessionsStatic = [
-  {
-    _id: "r1",
-    status: "reviewed",
-    appointmentId: {
-      date: "2026-04-20",
-      time: "10:00 AM",
-      providerId: {
-        _id: "p1",
-        firstName: "Amit",
-        lastName: "Sharma",
-        specialty: "Psychologist",
-      },
-    },
-  },
-  {
-    _id: "r2",
-    status: "reviewed",
-    appointmentId: {
-      date: "2026-04-18",
-      time: "02:30 PM",
-      providerId: {
-        _id: "p2",
-        firstName: "Neha",
-        lastName: "Verma",
-        specialty: "Therapist",
-      },
-    },
-  },
-];
-
 function VideoSessionsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q");
@@ -84,19 +53,22 @@ function VideoSessionsContent() {
   }, [search]);
 
   const filteredSessions = useMemo(() => {
-    if (sessionTab === "reviewed") {
-      return reviewedSessionsStatic;
-    }
-
     if (!sessions) return [];
 
+    if (sessionTab === "reviewed") {
+      return sessions.filter((item: any) => item?.isReviewed === true);
+    }
+
     if (sessionTab === "completed") {
-      return sessions.filter((item: any) => item?.status === "completed");
+      return sessions.filter(
+        (item: any) =>
+          item?.status === "completed" && item?.isReviewed === false
+      );
     }
 
     return sessions.filter(
       (item: any) =>
-        item?.status !== "completed" && item?.status !== "reviewed",
+        item?.status !== "completed" && item?.status !== "cancelled"
     );
   }, [sessions, sessionTab]);
 
@@ -153,6 +125,7 @@ function VideoSessionsContent() {
   if (isVideoSession) {
     return <VideoCall connection={connection} />;
   }
+
   return (
     <div className="space-y-6 h-full">
       <div>
@@ -217,7 +190,6 @@ function VideoSessionsContent() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
                       <div className="size-12 rounded-full bg-gray-200" />
-
                       <div className="space-y-2">
                         <div className="h-4 w-40 bg-gray-200 rounded" />
                         <div className="h-3 w-32 bg-gray-200 rounded" />
@@ -225,7 +197,6 @@ function VideoSessionsContent() {
                         <div className="h-8 w-32 bg-gray-200 rounded" />
                       </div>
                     </div>
-
                     <div className="h-6 w-24 bg-gray-200 rounded" />
                   </div>
                 </Card>
@@ -233,8 +204,7 @@ function VideoSessionsContent() {
           ) : filteredSessions?.length === 0 ? (
             <Card className="p-6 text-center text-muted-foreground">
               <p className="text-base font-medium">
-                No {sessionTab === "upcoming" ? "upcoming" : "completed"}{" "}
-                sessions found.
+                No {sessionTab === "upcoming" ? "upcoming" : "completed"} sessions found.
               </p>
               <p className="mt-2 text-sm">
                 Check back later or schedule a new session with your provider.
@@ -274,7 +244,7 @@ function VideoSessionsContent() {
                           <span>{item?.appointmentId?.time}</span>
                         </div>
 
-                        {item?.status === "completed" ? (
+                        {item?.status === "completed" && !item?.isReviewed ? (
                           <Button
                             variant="outline"
                             onClick={() => {
@@ -285,7 +255,7 @@ function VideoSessionsContent() {
                           >
                             Rate for this session
                           </Button>
-                        ) : item?.status === "reviewed" ? null : (
+                        ) : item?.isReviewed ? null : (
                           <Button
                             variant="outline"
                             onClick={() => handleStartSession(item?._id)}
