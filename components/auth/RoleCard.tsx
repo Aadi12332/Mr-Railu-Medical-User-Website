@@ -20,7 +20,7 @@ export default function RoleCard({ role, path }: Props) {
 
 const handleClick = () => {
   if (role === "provider") {
-    router.push("https://tele-health-provider-integration.vercel.app/provider-login");
+    router.push("https://mr-railu-medical-provider.vercel.app/provider-login");
   } else {
     router.push(path || `/${role}-login`);
   }
