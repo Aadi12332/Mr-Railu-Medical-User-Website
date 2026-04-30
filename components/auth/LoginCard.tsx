@@ -23,7 +23,11 @@ export default function LoginCard({
   const [remember, setRemember] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string; api?: string }>({});
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    api?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
 
   const resolvedSignUpPath =
@@ -55,7 +59,11 @@ export default function LoginCard({
       setErrors({});
 
       if (role === "Patient") {
-        const response = await authApi.patientLogin({ email, password,rememberMe:remember });
+        const response = await authApi.patientLogin({
+          email,
+          password,
+          rememberMe: remember,
+        });
         localStorage.setItem("role", "patient");
       } else {
         await providerApi.login({ email, password });
@@ -126,7 +134,7 @@ export default function LoginCard({
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
               >
-                {!showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
             {errors.password && (
@@ -143,13 +151,13 @@ export default function LoginCard({
                 onChange={() => setRemember(!remember)}
                 className="w-4 h-4 accent-teal-600"
               />
-              <label htmlFor="remember" className="text-sm text-gray-600">Remember me</label>
+              <label htmlFor="remember" className="text-sm text-gray-600">
+                Remember me
+              </label>
             </div>
             <span
               className="text-sm text-gray-600 cursor-pointer"
-              onClick={() =>
-                router.push(`/forgot-password?role=${role}`)
-              }
+              onClick={() => router.push(`/forgot-password?role=${role}`)}
             >
               Forgot password?
             </span>
