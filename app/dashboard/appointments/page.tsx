@@ -2,9 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { cn } from "@/lib/utils";
-import {
-  AppointmentCard,
-} from "@/components/dashboard/AppointmentCard";
+import { AppointmentCard } from "@/components/dashboard/AppointmentCard";
 import { Calendar } from "lucide-react";
 import { dashboardApi } from "@/api/dashboard.service";
 import { toast } from "react-toastify";
@@ -14,14 +12,14 @@ import { useDebounce } from "@/hooks/useDebounce";
 
 const VideoCall = dynamic(() => import("../video-sessions/video"), {
   ssr: false,
-  loading: () => <div>Loading video session...</div>
+  loading: () => <div>Loading video session...</div>,
 });
 
 function AppointmentsContent() {
-    const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const query = searchParams.get("q");
   const search = useDebounce(query, 500);
-  
+
   const [tab, setTab] = useState<"upcoming" | "past" | "cancelled">("upcoming");
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +48,25 @@ function AppointmentsContent() {
   };
   const mappedAppointments = appointments.map((item) => {
     const provider = item?.providerId;
+    const rawDate = item?.date;
+    const itemDate = rawDate ? new Date(rawDate) : null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (itemDate) itemDate.setHours(0, 0, 0, 0);
+    const isPast = itemDate ? itemDate.getTime() < today.getTime() : false;
+
+    let status =
+      item?.status === "confirmed"
+        ? "Confirmed"
+        : item?.status === "cancelled"
+          ? "Cancelled"
+          : item?.status === "completed"
+            ? "Past"
+            : "Pending";
+
+    if (status !== "Cancelled" && isPast) {
+      status = "Past";
+    }
 
     return {
       id: item?._id,
@@ -57,18 +74,12 @@ function AppointmentsContent() {
       providerName: `${provider?.firstName || ""} ${provider?.lastName || ""}`,
       specialty: provider?.specialty || "",
       initials: `${provider?.firstName?.[0] || ""}${provider?.lastName?.[0] || ""}`,
-      date: new Date(item?.date).toDateString(),
+      date: itemDate ? itemDate.toDateString() : "",
+      rawDate,
       time: item?.time,
       duration: item?.sessionDurationMinutes,
       type: item?.type === "video" ? "Video Call" : "Audio Call",
-      status:
-        item?.status === "confirmed"
-          ? "Confirmed"
-          : item?.status === "cancelled"
-            ? "Cancelled"
-            : item?.status === "completed"
-              ? "Past"
-              : "Pending",
+      status,
     };
   });
 
@@ -85,23 +96,25 @@ function AppointmentsContent() {
   function formatBannerDate(app: any) {
     if (!app) return "";
     const today = new Date();
-    const parsed = new Date(app.date);
-    const diff = parsed.setHours(0, 0, 0) - today.setHours(0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const parsed = new Date(app.rawDate || app.date);
+    parsed.setHours(0, 0, 0, 0);
+    const diff = parsed.getTime() - today.getTime();
     if (diff === 0) return "today";
     if (diff === 24 * 60 * 60 * 1000) return "tomorrow";
-    return `on ${app.date}`;
+    return `on ${parsed.toDateString()}`;
   }
   const handleStartSession = async (id: string) => {
     try {
-      const res = await dashboardApi.postSessionData("patient", { sessionId: id });
+      const res = await dashboardApi.postSessionData("patient", {
+        sessionId: id,
+      });
 
       setIsVideoSession(true);
       setConnection(res?.data?.connection || null);
       toast.success("Session started successfully");
     } catch (error: any) {
-      toast.error(
-        error?.message || "Failed to start session"
-      );
+      toast.error(error?.message || "Failed to start session");
     }
   };
   if (isVideoSession) {
@@ -109,7 +122,6 @@ function AppointmentsContent() {
   }
   return (
     <div className="space-y-6 h-full">
-
       <div>
         <h1 className="text-2xl font-medium">My Appointments</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -141,7 +153,6 @@ function AppointmentsContent() {
       </div>
 
       <div className="space-y-4">
-
         {loading &&
           Array(3)
             .fill(0)
@@ -163,7 +174,10 @@ function AppointmentsContent() {
             <AppointmentCard
               fetchAppointments={fetchAppointments}
               handleStartSession={handleStartSession}
-              key={app.id} appointment={app} handleCancelApp={handleCancelApp} />
+              key={app.id}
+              appointment={app}
+              handleCancelApp={handleCancelApp}
+            />
           ))}
       </div>
     </div>
