@@ -9,7 +9,7 @@ export default function ServicesDisclaimer() {
         <div>
           <strong>Important Disclaimer</strong>
           <div className="text-sm text-muted-foreground mt-1">
-            MEDvidi operates as a technology platform that facilitates
+            Telehealth operates as a technology platform that facilitates
             connections between patients and independent healthcare
             professionals. We do not employ physicians or mental health
             practitioners.
@@ -29,9 +29,9 @@ export default function ServicesDisclaimer() {
       </h4>
       <ul className="mt-2 space-y-1 list-disc list-inside">
         {[
-          "Healthcare providers are not employees or agents of MEDvidi",
+          "Healthcare providers are not employees or agents of Telehealth",
           "Providers maintain independent professional liability for their services",
-          "MEDvidi does not direct, supervise, or control clinical decisions",
+          "Telehealth does not direct, supervise, or control clinical decisions",
           "Professional-patient relationships exist solely between users and providers",
         ].map((point) => (
           <li key={point}>
@@ -41,9 +41,9 @@ export default function ServicesDisclaimer() {
       </ul>
 
       <p className="mt-4 text-sm text-muted-foreground">
-        MEDvidi's role is limited to providing the technical infrastructure and
-        administrative support that enables these independent professionals to
-        deliver care remotely.
+        Telehealth's role is limited to providing the technical infrastructure
+        and administrative support that enables these independent professionals
+        to deliver care remotely.
       </p>
     </>
   );

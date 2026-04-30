@@ -18,10 +18,10 @@ export default function EnforcementOfTerms() {
           <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
         </summary>
         <div className="mt-3 text-sm text-muted-foreground">
-          These Terms are governed by the laws of the jurisdiction where MEDvidi
-          is incorporated, without regard to conflict of law provisions. You
-          agree to submit to the personal jurisdiction of the courts located in
-          that jurisdiction for any disputes.
+          These Terms are governed by the laws of the jurisdiction where
+          Telehealth is incorporated, without regard to conflict of law
+          provisions. You agree to submit to the personal jurisdiction of the
+          courts located in that jurisdiction for any disputes.
         </div>
       </details>
 
@@ -52,7 +52,7 @@ export default function EnforcementOfTerms() {
       </details>
 
       <p className="mt-2">
-        These Terms constitute the entire agreement between you and MEDvidi
+        These Terms constitute the entire agreement between you and Telehealth
         regarding use of the website and supersede all prior agreements.
       </p>
     </>

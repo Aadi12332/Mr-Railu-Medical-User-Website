@@ -7,7 +7,7 @@ export default function AgreementToIndemnify() {
   return (
     <>
       <p>
-        You agree to defend, indemnify, and hold harmless MEDvidi, its
+        You agree to defend, indemnify, and hold harmless Telehealth, its
         affiliates, officers, directors, employees, and agents from any claims,
         damages, losses, or expenses arising from your use of the website.
       </p>

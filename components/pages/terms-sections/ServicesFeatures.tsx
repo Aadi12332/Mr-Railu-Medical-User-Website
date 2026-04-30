@@ -6,7 +6,7 @@ export default function ServicesFeatures() {
   return (
     <>
       <p>
-        MEDvidi provides an online platform that connects users with licensed
+        Telehealth provides an online platform that connects users with licensed
         healthcare professionals for telehealth services. Our website offers
         various features designed to facilitate remote healthcare delivery.
       </p>

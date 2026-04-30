@@ -43,7 +43,7 @@ export default function NoAssignmentOfTerms() {
       </div>
 
       <p className="mt-3 text-sm text-muted-foreground">
-        MEDvidi reserves the right to assign these Terms and any rights or
+        Telehealth reserves the right to assign these Terms and any rights or
         obligations hereunder to any third party in connection with a merger,
         acquisition, sale of assets, or other business transfer.
       </p>

@@ -21,7 +21,7 @@ import { publicPageApi } from "@/api/publicpage.api";
 
 const categories = [
   {
-    title: "About MEDvidi",
+    title: "About Telehealth",
     icon: Building2Icon,
     items: [],
   },
@@ -74,12 +74,12 @@ export default function FAQCategories({ search }: { search: string }) {
   }, []);
 
   const categoryMap: Record<string, string> = {
-    about: "About MEDvidi",
+    about: "About Telehealth",
     appointments: "Appointments",
     prescription: "Prescription",
     pricing: "Pricing",
     "dea-update": "DEA Update",
-    providers: "About MEDvidi",
+    providers: "About Telehealth",
   };
 
   const groupedFaqs = faqs.reduce((acc: any, faq: any) => {
@@ -99,26 +99,27 @@ export default function FAQCategories({ search }: { search: string }) {
   }, {});
 
   const filteredFaqs = Object.keys(groupedFaqs).reduce((acc: any, key) => {
-    acc[key] = groupedFaqs[key].filter((item: any) =>
-      item.q.toLowerCase().includes(search.toLowerCase()) ||
-      item.a.toLowerCase().includes(search.toLowerCase())
+    acc[key] = groupedFaqs[key].filter(
+      (item: any) =>
+        item.q.toLowerCase().includes(search.toLowerCase()) ||
+        item.a.toLowerCase().includes(search.toLowerCase()),
     );
     return acc;
   }, {});
 
   useEffect(() => {
-  const handleScroll = () => {
-    const offsets = sectionRefs.current.map((el) =>
-      el ? Math.abs(el.getBoundingClientRect().top) : Infinity
-    );
+    const handleScroll = () => {
+      const offsets = sectionRefs.current.map((el) =>
+        el ? Math.abs(el.getBoundingClientRect().top) : Infinity,
+      );
 
-    const minIndex = offsets.indexOf(Math.min(...offsets));
-    setActive(minIndex);
-  };
+      const minIndex = offsets.indexOf(Math.min(...offsets));
+      setActive(minIndex);
+    };
 
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -132,7 +133,7 @@ export default function FAQCategories({ search }: { search: string }) {
           }
         });
       },
-      { rootMargin: "-20% 0px -70% 0px", threshold: 0.1 }
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0.1 },
     );
 
     sectionRefs.current.forEach((el) => {
@@ -182,7 +183,7 @@ export default function FAQCategories({ search }: { search: string }) {
                   "flex items-center gap-2 whitespace-nowrap px-4 py-2 border-b-2 transition-colors",
                   idx === active
                     ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
                 <cat.icon className="size-4" />

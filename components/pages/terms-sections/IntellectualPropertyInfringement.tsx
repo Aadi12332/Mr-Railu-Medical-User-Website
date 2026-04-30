@@ -41,9 +41,9 @@ export default function IntellectualPropertyInfringement() {
       <div className="mt-4 p-4 border rounded-md bg-white">
         <p className="text-sm font-semibold">Send Notices To:</p>
         <div className="mt-2 text-sm text-muted-foreground">
-          MEDvidi Legal Department
+          Telehealth Legal Department
           <br />
-          Email: legal@medvidi.com
+          Email: legal@Telehealth.com
           <br />
           Subject Line: ”Copyright Infringement Notice“
         </div>

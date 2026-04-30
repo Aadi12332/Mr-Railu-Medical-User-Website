@@ -10,8 +10,8 @@ export default function NoProviderRelationship() {
           <strong>Critical Disclaimer</strong>
           <div className="text-sm mt-1">
             No provider-patient relationship is established between you and
-            MEDvidi by using this website. MEDvidi does not provide medical
-            advice or healthcare services directly.
+            Telehealth by using this website. Telehealth does not provide
+            medical advice or healthcare services directly.
           </div>
         </div>
       </div>
@@ -25,7 +25,7 @@ export default function NoProviderRelationship() {
       <h4 className="mt-4 font-medium">Important Clarifications</h4>
       <ul className="mt-2 space-y-1 list-disc list-inside">
         {[
-          "MEDvidi is a technology platform, not a healthcare provider",
+          "Telehealth is a technology platform, not a healthcare provider",
           "Provider-patient relationships exist only between you and independent professionals",
           "General website content should not be relied upon as medical advice",
           "Always consult directly with a licensed professional for medical concerns",

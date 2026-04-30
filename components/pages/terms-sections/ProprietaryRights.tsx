@@ -8,7 +8,7 @@ export default function ProprietaryRights() {
     <>
       <p>
         All content, features, and functionality on this website are owned by
-        MEDvidi or our licensors and are protected by copyright, trademark,
+        Telehealth or our licensors and are protected by copyright, trademark,
         patent, and other intellectual property laws.
       </p>
 
@@ -70,7 +70,7 @@ export default function ProprietaryRights() {
       <p className="mt-4 text-sm text-muted-foreground">
         Unauthorized use of our intellectual property may result in legal action
         and liability for damages. All rights not expressly granted are reserved
-        by MEDvidi.
+        by Telehealth.
       </p>
     </>
   );

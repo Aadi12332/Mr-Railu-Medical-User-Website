@@ -7,13 +7,13 @@ export default function TermsOverview() {
   return (
     <>
       <p>
-        Welcome to MEDvidi. By accessing or using our website and services, you
-        agree to be bound by these Terms and Conditions of Use. Please read them
-        carefully before proceeding.
+        Welcome to Telehealth. By accessing or using our website and services,
+        you agree to be bound by these Terms and Conditions of Use. Please read
+        them carefully before proceeding.
       </p>
       <p className="mt-2">
         These Terms constitute a legally binding agreement between you and
-        MEDvidi. If you do not agree with any part of these Terms, you must
+        Telehealth. If you do not agree with any part of these Terms, you must
         discontinue use of our website immediately.
       </p>
 
