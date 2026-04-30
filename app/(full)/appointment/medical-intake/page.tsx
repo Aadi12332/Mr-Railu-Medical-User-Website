@@ -31,37 +31,55 @@ const intakeFormSchema = z.object({
   middleInitial: z.string().optional(),
   lastName: z.string().min(1, { message: "Last name is required" }),
   sex: z.string().min(1, { message: "Please select your sex" }),
-  dob: z.string().min(1, { message: "Date of birth is required" }),
+  dob: z
+    .string()
+    .min(1, { message: "Date of birth is required" })
+    .refine(
+      (value) => {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return false;
+        }
+        const today = new Date();
+        const minDate = new Date(
+          today.getFullYear() - 18,
+          today.getMonth(),
+          today.getDate(),
+        );
+        return date <= minDate;
+      },
+      { message: "You must be at least 18 years old." },
+    ),
   primaryPhone: z.string().optional(),
-  mobilePhone: z.string().optional(),
+  mobilePhone: z.string().min(1, { message: "Mobile number is required" }),
   workPhone: z.string().optional(),
   email: z
     .string()
-    .email({ message: "Enter a valid email address" })
-    .optional(),
-  address1: z.string().optional(),
+    .min(1, { message: "Email is required" })
+    .email({ message: "Enter a valid email address" }),
+  address1: z.string().min(1, { message: "Address is required" }),
   address2: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zip: z.string().optional(),
+  city: z.string().min(1, { message: "City is required" }),
+  state: z.string().min(1, { message: "State is required" }),
+  zip: z.string().min(1, { message: "Zip is required" }),
   maritalStatus: z.string().optional(),
   drivingLicense: z.string().optional(),
 
   // emergency contact
   emergency: z.object({
-    relationship: z.string().optional(),
-    firstName: z.string().optional(),
+    relationship: z.string().min(1, { message: "Relationship is required" }),
+    firstName: z.string().min(1, { message: "First name is required" }),
     middleName: z.string().optional(),
-    lastName: z.string().optional(),
+    lastName: z.string().min(1, { message: "Last name is required" }),
     primaryPhone: z.string().optional(),
     mobilePhone: z.string().optional(),
     workPhone: z.string().optional(),
     email: z.string().optional(),
-    address1: z.string().optional(),
+    address1: z.string().min(1, { message: "Address is required" }),
     address2: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    zip: z.string().optional(),
+    city: z.string().min(1, { message: "City is required" }),
+    state: z.string().min(1, { message: "State is required" }),
+    zip: z.string().min(1, { message: "Zip is required" }),
   }),
 
   // medical questions
@@ -82,12 +100,17 @@ type IntakeFormValues = z.infer<typeof intakeFormSchema>;
 
 export default function MedicalIntakePage() {
   const router = useRouter();
-  const { data: bookingFlow, loading: bookingFlowLoading, error: bookingFlowError } = useFetch(publicPageApi.getBookingFlow) as any;
+  const {
+    data: bookingFlow,
+    loading: bookingFlowLoading,
+    error: bookingFlowError,
+  } = useFetch(publicPageApi.getBookingFlow) as any;
 
   const intakeSections = bookingFlow?.intakeStep?.sections;
-  const hasDynamicSections = Array.isArray(intakeSections) && intakeSections.length > 0;
-console.log({bookingFlow});
-const intakeForm=bookingFlow?.intakeStep?.phq9
+  const hasDynamicSections =
+    Array.isArray(intakeSections) && intakeSections.length > 0;
+  console.log({ bookingFlow });
+  const intakeForm = bookingFlow?.intakeStep?.phq9;
 
   const showSection = (key: string) => {
     if (!hasDynamicSections) return true;
@@ -96,13 +119,19 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
   // Create dynamic PHQ-9 default values based on API data
   const createPhqDefaults = () => {
     if (!intakeForm?.questions) return {};
-    
+
     const defaults: Record<string, number> = {};
     intakeForm.questions.forEach((question: any) => {
       defaults[question.key] = 0; // Default to "Not At All" (value 0)
     });
     return defaults;
   };
+
+  const maxDob = (() => {
+    const today = new Date();
+    today.setFullYear(today.getFullYear() - 18);
+    return today.toISOString().split("T")[0];
+  })();
 
   const form = useForm<IntakeFormValues>({
     resolver: zodResolver(intakeFormSchema),
@@ -144,10 +173,20 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
     console.log("intake form data", data);
     setIsSubmitting(true);
     try {
-      const providerData = typeof window !== "undefined" ? JSON.parse(sessionStorage.getItem("providerData") || "{}") : {};
-      const selectedSlot = typeof window !== "undefined" ? JSON.parse(sessionStorage.getItem("selectedSlot") || "{}") : {};
-      const carePlan = typeof window !== "undefined" ? sessionStorage.getItem("plan") : "new_patient";
-      const careType = carePlan === "new" ? "new_patient" : (carePlan || "new_patient");
+      const providerData =
+        typeof window !== "undefined"
+          ? JSON.parse(sessionStorage.getItem("providerData") || "{}")
+          : {};
+      const selectedSlot =
+        typeof window !== "undefined"
+          ? JSON.parse(sessionStorage.getItem("selectedSlot") || "{}")
+          : {};
+      const carePlan =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("plan")
+          : "new_patient";
+      const careType =
+        carePlan === "new" ? "new_patient" : carePlan || "new_patient";
 
       let formattedDate = "2026-04-20";
       let formattedTime = "10:00";
@@ -155,7 +194,9 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
         if (selectedSlot?.date && selectedSlot?.start) {
           let dateObj = new Date();
           if (selectedSlot.date !== "Today") {
-            dateObj = new Date(`${selectedSlot.date}, ${dateObj.getFullYear()}`);
+            dateObj = new Date(
+              `${selectedSlot.date}, ${dateObj.getFullYear()}`,
+            );
           }
           const timeParts = selectedSlot.start.match(/(\d+):(\d+)\s*(AM|PM)?/i);
           if (timeParts) {
@@ -188,17 +229,27 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
         conditionLabel: providerData?.specialty || "ADHD / ADD Treatment",
         conditionSlug: "adhd-add-treatment",
         careType: careType,
-        consultationFee: selectedSlot?.date === "Today" ? (providerData?.sessionTypes?.[0]?.fee || 195) : (providerData?.suggestedProvider?.sessionTypes?.[1]?.fee || providerData?.sessionTypes?.[1]?.fee || 195),
+        consultationFee:
+          selectedSlot?.date === "Today"
+            ? providerData?.sessionTypes?.[0]?.fee || 195
+            : providerData?.suggestedProvider?.sessionTypes?.[1]?.fee ||
+              providerData?.sessionTypes?.[1]?.fee ||
+              195,
         date: formattedDate,
         time: formattedTime,
         type: "video",
-        reasonForVisit: data.medicalHistory?.[0] || "Difficulty focusing and inattentiveness",
+        reasonForVisit:
+          data.medicalHistory?.[0] || "Difficulty focusing and inattentiveness",
         marketingMessages: true,
         agreeToTerms: true,
       };
 
       const res: any = await publicPageApi.postBookingFlow(payload);
-      if (res.status === 200 || res.status === 201 || res.status === "success") {
+      if (
+        res.status === 200 ||
+        res.status === 201 ||
+        res.status === "success"
+      ) {
         router.push("/appointment/medical-intake/success");
       }
     } catch (error) {
@@ -214,7 +265,7 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
       <div className="relative max-w-6xl mx-auto p-5 pt-16 py-8 space-y-4 bg-[#E6E8EE] flex flex-col items-center min-h-[60vh]">
         <Card className="w-full p-6 shadow-lg space-y-4">
           <Skeleton className="h-8 w-1/4 mb-6" />
-          
+
           {/* Basic Information Section */}
           <div className="space-y-4">
             <Skeleton className="h-6 w-32" />
@@ -271,7 +322,7 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                 ))}
               </div>
             </div>
-            
+
             {/* Difficulty options skeleton */}
             <div className="border-t p-3">
               <Skeleton className="h-4 w-64 mb-3" />
@@ -362,7 +413,10 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                     control={form.control}
                     name="sex"
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <SelectTrigger id="sex">
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
@@ -378,7 +432,7 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                 </Field>
                 <Field>
                   <FieldLabel>DOB</FieldLabel>
-                  <Input type="date" {...form.register("dob")} />
+                  <Input type="date" max={maxDob} {...form.register("dob")} />
                   <FieldError errors={[form.formState.errors.dob]} />
                 </Field>
                 <Field>
@@ -495,7 +549,8 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                   <Input {...form.register("emergency.middleName")} />
                   <FieldError
                     errors={[
-                      form.formState.errors.emergency?.middleName as unknown as {
+                      form.formState.errors.emergency
+                        ?.middleName as unknown as {
                         message?: string;
                       },
                     ]}
@@ -529,7 +584,8 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                   <Input {...form.register("emergency.mobilePhone")} />
                   <FieldError
                     errors={[
-                      form.formState.errors.emergency?.mobilePhone as unknown as {
+                      form.formState.errors.emergency
+                        ?.mobilePhone as unknown as {
                         message?: string;
                       },
                     ]}
@@ -633,7 +689,6 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-
                 <Field>
                   <FieldLabel>Concern in brief</FieldLabel>
 
@@ -805,7 +860,9 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                         {intakeForm.prompt}
                       </th>
                       {intakeForm.responseOptions
-                        .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+                        .sort(
+                          (a: any, b: any) => a.displayOrder - b.displayOrder,
+                        )
                         .map((option: any) => (
                           <th key={option.value} className="p-2 text-center">
                             {option.label}
@@ -820,8 +877,8 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                         const key = `phq.${question.key}` as const;
                         const phqError = (
                           form.formState.errors.phq as
-                          | Record<string, { message?: string } | undefined>
-                          | undefined
+                            | Record<string, { message?: string } | undefined>
+                            | undefined
                         )?.[question.key];
                         return (
                           <Fragment key={question.key}>
@@ -830,9 +887,15 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                                 {question.text}
                               </td>
                               {intakeForm.responseOptions
-                                .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
+                                .sort(
+                                  (a: any, b: any) =>
+                                    a.displayOrder - b.displayOrder,
+                                )
                                 .map((option: any) => (
-                                  <td key={option.value} className="p-2 py-3 text-center">
+                                  <td
+                                    key={option.value}
+                                    className="p-2 py-3 text-center"
+                                  >
                                     <Controller
                                       control={form.control}
                                       name={key}
@@ -840,8 +903,12 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                                         <input
                                           type="radio"
                                           value={option.value}
-                                          checked={Number(field.value) === option.value}
-                                          onChange={() => field.onChange(option.value)}
+                                          checked={
+                                            Number(field.value) === option.value
+                                          }
+                                          onChange={() =>
+                                            field.onChange(option.value)
+                                          }
                                         />
                                       )}
                                     />
@@ -855,7 +922,9 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                               >
                                 <td
                                   className="px-2 pb-2 text-destructive text-xs"
-                                  colSpan={intakeForm.responseOptions.length + 3}
+                                  colSpan={
+                                    intakeForm.responseOptions.length + 3
+                                  }
                                 >
                                   {question.text}: {phqError.message}
                                 </td>
@@ -874,7 +943,10 @@ const intakeForm=bookingFlow?.intakeStep?.phq9
                     {intakeForm.difficultyOptions
                       .sort((a: any, b: any) => a.displayOrder - b.displayOrder)
                       .map((option: any) => (
-                        <div key={option.value} className="flex items-center gap-2">
+                        <div
+                          key={option.value}
+                          className="flex items-center gap-2"
+                        >
                           <Controller
                             control={form.control}
                             name="difficulty"
