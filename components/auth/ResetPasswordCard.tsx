@@ -19,7 +19,7 @@ export default function ResetPasswordCard({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,11 +47,11 @@ const searchParams = useSearchParams();
       setLoading(true);
       setError(null);
       setSuccess(null);
-const email = searchParams.get("email") || "";
+      const email = searchParams.get("email") || "";
       await authApi.resetPassword({
         otp,
         email,
-        newPassword
+        newPassword,
       });
 
       setSuccess("Password reset successfully");
@@ -82,19 +82,13 @@ const email = searchParams.get("email") || "";
           Enter your details to reset password
         </p>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-5">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm mb-5">{error}</p>}
 
-        {success && (
-          <p className="text-green-600 text-sm mb-5">{success}</p>
-        )}
+        {success && <p className="text-green-600 text-sm mb-5">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block mb-2 text-sm font-medium">
-              OTP
-            </label>
+            <label className="block mb-2 text-sm font-medium">OTP</label>
             <input
               type="text"
               value={otp}
@@ -120,7 +114,7 @@ const email = searchParams.get("email") || "";
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
               >
-                {!showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
@@ -138,9 +132,7 @@ const email = searchParams.get("email") || "";
               />
               <button
                 type="button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
               >
                 {!showConfirmPassword ? (
