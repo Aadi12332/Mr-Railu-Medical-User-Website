@@ -15,15 +15,59 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { Star, Search, ChevronLeft, ChevronRight, Video, MessageCircle } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import BookAppointmentDialog from "@/components/dashboard/BookAppointmentDialog";
-import PaymentDialog from "@/components/dashboard/PaymentDialog";
-import { Button } from "@/components/ui/button";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
 import { RatingStars } from "@/components/ui/rating";
 import { cn } from "@/lib/utils";
-import { settingApi } from "@/api/setting.api";
+
+type SessionType = {
+  name?: string;
+  title?: string;
+  price?: number;
+  fee?: number;
+};
+
+type ProviderCondition = {
+  name?: string;
+  title?: string;
+  slug?: string;
+};
+
+type ProviderRecord = {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  specialty?: string;
+  rating?: number;
+  reviewCount?: number;
+  availableToday?: boolean;
+  experience?: number;
+  sessionFee?: number;
+  sessionTypes?: SessionType[];
+  conditions?: Array<string | ProviderCondition>;
+  condition?: string;
+};
+
+type ProvidersResponse = {
+  data?: {
+    providers?: ProviderRecord[];
+  };
+  providers?: ProviderRecord[];
+  total?: number;
+};
+
+type ChatStartResponse = {
+  chat?: {
+    _id?: string;
+  };
+  data?: {
+    chat?: {
+      _id?: string;
+    };
+  };
+};
 
 const SkeletonCard = () => (
   <Card className="p-4 animate-pulse">
@@ -56,82 +100,88 @@ const SkeletonCard = () => (
     </div>
   </Card>
 );
-export default function page() {
+export default function Page() {
   const [role, setRole] = useState("");
-  const [providers, setProviders] = useState<any[]>([]);
+  const [providers, setProviders] = useState<ProviderRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [rating, setRating] = useState("any");
   const [priceRange, setPriceRange] = useState("any");
-    const router = useRouter();
-  const [selectedProvider, setSelectedProvider] = useState<any>(null);
-  const [sessionTab, setSessionTab] = useState<"All Providers" | "My Providers">(
-    "All Providers",
-  );
-  const [chatList, setChatList] = useState<any[]>([]);
-  const [page, setPage] = useState(1)
-  const [limit] = useState(9)
-  const [total, setTotal] = useState(0)
-  const handleMyProviders = async () => {
-    if (!role) return
+  const router = useRouter();
+  const [sessionTab, setSessionTab] = useState<
+    "All Providers" | "My Providers"
+  >("All Providers");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(9);
+  const [total, setTotal] = useState(0);
+  const handleMyProviders = useCallback(async () => {
+    if (!role) return;
 
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
-      let response: any
+      const response = (await (sessionTab === "My Providers"
+        ? dashboardApi.getMyProviders(role, { page, limit })
+        : dashboardApi.getProviders(role, {
+            page,
+            limit,
+          }))) as ProvidersResponse;
 
-      if (sessionTab === "My Providers") {
-        response = await dashboardApi.getMyProviders(role, { page, limit })
-      } else {
-        response = await dashboardApi.getProviders(role, { page, limit })
-      }
-
-      const data = response?.data || {}
-      console.log(response)
-      setProviders(data?.providers || [])
-      setTotal(response?.total || 0)
-
-    } catch (err: any) {
-      setError(err?.message || "Failed to fetch providers")
+      const validProviders = (
+        response?.data?.providers ||
+        response?.providers ||
+        []
+      ).filter(
+        (provider) =>
+          Array.isArray(provider?.sessionTypes) &&
+          provider.sessionTypes.length > 0,
+      );
+      setProviders(validProviders);
+      setTotal(response?.total || 0);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch providers",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [role, sessionTab, page, limit]);
+
   useEffect(() => {
     handleMyProviders();
-  }, [role, sessionTab, page]);
-  const totalPages = Math.ceil(total / limit)
+  }, [handleMyProviders]);
+  const totalPages = Math.ceil(total / limit);
 
   const pagination = useMemo(() => {
     if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1)
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    const pages: (number | string)[] = []
-    pages.push(1)
+    const pages: (number | string)[] = [];
+    pages.push(1);
 
     if (page > 4) {
-      pages.push("...")
+      pages.push("...");
     }
 
-    const start = Math.max(2, page - 2)
-    const end = Math.min(totalPages - 1, page + 2)
+    const start = Math.max(2, page - 2);
+    const end = Math.min(totalPages - 1, page + 2);
 
     for (let i = start; i <= end; i++) {
-      pages.push(i)
+      pages.push(i);
     }
 
     if (page < totalPages - 3) {
-      pages.push("...")
+      pages.push("...");
     }
 
-    pages.push(totalPages)
+    pages.push(totalPages);
 
-    return pages
-  }, [totalPages, page])
+    return pages;
+  }, [totalPages, page]);
   const handleClick = (page: number) => {
     setPage(page);
   };
@@ -139,82 +189,86 @@ export default function page() {
     setRole(localStorage.getItem("role") || "");
   }, []);
 
-  const filteredProviders = providers.filter((p: any) => {
+  const searchQuery = search.trim().toLowerCase();
+
+  const filteredProviders = providers.filter((p) => {
     const fullName = `${p.firstName} ${p.lastName}`.toLowerCase();
     const spec = p.specialty?.toLowerCase() || "";
+    const sessionTypesText = Array.isArray(p.sessionTypes)
+      ? p.sessionTypes
+          .map((sessionType) => {
+            return [sessionType?.name, sessionType?.title]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+          })
+          .join(" ")
+      : "";
+    const conditionsText = Array.isArray(p.conditions)
+      ? p.conditions
+          .map((condition) => {
+            if (typeof condition === "string") {
+              return condition.toLowerCase();
+            }
+
+            return [condition?.name, condition?.title, condition?.slug]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+          })
+          .join(" ")
+      : typeof p.condition === "string"
+        ? p.condition.toLowerCase()
+        : "";
     const ratingValue = Number(p.rating || 0);
-    const matchesSearch =
-      fullName.includes(search.toLowerCase()) ||
-      spec.includes(search.toLowerCase());
+    const matchesSearch = !searchQuery
+      ? true
+      : [fullName, spec, sessionTypesText, conditionsText].some((field) =>
+          field.includes(searchQuery),
+        );
 
     const matchesSpecialty = specialty === "all" || spec.includes(specialty);
 
     const matchesRating = rating === "any" || ratingValue >= Number(rating);
     const matchesPriceRange = (() => {
-      if (priceRange === "any" || priceRange === "all") return true
+      if (priceRange === "any" || priceRange === "all") return true;
 
-      const fee = Number(p.sessionFee ?? 0)
+      const fee = Number(p.sessionFee ?? 0);
 
       if (priceRange === "0-100") {
-        return fee >= 0 && fee <= 100
+        return fee >= 0 && fee <= 100;
       }
 
       if (priceRange === "100-150") {
-        return fee > 100 && fee <= 150
+        return fee > 100 && fee <= 150;
       }
 
       if (priceRange === "150+") {
-        return fee > 150
+        return fee > 150;
       }
 
-      return true
-    })()
+      return true;
+    })();
 
     return (
       matchesSearch && matchesSpecialty && matchesRating && matchesPriceRange
     );
   });
 
-    const fetchChatList = async () => {
-      try {
-        setLoading(true);
-        setError("");
-  
-        const res = await settingApi.getChatList("patient", search);
-  
-        const normalizedChats = (res?.data?.chats || []).filter((i:any)=>i?.providerId).map((chat: any) => ({
-          ...chat,
-          id: chat.id || chat._id,
-        }));
-  
-        setChatList(normalizedChats);
-      } catch (err: any) {
-        console.error("Chat list error:", err);
-        setError("Failed to load chats");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      fetchChatList();
-    }, [search]);
-
-    const handleChat = async (providerId: string) => {
+  const handleChat = async (providerId: string) => {
     try {
       const role =
         typeof localStorage !== "undefined"
           ? localStorage.getItem("role")?.toLowerCase()
           : "";
 
-      const res: any = await dashboardApi.getMessageProvider(role || "", {
+      const res = (await dashboardApi.getMessageProvider(role || "", {
         providerId,
-      });
+      })) as ChatStartResponse;
 
       router.push(
         `/dashboard/messages?chatId=${res?.chat?._id || res?.data?.chat?._id}`,
       );
-      fetchChatList && fetchChatList();
     } catch (error) {
       console.error("Chat error:", error);
     }
@@ -265,7 +319,6 @@ export default function page() {
           </InputGroup>
         </div>
         {sessionTab === "All Providers" && (
-
           <div className="flex gap-2 w-full md:w-auto">
             <Select onValueChange={setSpecialty}>
               <SelectTrigger className="w-40 bg-accent border-0">
@@ -316,73 +369,80 @@ export default function page() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : filteredProviders.map((p: any) => (
-              <Card key={p._id} className="p-4">
-                <div className="flex flex-col items-center text-center justify-between w-full h-full">
-                  <div className="flex flex-col items-center text-center w-full flex-1">
-                    <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
-                    <AvatarFallback>
-                      {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
-                    </AvatarFallback>
-                  </Avatar>
+            : filteredProviders.map((p) => (
+                <Card key={p._id} className="p-4">
+                  <div className="flex flex-col items-center text-center justify-between w-full h-full">
+                    <div className="flex flex-col items-center text-center w-full flex-1">
+                      <Avatar className="size-20 border border-slate-100 bg-white shadow-sm">
+                        <AvatarFallback>
+                          {`${p?.firstName?.[0] || ""}${p?.lastName?.[0] || ""}`}
+                        </AvatarFallback>
+                      </Avatar>
 
-                  <div className="mt-4">
-                    <div className="text-sm font-semibold">
-                      {`${/^dr\.?\s/i.test(p?.firstName || "") ? "" : "Dr. "}${p?.firstName || ""} ${p?.lastName || ""}`}
-                    </div>
-
-                    <div className="text-xs text-muted-foreground">
-                      {p?.specialty || "Specialist"}
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
-                      <div className="flex items-center gap-2">
-                        <RatingStars rating={p?.rating ?? 0} />
-                        <span className="font-semibold text-sm flex items-center gap-1">
-                          {p?.rating ?? 0} <span className="text-[10px]">({p?.reviewCount} reviews)</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
-                      {p?.availableToday ? "Available Today" : "Not Available Today"}
-                    </Badge>
-                  </div>
-
-                  <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="space-y-1">
-                      <div className="text-start">Experience</div>
-                      {p?.sessionTypes?.map((s: any, idx: number) => (
-                        <p key={idx} className="text-start">{s.name}</p>
-                      ))}
-                    </div>
-
-                    <div className="text-right space-y-1">
-                      <div className="font-medium">
-                        {p?.experience ? `${p.experience} years` : "-"}
-                      </div>
-                      {p?.sessionTypes?.map((s: any, idx: number) => (
-                        <div key={idx} className="font-medium text-end">
-                          ${s?.price ?? "N/A"}
+                      <div className="mt-4">
+                        <div className="text-sm font-semibold">
+                          {`${/^dr\.?\s/i.test(p?.firstName || "") ? "" : "Dr. "}${p?.firstName || ""} ${p?.lastName || ""}`}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  </div>
 
-                  <div className="mt-6 w-full flex gap-2">
-                    <div className="flex-1 flex items-center gap-2">
-                      <BookAppointmentDialog provider={p} />
-                            <button
-                              className="bg-gradient-dash w-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 justify-center px-3 py-2 rounded-lg text-white"
-                        onClick={() => handleChat(p._id)}
+                        <div className="text-xs text-muted-foreground">
+                          {p?.specialty || "Specialist"}
+                        </div>
+
+                        <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground justify-center">
+                          <div className="flex items-center gap-2">
+                            <RatingStars rating={p?.rating ?? 0} />
+                            <span className="font-semibold text-sm flex items-center gap-1">
+                              {p?.rating ?? 0}{" "}
+                              <span className="text-[10px]">
+                                ({p?.reviewCount} reviews)
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+
+                        <Badge className="mt-3 rounded-full bg-emerald-100 text-emerald-700 border-emerald-100 px-3 py-1 text-xs">
+                          {p?.availableToday
+                            ? "Available Today"
+                            : "Not Available Today"}
+                        </Badge>
+                      </div>
+
+                      <div className="mt-6 w-full flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="space-y-1">
+                          <div className="text-start">Experience</div>
+                          {p?.sessionTypes?.map((s, idx: number) => (
+                            <p key={idx} className="text-start">
+                              {s.name}
+                            </p>
+                          ))}
+                        </div>
+
+                        <div className="text-right space-y-1">
+                          <div className="font-medium">
+                            {p?.experience ? `${p.experience} years` : "-"}
+                          </div>
+                          {p?.sessionTypes?.map((s, idx: number) => (
+                            <div key={idx} className="font-medium text-end">
+                              ${s?.price ?? "N/A"}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 w-full flex gap-2">
+                      <div className="flex-1 flex items-center gap-2">
+                        <BookAppointmentDialog provider={p} />
+                        <button
+                          className="bg-gradient-dash w-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 justify-center px-3 py-2 rounded-lg text-white"
+                          onClick={() => handleChat(p._id)}
                         >
                           <MessageCircle className="size-3" />
                           Chat
                         </button>
-                    </div>
+                      </div>
 
-                    {/* <PaymentDialog>
+                      {/* <PaymentDialog>
                       <Button
                         variant="outline"
                         className="w-full flex-1"
@@ -397,10 +457,10 @@ export default function page() {
                         Pay
                       </Button>
                     </PaymentDialog> */}
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
         </div>
       )}
 
@@ -410,37 +470,38 @@ export default function page() {
         </p>
       )}
 
-      {totalPages > 1 && <nav className="mt-12 flex justify-center items-center space-x-2">
-        <button
-          disabled={page === 1}
-          onClick={() => handleClick(page - 1)}
-          className="p-2 rounded-lg border bg-white disabled:opacity-50"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-
-        {pagination.map((p, idx) => (
+      {totalPages > 1 && (
+        <nav className="mt-12 flex justify-center items-center space-x-2">
           <button
-            key={`${p}-${idx}`}
-            onClick={() => typeof p === "number" && handleClick(p)}
-            disabled={p === "..."}
-            className={`px-4 py-2 rounded-lg border text-sm ${p === page
-              ? "bg-gradient-primary text-white"
-              : "bg-white"
-              }`}
+            disabled={page === 1}
+            onClick={() => handleClick(page - 1)}
+            className="p-2 rounded-lg border bg-white disabled:opacity-50"
           >
-            {p}
+            <ChevronLeft className="w-4 h-4" />
           </button>
-        ))}
 
-        <button
-          disabled={page === total}
-          onClick={() => handleClick(page + 1)}
-          className="p-2 rounded-lg border bg-white disabled:opacity-50"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </nav>}
+          {pagination.map((p, idx) => (
+            <button
+              key={`${p}-${idx}`}
+              onClick={() => typeof p === "number" && handleClick(p)}
+              disabled={p === "..."}
+              className={`px-4 py-2 rounded-lg border text-sm ${
+                p === page ? "bg-gradient-primary text-white" : "bg-white"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+
+          <button
+            disabled={page === total}
+            onClick={() => handleClick(page + 1)}
+            className="p-2 rounded-lg border bg-white disabled:opacity-50"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </nav>
+      )}
     </div>
   );
 }
