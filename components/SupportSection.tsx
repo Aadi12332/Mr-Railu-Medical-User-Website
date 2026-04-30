@@ -13,7 +13,9 @@ export default function SupportSection({ data }: any) {
   const features =
     data?.bullets
       ?.slice()
-      ?.sort((a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) || [];
+      ?.sort(
+        (a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+      ) || [];
 
   return (
     <section className="py-16 md:py-20 space-y-12">
@@ -22,9 +24,7 @@ export default function SupportSection({ data }: any) {
           <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-2 items-center">
             <div>
               <h2 className="text-2xl md:text-3xl font-semibold leading-relaxed">
-                <span className="block text-primary">
-                  {data?.title}
-                </span>
+                <span className="block text-primary">{data?.title}</span>
                 <span className="block text-slate-900 font-semibold">
                   {data?.subtitle}
                 </span>
@@ -39,7 +39,12 @@ export default function SupportSection({ data }: any) {
                     <li key={item.heading}>
                       <div className="flex gap-2 items-center">
                         <div className="size-8 rounded-full bg-[#2195801A] flex items-center justify-center shrink-0">
-                          <Image src={Icon} alt="" className="size-6" width={100} />
+                          <Image
+                            src={Icon}
+                            alt=""
+                            className="size-6"
+                            width={250}
+                          />
                         </div>
                         <div className="text-sm font-semibold text-slate-900">
                           {item.heading}
@@ -61,8 +66,8 @@ export default function SupportSection({ data }: any) {
                   <Image
                     src={data?.imageUrl || supportImg}
                     alt=""
-                    width={100}
-                    height={96}
+                    // width={100}
+                    // height={96}
                     className="object-cover w-full h-96"
                   />
                 </div>
@@ -78,9 +83,12 @@ export default function SupportSection({ data }: any) {
             <div className="flex justify-center md:justify-start">
               <div className="relative w-full max-w-lg">
                 <div className="relative">
-                  <Image src={mapImg} alt="" className="object-contain w-full h-auto" width={100}
-                    height={96}
-
+                  <Image
+                    src={mapImg}
+                    alt=""
+                    className="object-contain w-full h-auto"
+                    // width={100}
+                    // height={96}
                   />
                 </div>
               </div>
@@ -100,9 +108,12 @@ export default function SupportSection({ data }: any) {
                 <div className="mt-6">
                   <div className="flex items-center gap-4">
                     <div className="size-8 flex items-center justify-center bg-[#2195801A] rounded-full">
-                      <Image src={targetIcon} alt="" className="size-5" width={100}
+                      <Image
+                        src={targetIcon}
+                        alt=""
+                        className="size-5"
+                        width={100}
                         height={96}
-
                       />
                     </div>
                     <div className="text-sm font-semibold text-slate-900">
