@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import { Heart, Stethoscope } from "lucide-react";
 import { useState } from "react";
@@ -18,13 +20,17 @@ export default function RoleCard({ role, path }: Props) {
     ? "Access your, appointments, and prescriptions"
     : "Manage appointments, patients, and consultations";
 
-const handleClick = () => {
-  if (role === "provider") {
-    router.push("https://tele-health-provider-integration.vercel.app/provider-login");
-  } else {
-    router.push(path || `/${role}-login`);
-  }
-};
+  const handleClick = () => {
+    if (role === "provider") {
+      const providerBase = (
+        process.env.NEXT_PUBLIC_PROVIDER_PANEL_URL ||
+        "https://tele-health-provider-integration.vercel.app"
+      ).replace(/\/+$/g, "");
+      router.push(`${providerBase}/provider-login`);
+    } else {
+      router.push(path || `/${role}-login`);
+    }
+  };
 
   const Icon = isPatient ? Heart : Stethoscope;
 
