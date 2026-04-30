@@ -94,10 +94,19 @@ function VideoSessionsContent() {
       return sessions.filter((item: any) => item?.status === "completed");
     }
 
-    return sessions.filter(
-      (item: any) =>
-        item?.status !== "completed" && item?.status !== "reviewed",
-    );
+    return sessions.filter((item: any) => {
+      // Filter out completed and reviewed sessions
+      if (item?.status === "completed" || item?.status === "reviewed") {
+        return false;
+      }
+
+      // Filter out sessions with past dates
+      const sessionDate = new Date(item?.appointmentId?.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return sessionDate >= today;
+    });
   }, [sessions, sessionTab]);
 
   const [checking, setChecking] = useState(false);
