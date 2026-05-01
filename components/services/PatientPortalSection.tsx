@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import Link from "next/link";
-import portalImg from "@/assets/public/patient-portal.jpg";
+import portalImg from "@/public/services/patient-portal.jpg";
 
 export default function PatientPortalSection({ data }: { data: any }) {
   const features = [
