@@ -15,7 +15,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { Search, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, MessageCircle, X } from "lucide-react";
 import BookAppointmentDialog from "@/components/dashboard/BookAppointmentDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "@/api/dashboard.service";
@@ -56,6 +56,21 @@ type ProvidersResponse = {
   };
   providers?: ProviderRecord[];
   total?: number;
+};
+
+type SpecialtyRecord = {
+  id?: string;
+  value?: string;
+  label?: string;
+  name?: string;
+};
+
+type SpecialtiesResponse = {
+  data?: {
+    specialties?: SpecialtyRecord[];
+  };
+  specialties?: SpecialtyRecord[];
+  results?: number;
 };
 
 type ChatStartResponse = {
@@ -103,6 +118,7 @@ const SkeletonCard = () => (
 export default function Page() {
   const [role, setRole] = useState("");
   const [providers, setProviders] = useState<ProviderRecord[]>([]);
+  const [specialties, setSpecialties] = useState<SpecialtyRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -150,9 +166,24 @@ export default function Page() {
     }
   }, [role, sessionTab, page, limit]);
 
+  const handleSpecialties = useCallback(async () => {
+    try {
+      const response = (await dashboardApi.getProviderSpecialties()) as SpecialtiesResponse;
+      setSpecialties(response?.data?.specialties || response?.specialties || []);
+    } catch (err) {
+      console.error("Failed to fetch specialties:", err);
+      setSpecialties([]);
+    }
+  }, []);
+
   useEffect(() => {
     handleMyProviders();
   }, [handleMyProviders]);
+
+  useEffect(() => {
+    handleSpecialties();
+  }, [handleSpecialties]);
+
   const totalPages = Math.ceil(total / limit);
 
   const pagination = useMemo(() => {
@@ -185,6 +216,14 @@ export default function Page() {
   const handleClick = (page: number) => {
     setPage(page);
   };
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setSpecialty("all");
+    setRating("any");
+    setPriceRange("any");
+  };
+
   useEffect(() => {
     setRole(localStorage.getItem("role") || "");
   }, []);
@@ -303,32 +342,60 @@ export default function Page() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="flex-1">
-          <InputGroup className="bg-accent border-0 h-10">
-            <InputGroupAddon>
-              <Search className="size-4 text-muted-foreground" />
-            </InputGroupAddon>
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+          <div className="flex-1">
+            <InputGroup className="bg-accent border-0 h-10">
+              <InputGroupAddon>
+                <Search className="size-4 text-muted-foreground" />
+              </InputGroupAddon>
 
-            <InputGroupInput
-              type="search"
-              placeholder="Search by name, specialty, or condition..."
-              aria-label="Search providers"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </InputGroup>
+              <InputGroupInput
+                type="search"
+                placeholder="Search by name, specialty, or condition..."
+                aria-label="Search providers"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </InputGroup>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className={cn(
+              "inline-flex h-10 items-center gap-2 rounded-lg border border-dashed border-border bg-background px-3 text-sm text-muted-foreground transition-colors hover:border-foreground hover:text-foreground",
+              !search && specialty === "all" && rating === "any" && priceRange === "any" && "opacity-50",
+            )}
+          >
+            <X className="size-3.5" />
+            Clear filters
+          </button>
         </div>
+
         {sessionTab === "All Providers" && (
           <div className="flex gap-2 w-full md:w-auto">
-            <Select onValueChange={setSpecialty}>
+            <Select value={specialty} onValueChange={setSpecialty}>
               <SelectTrigger className="w-40 bg-accent border-0">
                 <SelectValue placeholder="Specialty" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="psychology">Psychology</SelectItem>
-                <SelectItem value="psychiatry">Psychiatry</SelectItem>
-                <SelectItem value="dermatology">Dermatology</SelectItem>
+                {specialties.map((specialtyItem) => {
+                  const optionValue =
+                    (specialtyItem.value || specialtyItem.name || specialtyItem.label || "")
+                      .toLowerCase()
+                      .trim();
+
+                  if (!optionValue) {
+                    return null;
+                  }
+
+                  return (
+                    <SelectItem key={specialtyItem.id || optionValue} value={optionValue}>
+                      {specialtyItem.label || specialtyItem.name || optionValue}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
 

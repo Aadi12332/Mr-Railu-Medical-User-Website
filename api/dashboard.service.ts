@@ -4,10 +4,17 @@ export const dashboardApi = {
   getDashboardData: (role = "patient") => {
     return axios.get(`/v1/${role}/dashboard`);
   },
+  getProviderSpecialties: () => {
+    return axios.get(`/v1/provider/auth/specialties`);
+  },
   getHomepageData: () => {
     return axios.get(`/v1/public/homepage`);
   },
-  getNotification: (params?: { filter?: string; page?: number; limit?: number }) => {
+  getNotification: (params?: {
+    filter?: string;
+    page?: number;
+    limit?: number;
+  }) => {
     return axios.get(`/v1/patient/notifications`, {
       params: {
         filter: params?.filter || "all",
@@ -33,7 +40,10 @@ export const dashboardApi = {
     });
   },
   postSessionData: (role = "patient", payload: any) => {
-    return axios.post(`/v1/${role}/sessions/${payload.sessionId}/join`, payload);
+    return axios.post(
+      `/v1/${role}/sessions/${payload.sessionId}/join`,
+      payload,
+    );
   },
   getAppointments: (role = "patient", search?: string) => {
     return axios.get(`/v1/${role}/appointments`, {
@@ -52,11 +62,17 @@ export const dashboardApi = {
   getMentalPlans: (role = "patient") => {
     return axios.get(`/v1/${role}/plans`);
   },
- getMyProviders: (role = "patient", params?: { page?: number; limit?: number }) => {
-  return axios.get(`/v1/${role}/providers/my-providers`, { params })
-},
-  getProviders: (role = "patient", params?: { page?: number; limit?: number }) => {
-    return axios.get(`/v1/${role}/providers`, { params })
+  getMyProviders: (
+    role = "patient",
+    params?: { page?: number; limit?: number },
+  ) => {
+    return axios.get(`/v1/${role}/providers/my-providers`, { params });
+  },
+  getProviders: (
+    role = "patient",
+    params?: { page?: number; limit?: number },
+  ) => {
+    return axios.get(`/v1/${role}/providers`, { params });
   },
   getMoodOptions: (role = "patient") => {
     return axios.get(`/v1/${role}/mood/options`);
@@ -64,7 +80,11 @@ export const dashboardApi = {
   getMoodHistory: (role = "patient") => {
     return axios.get(`/v1/${role}/mood/`);
   },
-  postRequestRefill: (role = "patient", prescriptionId: string, payload: any) => {
+  postRequestRefill: (
+    role = "patient",
+    prescriptionId: string,
+    payload: any,
+  ) => {
     return axios.post(
       `/v1/${role}/prescriptions/${prescriptionId}/request-refill`,
       payload,
@@ -122,11 +142,13 @@ export const dashboardApi = {
   postAdminMessage: (role = "patient") => {
     return axios.post(`/v1/${role}/chat/start-admin`);
   },
-  
+
   sendSupportReply: (role = "patient", ticketId: string, payload: any) => {
     return axios.post(`/v1/${role}/support/${ticketId}/reply`, payload);
   },
   getProviderAvailability: (providerId: string, date: string) => {
-    return axios.get(`/v1/public/providers/${providerId}/availability?date=${date}`);
+    return axios.get(
+      `/v1/public/providers/${providerId}/availability?date=${date}`,
+    );
   },
 };
