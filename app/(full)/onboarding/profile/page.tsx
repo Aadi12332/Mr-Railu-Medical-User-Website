@@ -38,16 +38,22 @@ function PatientProfileContent() {
   const parsedProviderData = storedProviderData ? JSON.parse(storedProviderData) : null;
   const fields = bookingFlow?.profileStep?.fields || [];
 
-  const getMaxDOB = () => {
-    const today = new Date();
-    return new Date(
-      today.getFullYear() - 18,
-      today.getMonth(),
-      today.getDate()
-    )
-      .toISOString()
-      .split("T")[0];
-  };
+  const formatDate = (date:any) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getMaxDOB = () => {
+  const today = new Date();
+  const maxDate = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
+  return formatDate(maxDate);
+};
 
   const validateDOB = (value: string) => {
     const dob = new Date(value);
@@ -62,6 +68,8 @@ function PatientProfileContent() {
 
     return age >= 18 || "You must be at least 18 years old";
   };
+
+
 
   const createSchema = (fields: any[]) => {
     const shape: any = {};
@@ -134,6 +142,27 @@ function PatientProfileContent() {
 
     return z.object(shape);
   };
+
+    const getPlaceholder = (field:any) => {
+  switch (field.key) {
+    case "firstName":
+      return "Eg. John";
+    case "lastName":
+      return "Eg. Doe";
+    case "email":
+      return "Eg. john@email.com";
+    case "password":
+      return "********";
+    case "zipCode":
+      return "Eg. 12345";
+    case "mobileNumber":
+      return "Eg. +1 9876543210";
+    case "dateOfBirth":
+      return "Select date";
+    default:
+      return field.placeholder || "";
+  }
+};
 
   const schema = createSchema(fields);
 
@@ -300,6 +329,7 @@ function PatientProfileContent() {
 
                   <div className="relative">
                     <Input
+                    placeholder={getPlaceholder(field)}
                       type={
                         isPassword
                           ? showPassword
@@ -321,7 +351,7 @@ function PatientProfileContent() {
                         onClick={() => setShowPassword((prev) => !prev)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                       >
-                        {showPassword ? (
+                        {!showPassword ? (
                           <EyeOff className="h-4 w-4" />
                         ) : (
                           <Eye className="h-4 w-4" />

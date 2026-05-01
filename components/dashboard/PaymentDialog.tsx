@@ -155,10 +155,7 @@ const handlePayment = async () => {
           </h2>
         </DialogHeader>
 
-        {/* Payment Form Container */}
         <div className="border border-[#2a9d8f] rounded-2xl p-6 bg-[#f8fbfb]">
-
-          {/* Tabs */}
           <div className="flex gap-3 mb-6">
             <Button
               onClick={() => setPaymentTab("debit")}
@@ -187,7 +184,6 @@ const handlePayment = async () => {
             </Button>
           </div>
 
-          {/* Radio and Logos */}
           <div className="flex items-center justify-between mb-6">
             <RadioGroup defaultValue={paymentTab} className="flex items-center">
               <div className="flex items-center space-x-2">
@@ -228,7 +224,6 @@ const handlePayment = async () => {
             </div>
           </div>
 
-          {/* Form Fields */}
           <div className="space-y-5">
             <div className="grid grid-cols-2 gap-5">
               <div className="col-span-2 sm:col-span-1 space-y-2">
@@ -316,7 +311,6 @@ const handlePayment = async () => {
           </div>
         </div>
 
-        {/* Security Notice */}
         <div className="flex items-center gap-4 px-2">
           <div className="p-2.5 bg-[#eef7f6] rounded-full text-[#2a9d8f] shrink-0">
             <Lock className="h-5 w-5" />
@@ -327,7 +321,6 @@ const handlePayment = async () => {
           </p>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end mt-2">
           <Button size="lg" className="bg-gradient-dash" onClick={handlePayment}>
             Submit <ArrowRight className="ml-2 h-5 w-5" />

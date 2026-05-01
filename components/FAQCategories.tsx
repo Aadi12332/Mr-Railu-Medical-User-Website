@@ -21,7 +21,7 @@ import { publicPageApi } from "@/api/publicpage.api";
 
 const categories = [
   {
-    title: "About MEDvidi",
+    title: "About Telehealth",
     icon: Building2Icon,
     items: [],
   },
@@ -74,12 +74,12 @@ export default function FAQCategories({ search }: { search: string }) {
   }, []);
 
   const categoryMap: Record<string, string> = {
-    about: "About MEDvidi",
+    about: "About Telehealth",
     appointments: "Appointments",
     prescription: "Prescription",
     pricing: "Pricing",
     "dea-update": "DEA Update",
-    providers: "About MEDvidi",
+    providers: "About Telehealth",
   };
 
   const groupedFaqs = faqs.reduce((acc: any, faq: any) => {

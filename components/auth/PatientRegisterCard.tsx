@@ -109,6 +109,7 @@ export default function PatientRegisterCard() {
                 </FieldLabel>
                 <Input
                   className="h-12 rounded-[14px]"
+                  placeholder="Eg. John"
                   {...form.register("firstName")}
                 />
                 <FieldError errors={[form.formState.errors.firstName]} />
@@ -120,6 +121,7 @@ export default function PatientRegisterCard() {
                 </FieldLabel>
                 <Input
                   className="h-12 rounded-[14px]"
+                  placeholder="Eg. Doe"
                   {...form.register("lastName")}
                 />
                 <FieldError errors={[form.formState.errors.lastName]} />
@@ -147,6 +149,7 @@ export default function PatientRegisterCard() {
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
+                    placeholder="********"
                     className="h-12 rounded-[14px] pr-11"
                     {...form.register("password")}
                   />
@@ -168,6 +171,7 @@ export default function PatientRegisterCard() {
                 <div className="relative">
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
+                    placeholder="********"
                     className="h-12 rounded-[14px] pr-11"
                     {...form.register("confirmPassword")}
                   />

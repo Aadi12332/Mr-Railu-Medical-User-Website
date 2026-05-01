@@ -106,7 +106,7 @@ export default function ExpertsSection({ data }: any) {
           {ex?.fullName || "Expert Name"}
         </div>
 
-        <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed min-h-6 overflow-hidden">
           {ex?.specialty || "Specialist"}
           {ex?.experienceYears
             ? ` • ${ex.experienceYears} yrs exp`

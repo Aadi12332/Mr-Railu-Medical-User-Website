@@ -39,17 +39,17 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
   const handleMyProviders = async (providerId: string) => {
     try {
       const awaitData = await patientApi.getProviderById(providerId);
-      setOpen(true)
+      setOpen(true);
       setProviderData(awaitData);
-    } catch (error) {
-    }
-  }
+    } catch (error) {}
+  };
   useEffect(() => {
     setSelectedTime(null);
   }, [date]);
   const handleBooking = async () => {
     try {
-      const selectedTimeFromStorage = sessionStorage.getItem("selectedTime") || "";
+      const selectedTimeFromStorage =
+        sessionStorage.getItem("selectedTime") || "";
       const parsed = dayjs(selectedTimeFromStorage, "hh:mm A");
 
       let time = selectedTimeFromStorage;
@@ -65,10 +65,10 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
 
         time = parsed.minute(minutes).format("HH:mm");
       }
-       const data = provider?.sessionTypes?.find(
-    (s: any) => s.name === sessionType
-  );
-      const formattedDate = dayjs(date).format("YYYY-MM-DD")
+      const data = provider?.sessionTypes?.find(
+        (s: any) => s.name === sessionType,
+      );
+      const formattedDate = dayjs(date).format("YYYY-MM-DD");
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
         date: formattedDate,
@@ -96,32 +96,32 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
     }
   }, [open]);
 
-const isValidFee =
-  Array.isArray(provider?.sessionTypes) &&
-  provider.sessionTypes.some(
-    (s: any) => typeof s?.price === "number" && s.price > 0
-  );
+  const isValidFee =
+    Array.isArray(provider?.sessionTypes) &&
+    provider.sessionTypes.some(
+      (s: any) => typeof s?.price === "number" && s.price > 0,
+    );
 
   const selectedSession = provider?.sessionTypes?.find(
-  (s: any) => s._id === sessionType
-);
+    (s: any) => s._id === sessionType,
+  );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>      <DialogTrigger asChild>
-
-      <button
-  disabled={!isValidFee}
-  className="bg-gradient-dash w-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 justify-center px-3 py-2 rounded-lg text-white"
-  onClick={() => {
-    if (!isValidFee) return;
-    handleMyProviders(provider?._id);
-  }}
->
-  <Video className="size-4" />
-  Book Now
-</button>
-    </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={setOpen}>
+      {" "}
+      <DialogTrigger asChild>
+        <button
+          disabled={!isValidFee}
+          className="bg-gradient-dash w-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-2 justify-center px-3 py-2 rounded-lg text-white"
+          onClick={() => {
+            if (!isValidFee) return;
+            handleMyProviders(provider?._id);
+          }}
+        >
+          <Video className="size-4" />
+          Book Now
+        </button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-semibold">Book Appointment</DialogTitle>
@@ -144,12 +144,13 @@ const isValidFee =
                 return (
                   <div key={label} className="flex flex-col items-center gap-2">
                     <div
-                      className={`size-8 rounded-full flex items-center justify-center text-xs font-medium ${active
-                        ? "bg-gradient-dash text-white"
-                        : completed
+                      className={`size-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                        active
                           ? "bg-gradient-dash text-white"
-                          : "bg-muted text-muted-foreground"
-                        }`}
+                          : completed
+                            ? "bg-gradient-dash text-white"
+                            : "bg-muted text-muted-foreground"
+                      }`}
                     >
                       {i + 1}
                     </div>
@@ -166,7 +167,12 @@ const isValidFee =
         <div className="mt-4">
           {step === 1 && <TherapistStep provider={provider} />}
           {step === 2 && (
-            <DateStep minDate={new Date()} date={date} setDate={setDate} provider={provider} />
+            <DateStep
+              minDate={new Date()}
+              date={date}
+              setDate={setDate}
+              provider={provider}
+            />
           )}
           {step === 3 && (
             <TimeStep

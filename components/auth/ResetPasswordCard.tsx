@@ -112,6 +112,7 @@ const email = searchParams.get("email") || "";
               <input
                 type={showPassword ? "text" : "password"}
                 value={newPassword}
+                placeholder="********"
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full h-12 px-4 pr-12 rounded-[14px] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
@@ -133,6 +134,7 @@ const email = searchParams.get("email") || "";
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
+                placeholder="********"
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full h-12 px-4 pr-12 rounded-[14px] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />

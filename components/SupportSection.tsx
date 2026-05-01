@@ -59,10 +59,10 @@ export default function SupportSection({ data }: any) {
                 <div className="absolute -inset-2 rounded-2xl border-2 border-primary w-4/5"></div>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl">
                   <Image
-                    src={data?.imageUrl || supportImg}
+                    src={supportImg}
                     alt=""
-                    width={100}
-                    height={96}
+                    width={2000}
+                    height={1000}
                     className="object-cover w-full h-96"
                   />
                 </div>
@@ -78,8 +78,8 @@ export default function SupportSection({ data }: any) {
             <div className="flex justify-center md:justify-start">
               <div className="relative w-full max-w-lg">
                 <div className="relative">
-                  <Image src={mapImg} alt="" className="object-contain w-full h-auto" width={100}
-                    height={96}
+                  <Image src={mapImg} alt="" className="object-contain max-w-130 h-auto" width={2000}
+                    height={1000}
 
                   />
                 </div>
