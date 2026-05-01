@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Container } from "../ui/container";
 import Link from "next/link";
 
-export default function AdhdHero({data}:any) {
+export default function AdhdHero({ data }: any) {
   const features = [
     "Licensed medical professionals",
     "Flexible online visits",
     "Digital prescriptions when appropriate",
   ];
+
+  const heroImg =
+    data?.heroImageUrl && data?.heroImageUrl !== ""
+      ? data?.heroImageUrl
+      : adhdImg;
 
   return (
     <section className="py-10">
@@ -21,14 +26,14 @@ export default function AdhdHero({data}:any) {
             src={bgPattern}
             alt="Background pattern"
             className="w-full h-full object-cover"
-              width={100}
-              height={100}
+            width={100}
+            height={100}
           />
         </div>
 
         <div className="absolute z-0 top-20 right-0 opacity-50 max-w-xs">
           <Image
-            src={data?.heroImageUrl??bgPattern}
+            src={bgPattern}
             alt="Background pattern"
             className="w-full h-full object-cover"
             width={100}
@@ -41,27 +46,30 @@ export default function AdhdHero({data}:any) {
             {/* left: copy + CTAs */}
             <div className="md:col-span-6">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
-                <span className="block text-primary">{data?.heroTitle??''}</span>
+                <span className="block text-primary">
+                  {data?.heroTitle ?? ""}
+                </span>
                 {/* <span className="block text-primary">
                   Care <span className="text-slate-900">100% Online</span>
                 </span> */}
               </h1>
 
               <p className="mt-4 max-w-xl  text-muted-foreground leading-relaxed">
-                {data?.heroSubtitle??'Connect With Licensed Professionals And Receive A Personalized ADHD Treatment Plan From The Comfort Of Your Home.'}
+                {data?.heroSubtitle ??
+                  "Connect With Licensed Professionals And Receive A Personalized ADHD Treatment Plan From The Comfort Of Your Home."}
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Link href={data?.heroCTAUrl??'/onboarding'}>
+                <Link href={data?.heroCTAUrl ?? "/onboarding"}>
                   <Button className="bg-gradient-primary" size="lg">
-                    <Link href={data?.heroCTAUrl??'/onboarding'}>
+                    <Link href={data?.heroCTAUrl ?? "/onboarding"}>
                       {data?.heroCTALabel}
                     </Link>
                   </Button>
                 </Link>
 
                 <Button variant="outline" size="lg" asChild>
-                  <Link href={data?.heroSecondaryCtaUrl??'/onboarding'}>
+                  <Link href={data?.heroSecondaryCtaUrl ?? "/onboarding"}>
                     {data?.heroSecondaryCtaLabel}
                   </Link>
                 </Button>
@@ -84,7 +92,7 @@ export default function AdhdHero({data}:any) {
               <div className="relative w-full max-w-md">
                 <div className="rounded-2xl overflow-hidden shadow-2xl">
                   <Image
-                    src={adhdImg}
+                    src={heroImg}
                     alt="Patient and provider discussion"
                     width={940}
                     height={620}
@@ -98,10 +106,10 @@ export default function AdhdHero({data}:any) {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-slate-900">
-                      {data?.heroStatValue??'500+ patients helped'}
+                      {data?.heroStatValue ?? "500+ patients helped"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {data?.heroStatLabel??'Join them today'}
+                      {data?.heroStatLabel ?? "Join them today"}
                     </div>
                   </div>
                 </div>
