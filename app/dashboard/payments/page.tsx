@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { DollarSign, Clock, CheckCircle } from "lucide-react";
 import AddPaymentMethodDialog from "@/components/dashboard/AddPaymentMethodDialog";
 import { cn } from "@/lib/utils";
@@ -9,13 +9,47 @@ import {
   PaymentMethodCard,
   PaymentMethod,
 } from "@/components/dashboard/PaymentMethodCard";
-import {
-  PaymentItemCard,
-  PaymentItem,
-} from "@/components/dashboard/PaymentItemCard";
+import { PaymentItemCard } from "@/components/dashboard/PaymentItemCard";
 import { dashboardApi } from "@/api/dashboard.service";
 import { useSearchParams } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
+
+interface PaymentMethodApiRecord {
+  _id: string;
+  brand: string;
+  last4: string;
+  expMonth: string | number;
+  expYear: string | number;
+  isDefault: boolean;
+}
+
+interface PaymentApiRecord {
+  _id: string;
+  description?: string;
+  createdAt: string;
+  amount: number;
+  status: string;
+  cardBrand?: string;
+  cardLast4?: string;
+  invoiceNumber?: string;
+  appointmentId?: {
+    providerId?: {
+      firstName?: string;
+      lastName?: string;
+    };
+  };
+}
+
+interface PaymentSummaryResponse {
+  data?: {
+    summary?: {
+      year?: string | number;
+      totalSpent?: number;
+      upcomingPayments?: number;
+      sessionsThisMonth?: number;
+    };
+  };
+}
 
 interface SummaryCard {
   id: string;
@@ -33,30 +67,32 @@ function PaymentsContent() {
   const query = searchParams.get("q");
   const search = useDebounce(query, 500);
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
-const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<PaymentSummaryResponse | null>(null);
   const [tab, setTab] = useState<Tab>("upcoming");
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<PaymentApiRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const handleCards = async () => {
+  const handleCards = useCallback(async () => {
     try {
       const res = await dashboardApi.getCardsApi("patient");
-      const data = res?.data?.paymentMethods?.map((i: any) => {
-        return {
-          id: i._id,
-          brand: i.brand,
-          last4: i.last4,
-          expiry: `${i.expMonth}/${i.expYear}`,
-          isDefault: i.isDefault,
-        };
-      });
+      const data = res?.data?.paymentMethods?.map(
+        (i: PaymentMethodApiRecord) => {
+          return {
+            id: i._id,
+            brand: i.brand,
+            last4: i.last4,
+            expiry: `${i.expMonth}/${i.expYear}`,
+            isDefault: i.isDefault,
+          };
+        },
+      );
       setMethods(data || []);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -69,7 +105,7 @@ const [summary, setSummary] = useState<any>(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
 
   const handleDefaultCard = async (cardId: string) => {
     try {
@@ -81,28 +117,14 @@ const [summary, setSummary] = useState<any>(null);
     }
   };
 
-  const addCard = async (payload: any) => {
-    try {
-      const dataPayload = {
-        cardNumber: payload.last4,
-        expMonth: payload.expiry.split("/")[0],
-        expYear: payload.expiry.split("/")[1],
-        cvv: payload.cvv,
-        cardholderName: payload.cardholderName,
-      };
-      const res = await dashboardApi.postAddCardApi("patient", dataPayload);
-      setMethods((prev) => [...prev, res?.data?.paymentMethod]);
-      handleCards();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchPaymentSummary = async () => {
+  const fetchPaymentSummary = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const resSummary = await dashboardApi.getPaymentSummary("patient",search||"");
+      const resSummary = await dashboardApi.getPaymentSummary(
+        "patient",
+        search || "",
+      );
       setSummary(resSummary);
     } catch (err) {
       console.error("Payment summary error:", err);
@@ -110,7 +132,7 @@ const [summary, setSummary] = useState<any>(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
 
   useEffect(() => {
     handleCards();
@@ -119,31 +141,31 @@ const [summary, setSummary] = useState<any>(null);
   }, [search]);
 
   const summaryCards: SummaryCard[] = [
-  {
-    id: "total",
-    label: `Total Spent (${summary?.data?.summary?.year})`,
-    value: summary?.data?.summary?.totalSpent ?? 0,
-    isCurrency: true,
-    icon: DollarSign,
-    iconClassName: "bg-blue-100 text-blue-600",
-  },
-  {
-    id: "upcoming",
-    label: "Upcoming Payments",
-    value: summary?.data?.summary?.upcomingPayments ?? 0,
-    isCurrency: true,
-    icon: Clock,
-    iconClassName: "bg-yellow-100 text-yellow-600",
-  },
-  {
-    id: "sessions",
-    label: "Sessions This Month",
-    value: summary?.data?.summary?.sessionsThisMonth ?? 0,
-    isCurrency: false,
-    icon: CheckCircle,
-    iconClassName: "bg-emerald-100 text-emerald-600",
-  },
-];
+    {
+      id: "total",
+      label: `Total Spent (${summary?.data?.summary?.year})`,
+      value: summary?.data?.summary?.totalSpent ?? 0,
+      isCurrency: true,
+      icon: DollarSign,
+      iconClassName: "bg-blue-100 text-blue-600",
+    },
+    {
+      id: "upcoming",
+      label: "Upcoming Payments",
+      value: summary?.data?.summary?.upcomingPayments ?? 0,
+      isCurrency: true,
+      icon: Clock,
+      iconClassName: "bg-yellow-100 text-yellow-600",
+    },
+    {
+      id: "sessions",
+      label: "Sessions This Month",
+      value: summary?.data?.summary?.sessionsThisMonth ?? 0,
+      isCurrency: false,
+      icon: CheckCircle,
+      iconClassName: "bg-emerald-100 text-emerald-600",
+    },
+  ];
 
   const mappedPayments = payments.map((item) => {
     const provider = item?.appointmentId?.providerId;
@@ -204,10 +226,10 @@ const [summary, setSummary] = useState<any>(null);
                   <p className="text-md text-muted-foreground">{card.label}</p>
                   {card.value !== undefined && card.value !== null && (
                     <p className="text-2xl font-medium leading-none">
-  {typeof card.value === "number" && card.isCurrency
-    ? `$${card.value}`
-    : card.value}
-</p>
+                      {typeof card.value === "number" && card.isCurrency
+                        ? `$${card.value}`
+                        : card.value}
+                    </p>
                   )}
                 </div>
               </div>
@@ -220,9 +242,8 @@ const [summary, setSummary] = useState<any>(null);
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Payment Methods</h2>
           <AddPaymentMethodDialog
-            onAdd={(method) => {
-              console.log({ method });
-              addCard(method);
+            onAdd={() => {
+              handleCards();
             }}
           />
         </div>
@@ -270,8 +291,8 @@ const [summary, setSummary] = useState<any>(null);
 
         {!loading && !error && filteredPayments.length === 0 && (
           <Card className="p-6 text-center text-muted-foreground">
-              No payments to show.
-              </Card>
+            No payments to show.
+          </Card>
         )}
 
         {!loading &&
