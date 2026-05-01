@@ -1,6 +1,6 @@
 import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import handlePrescriptionImage from "@/assets/services/handle-prescription.png";
+import handlePrescriptionImage from "@/public/services/handle-prescription.png";
 import Image from "next/image";
 import { Container } from "@/components/ui/container";
 
@@ -18,7 +18,9 @@ export default function TreatmentsPrescriptions({ data }: { data?: any }) {
     },
   ];
 
-  const titleWords = (data?.title || "Handle Your Prescriptions Digitally, With Confidence").split(" ");
+  const titleWords = (
+    data?.title || "Handle Your Prescriptions Digitally, With Confidence"
+  ).split(" ");
   const midIndex = Math.ceil(titleWords.length / 2);
   const title1 = titleWords.slice(0, midIndex).join(" ");
   const title2 = titleWords.slice(midIndex).join(" ");
@@ -48,12 +50,8 @@ export default function TreatmentsPrescriptions({ data }: { data?: any }) {
 
           <div>
             <h2 className="text-3xl font-semibold leading-tight">
-              <span className="block text-primary">
-                {title1}
-              </span>
-              <span className="block text-slate-900 mt-1">
-                {title2}
-              </span>
+              <span className="block text-primary">{title1}</span>
+              <span className="block text-slate-900 mt-1">{title2}</span>
             </h2>
 
             <div className="mt-6 space-y-4">

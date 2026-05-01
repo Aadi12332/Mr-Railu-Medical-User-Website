@@ -10,9 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import Link from "next/link";
-import portalImg from "@/assets/services/patient-portal.jpg";
+import portalImg from "@/assets/public/patient-portal.jpg";
 
-export default function PatientPortalSection({data}: {data: any}) {
+export default function PatientPortalSection({ data }: { data: any }) {
   const features = [
     { id: 1, icon: Calendar, title: "Book visits anytime" },
     { id: 2, icon: CalendarCheck, title: "Manage appointments easily" },
@@ -37,7 +37,9 @@ export default function PatientPortalSection({data}: {data: any}) {
               />
 
               <div className="absolute -right-4 -bottom-4 bg-gradient-primary text-white rounded-lg shadow-lg px-3 py-3 flex flex-col items-center text-xs">
-                <div className="font-semibold text-2xl leading-none">{data?.patientPortalStatValue}</div>
+                <div className="font-semibold text-2xl leading-none">
+                  {data?.patientPortalStatValue}
+                </div>
                 <div className="mt-0.5">{data?.patientPortalStatLabel}</div>
               </div>
             </div>
@@ -54,23 +56,28 @@ export default function PatientPortalSection({data}: {data: any}) {
             </p>
 
             <div className="mt-6 space-y-3">
-              {(data?.patientPortalFeatures??[]).map((f: any,idx:number) => {
-                const Icon = (f.icon && typeof f.icon === 'function') ? f.icon : features[idx]?.icon ?? Calendar;
-                return (
-                  <div
-                    key={f.id}
-                    className="rounded-2xl bg-[#F8FAFB] p-3 flex items-center gap-4"
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center">
-                      <Icon className="size-5" />
-                    </div>
+              {(data?.patientPortalFeatures ?? []).map(
+                (f: any, idx: number) => {
+                  const Icon =
+                    f.icon && typeof f.icon === "function"
+                      ? f.icon
+                      : (features[idx]?.icon ?? Calendar);
+                  return (
+                    <div
+                      key={f.id}
+                      className="rounded-2xl bg-[#F8FAFB] p-3 flex items-center gap-4"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center">
+                        <Icon className="size-5" />
+                      </div>
 
-                    <div className="text-sm font-medium text-slate-900">
-                      {f.title}
+                      <div className="text-sm font-medium text-slate-900">
+                        {f.title}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
 
             <div className="mt-6">

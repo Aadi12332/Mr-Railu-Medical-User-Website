@@ -13,14 +13,14 @@ import AutoScroll from "embla-carousel-auto-scroll";
 import bgPattern from "@/assets/landing/hero/bg-pattern.png";
 import Link from "next/link";
 import { Container } from "./ui/container";
-import condition1 from "../assets/conditions/ocd.png";
-import condition2 from "../assets/conditions/anxiety.png";
-import condition3 from "../assets/conditions/evidence-therapy.png";
-import condition4 from "../assets/conditions/medication-as-care.jpg";
-import condition5 from "../assets/conditions/depression.png";
-import condition6 from "../assets/conditions/useful-resources.jpg";
-import condition7 from "../assets/conditions/sleep-quality.png";
-import condition8 from "../assets/conditions/insomnia.png";
+import condition1 from "../public/conditions/ocd.png";
+import condition2 from "../public/conditions/anxiety.png";
+import condition3 from "../public/conditions/evidence-therapy.png";
+import condition4 from "../public/conditions/medication-as-care.jpg";
+import condition5 from "../public/conditions/depression.png";
+import condition6 from "../public/conditions/useful-resources.jpg";
+import condition7 from "../public/conditions/sleep-quality.png";
+import condition8 from "../public/conditions/insomnia.png";
 
 const conditionImages = [
   condition1,
@@ -33,9 +33,8 @@ const conditionImages = [
   condition8,
 ];
 
-
 export default function HeroSection({ data, conditions }: any) {
-  console.log({ da: data?.ctaLabel })
+  console.log({ da: data?.ctaLabel });
   const categories =
     conditions
       ?.slice()
@@ -54,10 +53,18 @@ export default function HeroSection({ data, conditions }: any) {
           style={{ backgroundColor: data?.backgroundColor }}
         >
           <div className="absolute -top-5 -scale-x-100 z-0 opacity-50 max-w-xs">
-            <Image src={bgPattern} alt="" className="w-full h-full object-cover" />
+            <Image
+              src={bgPattern}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="absolute z-0 -top-5 right-0 opacity-50 max-w-xs">
-            <Image src={bgPattern} alt="" className="w-full h-full object-cover" />
+            <Image
+              src={bgPattern}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           </div>
 
           <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -88,40 +95,46 @@ export default function HeroSection({ data, conditions }: any) {
                   ]}
                 >
                   <CarouselContent className="gap-6 -mx-2">
-                  {categories.map((c: any, i: number) => {
-  const imageSrc =
-    c?.src || conditionImages[i % conditionImages.length];
+                    {categories.map((c: any, i: number) => {
+                      const imageSrc =
+                        c?.src || conditionImages[i % conditionImages.length];
 
-  return (
-    <div
-      key={c.name}
-      className="pl-4 shrink-0 w-52 md:w-64 lg:w-72"
-    >
-      <Link href={c.to || "#"}>
-        <div className="relative overflow-hidden rounded-2xl bg-[#E2EBEC] p-6 flex flex-col items-center gap-4 text-center hover:shadow-lg transition-all duration-300">
-          <div className="absolute -top-20 -left-16 size-52 rounded-full bg-[#0084D41C]"></div>
+                      return (
+                        <div
+                          key={c.name}
+                          className="pl-4 shrink-0 w-52 md:w-64 lg:w-72"
+                        >
+                          <Link href={c.to || "#"}>
+                            <div className="relative overflow-hidden rounded-2xl bg-[#E2EBEC] p-6 flex flex-col items-center gap-4 text-center hover:shadow-lg transition-all duration-300">
+                              <div className="absolute -top-20 -left-16 size-52 rounded-full bg-[#0084D41C]"></div>
 
-          <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-sm">
-            <Image
-              src={imageSrc}
-              alt={c.name}
-              fill
-              className="object-cover"
-            />
-          </div>
+                              <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-sm">
+                                <Image
+                                  src={imageSrc}
+                                  alt={c.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
 
-          <span className="text-lg font-mono font-semibold text-sky-900">
-            {c.name}
-          </span>
-        </div>
-      </Link>
-    </div>
-  );
-})}
+                              <span className="text-lg font-mono font-semibold text-sky-900">
+                                {c.name}
+                              </span>
+                            </div>
+                          </Link>
+                        </div>
+                      );
+                    })}
                   </CarouselContent>
 
-                  <CarouselPrevious className="left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border" size="icon-sm" />
-                  <CarouselNext className="right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border" size="icon-sm" />
+                  <CarouselPrevious
+                    className="left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border"
+                    size="icon-sm"
+                  />
+                  <CarouselNext
+                    className="right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border"
+                    size="icon-sm"
+                  />
                 </Carousel>
               </div>
             </div>

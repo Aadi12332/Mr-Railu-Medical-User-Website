@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import medImg from "@/assets/services/medication-supported.png";
+import medImg from "@/public/services/medication-supported.png";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -62,7 +62,9 @@ export default function MedicationsSupported({ data }: { data?: any }) {
     },
   ];
 
-  const titleWords = (data?.medicationsTitle || "Medications Supported Through Our Platform").split(" ");
+  const titleWords = (
+    data?.medicationsTitle || "Medications Supported Through Our Platform"
+  ).split(" ");
   const midIndex = Math.ceil(titleWords.length / 2);
   const title = titleWords.slice(0, midIndex).join(" ");
   const subtitle = titleWords.slice(midIndex).join(" ");
@@ -75,7 +77,10 @@ export default function MedicationsSupported({ data }: { data?: any }) {
             <SectionHeader
               title={title}
               subtitle={subtitle}
-              description={data?.medicationsSubtitle || "Our licensed healthcare professionals are authorized to evaluate symptoms and, when appropriate, prescribe or continue medications for various mental health and wellness conditions including certain regulated medications, based on clinical guidelines."}
+              description={
+                data?.medicationsSubtitle ||
+                "Our licensed healthcare professionals are authorized to evaluate symptoms and, when appropriate, prescribe or continue medications for various mental health and wellness conditions including certain regulated medications, based on clinical guidelines."
+              }
             />
           </div>
 
@@ -93,16 +98,20 @@ export default function MedicationsSupported({ data }: { data?: any }) {
               </div>
 
               <p className="mt-6 max-w-md leading-relaxed text-muted-foreground">
-                {data?.medicationsNote || "A Detailed List Of Medications Available Through Our Platform Can Be Reviewed During Your Consultation."}
+                {data?.medicationsNote ||
+                  "A Detailed List Of Medications Available Through Our Platform Can Be Reviewed During Your Consultation."}
               </p>
 
               <div className="mt-4">
                 <Button size="lg" className="bg-gradient-primary">
                   <Link
-                    href={data?.medicationsCtaUrl || "/services/medication-refill"}
+                    href={
+                      data?.medicationsCtaUrl || "/services/medication-refill"
+                    }
                     className="flex items-center gap-3"
                   >
-                    {data?.medicationsCtaLabel || "View Medication Options"} <ArrowRight className="w-4 h-4" />
+                    {data?.medicationsCtaLabel || "View Medication Options"}{" "}
+                    <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>
               </div>

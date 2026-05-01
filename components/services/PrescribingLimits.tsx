@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 
 import Image from "next/image";
 
-import prescribingLimitsImage from "@/assets/services/prescribing-limits.png";
+import prescribingLimitsImage from "@/public/services/prescribing-limits.png";
 
 import Link from "next/link";
 
@@ -20,7 +20,9 @@ export default function PrescribingLimits({ data }: { data?: any }) {
     },
   ];
 
-  const titleWords = (data?.title || "Understanding medication prescribing limits").split(" ");
+  const titleWords = (
+    data?.title || "Understanding medication prescribing limits"
+  ).split(" ");
   const midIndex = Math.ceil(titleWords.length / 2);
   const title1 = titleWords.slice(0, midIndex).join(" ");
   const title2 = titleWords.slice(midIndex).join(" ");
@@ -50,9 +52,7 @@ export default function PrescribingLimits({ data }: { data?: any }) {
 
           <div>
             <h2 className="text-3xl md:text-4xl font-semibold leading-tight">
-              <span className="block text-primary">
-                {title1}
-              </span>
+              <span className="block text-primary">{title1}</span>
               <span className="block text-slate-900 mt-1">{title2}</span>
             </h2>
 
