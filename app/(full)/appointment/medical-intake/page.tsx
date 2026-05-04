@@ -119,7 +119,6 @@ export default function MedicalIntakePage() {
   // Create dynamic PHQ-9 default values based on API data
   const createPhqDefaults = () => {
     if (!intakeForm?.questions) return {};
-
     const defaults: Record<string, number> = {};
     intakeForm.questions.forEach((question: any) => {
       defaults[question.key] = 0; // Default to "Not At All" (value 0)
@@ -265,7 +264,6 @@ export default function MedicalIntakePage() {
       <div className="relative max-w-6xl mx-auto p-5 pt-16 py-8 space-y-4 bg-[#E6E8EE] flex flex-col items-center min-h-[60vh]">
         <Card className="w-full p-6 shadow-lg space-y-4">
           <Skeleton className="h-8 w-1/4 mb-6" />
-
           {/* Basic Information Section */}
           <div className="space-y-4">
             <Skeleton className="h-6 w-32" />
@@ -322,7 +320,6 @@ export default function MedicalIntakePage() {
                 ))}
               </div>
             </div>
-
             {/* Difficulty options skeleton */}
             <div className="border-t p-3">
               <Skeleton className="h-4 w-64 mb-3" />

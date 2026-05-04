@@ -226,7 +226,6 @@ function VideoSessionsContent() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
                       <div className="size-12 rounded-full bg-gray-200" />
-
                       <div className="space-y-2">
                         <div className="h-4 w-40 bg-gray-200 rounded" />
                         <div className="h-3 w-32 bg-gray-200 rounded" />
@@ -234,7 +233,6 @@ function VideoSessionsContent() {
                         <div className="h-8 w-32 bg-gray-200 rounded" />
                       </div>
                     </div>
-
                     <div className="h-6 w-24 bg-gray-200 rounded" />
                   </div>
                 </Card>

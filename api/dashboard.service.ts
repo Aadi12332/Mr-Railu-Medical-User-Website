@@ -142,7 +142,6 @@ export const dashboardApi = {
   postAdminMessage: (role = "patient") => {
     return axios.post(`/v1/${role}/chat/start-admin`);
   },
-
   sendSupportReply: (role = "patient", ticketId: string, payload: any) => {
     return axios.post(`/v1/${role}/support/${ticketId}/reply`, payload);
   },
