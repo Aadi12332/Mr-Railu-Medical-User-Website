@@ -34,8 +34,11 @@ export default function DetailsStep({
           </SelectTrigger>
 
           <SelectContent>
+            <SelectItem value="select" disabled className="text-muted-foreground">
+              Select Session Type
+            </SelectItem>
             {provider?.sessionTypes?.map((s: any) => (
-              <SelectItem key={s._id} value={s._id} >
+              <SelectItem key={s.name} value={s.name} >
                 {s.name} {s.price ? `- $${s.price}` : ""}
               </SelectItem>
             ))}

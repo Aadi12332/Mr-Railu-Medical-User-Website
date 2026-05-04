@@ -41,11 +41,19 @@ export default function ConfirmStep({
           <div className="text-right font-medium text-foreground">
             {selectedTime || ""}
           </div>
-
-          <div>Session Fee:</div>
+          <div>Session Name:</div>
+          <div className="text-right capitalize font-medium text-foreground">
+            {selectedSession?.name ?? "Video Call"}
+          </div>
+          <div>Session Price:</div>
           <div className="text-right font-medium text-foreground">
             $ {selectedSession?.price ?? 0}
           </div>
+          <div>Session Type:</div>
+          <div className="text-right capitalize font-medium text-foreground">
+            {selectedSession?.type ?? "video"}
+          </div>
+          
         </div>
       </div>
 

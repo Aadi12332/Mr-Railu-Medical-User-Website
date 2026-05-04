@@ -65,21 +65,19 @@ export default function BookAppointmentDialog({ provider }: { provider: any }) {
 
         time = parsed.minute(minutes).format("HH:mm");
       }
-      {
 
-      }
       const formattedDate = dayjs(date).format("YYYY-MM-DD")
       const res = await patientApi.bookAppointment({
         providerId: provider._id,
         date: formattedDate,
         time,
-        type: sessionType,
+        type: selectedSession?.type??"video",
       });
       sessionStorage.setItem("providerAmount", provider?.sessionFee);
       sessionStorage.setItem("appointmentId", res?.data?.appointment?._id);
       setIsSuccess(true);
 
-      toast.success(res?.data?.message || "Appointment booked successfully");
+      // toast.success(res?.data?.message || "Appointment booked successfully");
     } catch (error: any) {
       setIsSuccess(false);
       toast.error(error?.message || "Failed to book appointment");
@@ -103,7 +101,7 @@ const isValidFee =
   );
 
   const selectedSession = provider?.sessionTypes?.find(
-  (s: any) => s._id === sessionType
+  (s: any) => s.name === sessionType
 );
 
   return (
@@ -204,7 +202,7 @@ const isValidFee =
                 onClick={() => setStep((s) => Math.max(1, s - 1))}
                 className="flex-1"
               >
-                previous
+                Previous
               </Button>
             ) : (
               ""
@@ -217,10 +215,11 @@ const isValidFee =
               >
                 <Button
                   size="lg"
+                  disabled={isSuccess}
                   className="flex-1 bg-gradient-dash"
                   onClick={() => handleBooking()}
                 >
-                  confirm
+                  Confirm
                 </Button>
               </PaymentDialog>
             ) : (
