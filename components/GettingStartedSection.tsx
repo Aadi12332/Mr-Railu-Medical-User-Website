@@ -53,10 +53,10 @@ export default function GettingStartedSection({ howItWorksSection, howItWorkes }
           description={howItWorksSection?.subtitle || "No Clinic Visits. No Complicated Forms. Just Professional Mental Health Care, Designed To Fit Your Routine."}
         />
         <div className="max-w-6xl mx-auto">
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
             {stepsToRender.map((s: any) => (
               <div key={s.id} className="">
-                <Card className="p-0 overflow-hidden">
+                <Card className="p-0 overflow-hidden h-full">
                   <div className="overflow-hidden h-44 aspect-square">
                     <Image
                       src={s.image}
@@ -72,7 +72,7 @@ export default function GettingStartedSection({ howItWorksSection, howItWorkes }
                     <CardTitle className="text-sm font-semibold text-slate-900">
                       {s.title}
                     </CardTitle>
-                    <CardDescription className="mt-2 text-xs leading-relaxed h-20 overflow-hidden text-muted-foreground">
+                    <CardDescription className="mt-2 text-xs leading-relaxed line-clamp-3 text-muted-foreground">
                       {s.description}
                     </CardDescription>
                   </CardContent>

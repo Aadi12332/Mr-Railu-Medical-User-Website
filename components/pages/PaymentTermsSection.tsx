@@ -9,24 +9,47 @@ export default function PaymentTermsSection({ data }: any) {
 
   const title = sorted?.[0]?.heading || "";
 
-  const groups: any[] = [];
-  let current: any = null;
+const groups: any[] = [];
+let current: any = null;
 
-  sorted.forEach((item: any) => {
-    if (item.heading && item.body && item.body.length === 1) {
-      if (current) groups.push(current);
+sorted.forEach((item: any, index: number) => {
+  const heading = item?.heading?.trim();
+  const body = item?.body?.trim();
 
-      current = {
-        id: item.heading,
-        letter: item.body,
-        title: item.heading,
-        content: [],
-      };
-    } else if (current && item.body) {
-      current.content.push(item.body);
+  const isSection =
+    heading &&
+    body &&
+    /^[A-Z]$/.test(body);
+
+  if (isSection) {
+    if (current) {
+      groups.push(current);
     }
-  });
-  if (current) groups.push(current);
+
+    current = {
+      id: `${heading}-${index}`,
+      letter: body,
+      title: heading,
+      content: [],
+    };
+
+    return;
+  }
+
+  if (current) {
+    if (heading && body) {
+      current.content.push(`${heading}: ${body}`);
+    } else if (heading) {
+      current.content.push(heading);
+    } else if (body) {
+      current.content.push(body);
+    }
+  }
+});
+
+if (current) {
+  groups.push(current);
+}
 
   return (
     <section className="py-16 bg-white">

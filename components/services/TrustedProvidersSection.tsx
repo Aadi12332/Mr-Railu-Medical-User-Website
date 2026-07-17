@@ -63,6 +63,8 @@ export default function TrustedProvidersSection({ data }: { data?: any }) {
     id: p.id || p._id,
     name: p.fullName || p.name,
     description: p.bio || p.description,
+    specialty: p.specialty || p.department,
+    experienceYears: p.experienceYears || p.yearsOfExperience,
     image: p.profileImageUrl || expertImg1, // fallback if missing
     isStaticImage: !p.profileImageUrl,
   })) : providers.map(p => ({ ...p, isStaticImage: true }));
@@ -115,7 +117,12 @@ export default function TrustedProvidersSection({ data }: { data?: any }) {
       </div>
 
       <div className="text-sm font-semibold text-slate-900">{p.name}</div>
-      <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
+      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+        {p.specialty}
+        {p.experienceYears && " • "}
+        {p.experienceYears ? `${p.experienceYears} yrs exp` : ""}
+      </p>
+      <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-3">
         {p.description}
       </p>
     </div>

@@ -19,9 +19,10 @@ import {
 } from "@/components/ui/accordion";
 
 const buildHIPAASections = (sections: any[] = []) => {
-  const sorted = sections
-    ?.slice()
-    ?.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) || [];
+  const sorted =
+    sections
+      ?.slice()
+      ?.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) || [];
 
   const articles: any = {
     intro: "",
@@ -30,33 +31,72 @@ const buildHIPAASections = (sections: any[] = []) => {
     article3: [],
     rightsIntro: "",
     footer: "",
+    disclaimer: "",
   };
 
   let current = "";
 
   sorted.forEach((item) => {
-    if (item.heading?.includes("Introduction")) {
+    const heading = item?.heading?.trim() || "";
+    const body = item?.body?.trim() || "";
+
+    if (/our introduction/i.test(heading)) {
+      articles.intro = body;
       current = "intro";
-    } else if (item.heading?.includes("Article I")) {
+      return;
+    }
+
+    if (/^article i\b/i.test(heading)) {
       current = "article1";
-    } else if (item.heading?.includes("Article II")) {
+
+      if (body) {
+        articles.article1.push(body);
+      }
+
+      return;
+    }
+
+    if (/^article ii\b/i.test(heading)) {
       current = "article2";
-    } else if (item.heading?.includes("Article III")) {
+
+      if (body) {
+        articles.article2.push(body);
+      }
+
+      return;
+    }
+
+    if (/^article iii\b/i.test(heading)) {
       current = "article3";
-    } else if (item.heading?.includes("Your Rights")) {
-      articles.rightsIntro = item.body;
+
+      if (body) {
+        articles.article3.push(body);
+      }
+
+      return;
+    }
+
+    if (/your rights/i.test(heading)) {
+      articles.rightsIntro = body;
       current = "article3";
-    } else if (item.heading?.includes("Services")) {
-      articles.footer = item.body;
-    } else if (item.body) {
-      if (current === "intro") {
-        articles.intro = item.body;
-      } else if (current === "article1") {
-        articles.article1.push(item.body);
+      return;
+    }
+
+    if (/services and features/i.test(heading)) {
+      articles.footer = body;
+      current = "footer";
+      return;
+    }
+
+    if (body) {
+      if (current === "article1") {
+        articles.article1.push(body);
       } else if (current === "article2") {
-        articles.article2.push(item.body);
+        articles.article2.push(body);
       } else if (current === "article3") {
-        articles.article3.push(item.body);
+        articles.article3.push(body);
+      } else if (current === "footer") {
+        articles.disclaimer = body;
       }
     }
   });
@@ -133,7 +173,7 @@ export default function HIPAAPrivacyContent({ data }: any) {
                       : "text-muted-foreground border-l-2 border-transparent"
                   )}
                 >
-                  <s.Icon className="size-4 mr-2 shrink-0" />
+                  <s.Icon className="w-4 mr-2 min-w-4" />
                   {s.title} {s.subtitle}
                 </a>
               </li>
@@ -167,7 +207,7 @@ export default function HIPAAPrivacyContent({ data }: any) {
 
             <Accordion type="single" collapsible>
               {parsed.article1.map((item: string) => (
-                <AccordionItem key={item} value={item}>
+                <AccordionItem className="!border-none" key={item} value={item}>
                   <AccordionTrigger className="py-4">
                     <Shield className="size-4 mr-2" />
                     {item}
@@ -191,7 +231,7 @@ export default function HIPAAPrivacyContent({ data }: any) {
 
             <Accordion type="single" collapsible>
               {parsed.article2.map((item: string) => (
-                <AccordionItem key={item} value={item}>
+                <AccordionItem className="!border-none" key={item} value={item}>
                   <AccordionTrigger className="py-4">
                     <Lock className="size-4 mr-2" />
                     {item}
@@ -219,7 +259,7 @@ export default function HIPAAPrivacyContent({ data }: any) {
 
             <Accordion type="single" collapsible>
               {parsed.article3.map((item: string) => (
-                <AccordionItem key={item} value={item}>
+                <AccordionItem className="!border-none" key={item} value={item}>
                   <AccordionTrigger className="py-4">
                     <Users className="w-4 mr-2 min-w-4" />
                     {item}
@@ -239,11 +279,8 @@ export default function HIPAAPrivacyContent({ data }: any) {
             <p>{parsed.footer}</p>
 
             <div className="mt-6 p-4 rounded-lg border border-white/40 bg-white/10">
-              Disclaimer : This policy serves as a general guideline. Specific
-              situations may require individual assessment. For questions or
-              concerns, please contact our Privacy Officer or visit our website
-              for additional resources.
-            </div>
+  {parsed.disclaimer}
+</div>
           </Card>
         </div>
       </div>

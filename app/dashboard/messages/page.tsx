@@ -6,11 +6,8 @@ import { MessagesSidebar } from "@/components/messages/MessagesSidebar";
 import { settingApi } from "@/api/setting.api";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchParams } from "next/navigation";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { StartChatModal } from "@/components/messages/StartChatModal";
-import { dashboardApi } from "@/api/dashboard.service";
 
 function MessagesContent() {
   const [activeConversationId, setActiveConversationId] = useState<
@@ -22,7 +19,7 @@ function MessagesContent() {
   const [chatList, setChatList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const search = useDebounce(searchQuery, 500);
+  const search = useDebounce(searchQuery, 500);  
   const activeConversation = useMemo(
     () =>
       chatList.find(
@@ -38,14 +35,17 @@ function MessagesContent() {
 
       const res = await settingApi.getChatList("patient", search);
 
-      const normalizedChats = (res?.data?.chats || []).filter((i:any)=>i?.providerId).map((chat: any) => ({
-        ...chat,
-        id: chat.id || chat._id,
-      }));
+      const normalizedChats = (res?.data?.chats || [])
+        .filter(
+          (chat: any) => chat.chatType === "patient-admin" || chat.providerId,
+        )
+        .map((chat: any) => ({
+          ...chat,
+          id: chat.id || chat._id,
+        }));
 
       setChatList(normalizedChats);
     } catch (err: any) {
-      console.error("Chat list error:", err);
       setError("Failed to load chats");
     } finally {
       setLoading(false);

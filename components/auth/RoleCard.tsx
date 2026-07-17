@@ -24,7 +24,7 @@ export default function RoleCard({ role, path }: Props) {
     if (role === "provider") {
       const providerBase = (
         process.env.NEXT_PUBLIC_PROVIDER_PANEL_URL ||
-        "https://tele-health-provider-integration.vercel.app"
+        "https://mr-telerxs-backend.onrender.com/api"
       ).replace(/\/+$/g, "");
       router.push(`${providerBase}/provider-login`);
     } else {

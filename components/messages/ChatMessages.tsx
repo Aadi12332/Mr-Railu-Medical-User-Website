@@ -7,7 +7,7 @@ type ChatMessagesProps = {
 
 export function ChatMessages({ messages }: ChatMessagesProps) {
   return (
-    <div className="flex-1 space-y-4 bg-gray-50 overflow-y-auto p-4">
+    <div className="flex-1 space-y-4 bg-gray-50 overflow-y-auto p-4 max-h-[calc(100vh-365px)]">
       {messages?.map((message) => {
         const isPatientMessage = message.sender === "patient";
 

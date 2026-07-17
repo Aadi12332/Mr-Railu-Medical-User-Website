@@ -59,7 +59,9 @@ export default function RefundsDetails({ data, loading, error }: any) {
   const sorted =
     data
       ?.slice()
-      ?.sort((a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) || [];
+      ?.sort(
+        (a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+      ) || [];
   const definitions: any[] = [];
 
   const defIndex = sorted.findIndex((s: any) => s.heading === "Definitions");
@@ -96,26 +98,53 @@ export default function RefundsDetails({ data, loading, error }: any) {
     i++;
   }
 
-  const sections: any[] = [];
-  let current: any = null;
+const sections: any[] = [];
+let current: any = null;
 
-  sorted.forEach((item: any) => {
-    if (/^\d+\.$/.test(item.heading)) {
-      if (current) sections.push(current);
+sorted.forEach((item: any) => {
+  const isNumberHeading = /^\d+\.$/.test(item?.heading);
 
-      current = {
-        number: item.heading,
-        title: "",
-        content: [],
-      };
-    } else if (current && item.heading && !current.title) {
-      current.title = item.heading;
-    } else if (current && item.body) {
+  if (isNumberHeading) {
+    if (current) {
+      sections.push(current);
+    }
+
+    current = {
+      number: item.heading,
+      title: "",
+      content: [],
+    };
+
+    return;
+  }
+
+  if (current && !current.title && item?.heading) {
+    current.title = item.heading;
+
+    if (item?.body) {
       current.content.push(item.body);
     }
-  });
 
-  if (current) sections.push(current);
+    return;
+  }
+
+  if (current && item?.body) {
+    current.content.push(item.body);
+    return;
+  }
+
+  if (!current && item?.heading && item?.body) {
+    sections.push({
+      number: "",
+      title: item.heading,
+      content: [item.body],
+    });
+  }
+});
+
+if (current) {
+  sections.push(current);
+}
 
   const definitionIcons = [Clock, Calendar, XCircle];
   const sectionIcons = [
@@ -153,35 +182,42 @@ export default function RefundsDetails({ data, loading, error }: any) {
           })}
         </div>
 
-        <div className="mt-8 space-y-8">
-          {sections.map((sec: any, idx: number) => {
-            const Icon = sectionIcons[idx] || FileText;
+       <div className="mt-8 space-y-8">
+  {sections.map((sec: any, idx: number) => {
+    const Icon = sectionIcons[idx] || FileText;
 
-            return (
-              <Card key={idx} className="pt-0 shadow">
-                <CardHeader className="border-b pt-5 flex gap-4 items-center">
-                  <Icon className="size-6" />
+    return (
+      <Card key={idx} className="pt-0 shadow">
+        <CardHeader className="border-b pt-5 flex gap-4 items-center">
+          <Icon className="size-6" />
 
-                  <div className="flex items-end gap-2">
-                    <span className="font-bold text-3xl">{sec.number}</span>
+          <div className="flex items-end gap-2">
+            {sec.number && (
+              <span className="font-bold text-3xl">
+                {sec.number}
+              </span>
+            )}
 
-                    <CardTitle className="font-bold text-xl">
-                      {sec.title}
-                    </CardTitle>
-                  </div>
-                </CardHeader>
+            <CardTitle className="font-bold text-xl">
+              {sec.title}
+            </CardTitle>
+          </div>
+        </CardHeader>
 
-                <CardContent>
-                  {sec.content.map((c: string, i: number) => (
-                    <p key={i} className="text-muted-foreground mt-2 text-sm">
-                      {c}
-                    </p>
-                  ))}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <CardContent>
+          {sec.content.map((c: string, i: number) => (
+            <p
+              key={i}
+              className="text-muted-foreground mt-2 text-sm"
+            >
+              {c}
+            </p>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  })}
+</div>
       </Container>
     </section>
   );

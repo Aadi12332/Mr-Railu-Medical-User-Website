@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios"
 
 const axiosInstance = axios.create({
-  baseURL: "https://mr-telerxs-backend.vercel.app/api",
+  baseURL: "https://mr-telerxs-backend.onrender.com/api",
   headers: {
     "Content-Type": "application/json"
   }

@@ -157,7 +157,8 @@ export default function CompanyContactSection() {
               )}
             </div>
 
-            <div className="flex items-start space-x-2">
+            <div>
+              <div className="flex items-start space-x-2">
               <Controller
                 control={form.control}
                 name="agree"
@@ -170,11 +171,11 @@ export default function CompanyContactSection() {
               />
               <label className="text-sm text-slate-700">
                 I agree to the{" "}
-                <Link href="/terms" className="underline">
+                <Link href="/terms-of-use" className="font-medium text-primary">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="underline">
+                <Link href="/privacy-policy" className="font-medium text-primary">
                   Privacy Policy
                 </Link>
               </label>
@@ -184,6 +185,7 @@ export default function CompanyContactSection() {
                 {form.formState.errors.agree.message}
               </p>
             )}
+            </div>
 
             <Button
               type="submit"

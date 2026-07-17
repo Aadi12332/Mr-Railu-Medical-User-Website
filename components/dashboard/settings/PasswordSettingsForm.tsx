@@ -3,7 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -53,6 +54,9 @@ interface PasswordSettingsFormProps {
 export function PasswordSettingsForm({ onSubmit }: PasswordSettingsFormProps) {
     const router = useRouter();
   const role = localStorage.getItem("role")||"";
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
@@ -69,11 +73,8 @@ export function PasswordSettingsForm({ onSubmit }: PasswordSettingsFormProps) {
       const res=await settingApi.changePassword({currentPassword: values.currentPassword, newPassword: values.newPassword},role)
       if(res.status){
         localStorage.clear()
-        if(role === "Patient"){
+        toast.success("Password changed successfully. Please log in again.");
           router.push("/patient-login");
-        }else{
-          router.push("/provider-login");
-        }
       }
     }catch(error:any){
       console.log("password change error", error);
@@ -91,52 +92,100 @@ export function PasswordSettingsForm({ onSubmit }: PasswordSettingsFormProps) {
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
           <FieldGroup>
             <Field>
-              <FieldLabel
-                htmlFor="currentPassword"
-                className="w-auto border-0 p-0"
-              >
-                Current Password
-              </FieldLabel>
-              <Input
-                id="currentPassword"
-                type="password"
-                placeholder="Enter current password"
-                className="bg-muted"
-                {...form.register("currentPassword")}
-              />
-              <FieldError errors={[form.formState.errors.currentPassword]} />
-            </Field>
+  <FieldLabel
+    htmlFor="currentPassword"
+    className="w-auto border-0 p-0"
+  >
+    Current Password
+  </FieldLabel>
 
-            <Field>
-              <FieldLabel htmlFor="newPassword" className="w-auto border-0 p-0">
-                New Password
-              </FieldLabel>
-              <Input
-                id="newPassword"
-                type="password"
-                placeholder="Enter new password"
-                className="bg-muted"
-                {...form.register("newPassword")}
-              />
-              <FieldError errors={[form.formState.errors.newPassword]} />
-            </Field>
+  <div className="relative">
+    <Input
+      id="currentPassword"
+      type={showCurrentPassword ? "text" : "password"}
+      placeholder="Enter current password"
+      className="bg-muted pr-10"
+      {...form.register("currentPassword")}
+    />
 
-            <Field>
-              <FieldLabel
-                htmlFor="confirmPassword"
-                className="w-auto border-0 p-0"
-              >
-                Confirm New Password
-              </FieldLabel>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm new password"
-                className="bg-muted"
-                {...form.register("confirmPassword")}
-              />
-              <FieldError errors={[form.formState.errors.confirmPassword]} />
-            </Field>
+    <button
+      type="button"
+      onClick={() => setShowCurrentPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+    >
+      {showCurrentPassword ? (
+        <EyeOff className="size-4" />
+      ) : (
+        <Eye className="size-4" />
+      )}
+    </button>
+  </div>
+
+  <FieldError errors={[form.formState.errors.currentPassword]} />
+</Field>
+
+    <Field>
+  <FieldLabel htmlFor="newPassword" className="w-auto border-0 p-0">
+    New Password
+  </FieldLabel>
+
+  <div className="relative">
+    <Input
+      id="newPassword"
+      type={showNewPassword ? "text" : "password"}
+      placeholder="Enter new password"
+      className="bg-muted pr-10"
+      {...form.register("newPassword")}
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowNewPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+    >
+      {showNewPassword ? (
+        <EyeOff className="size-4" />
+      ) : (
+        <Eye className="size-4" />
+      )}
+    </button>
+  </div>
+
+  <FieldError errors={[form.formState.errors.newPassword]} />
+</Field>
+
+          <Field>
+  <FieldLabel
+    htmlFor="confirmPassword"
+    className="w-auto border-0 p-0"
+  >
+    Confirm New Password
+  </FieldLabel>
+
+  <div className="relative">
+    <Input
+      id="confirmPassword"
+      type={showConfirmPassword ? "text" : "password"}
+      placeholder="Confirm new password"
+      className="bg-muted pr-10"
+      {...form.register("confirmPassword")}
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowConfirmPassword((prev) => !prev)}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+    >
+      {showConfirmPassword ? (
+        <EyeOff className="size-4" />
+      ) : (
+        <Eye className="size-4" />
+      )}
+    </button>
+  </div>
+
+  <FieldError errors={[form.formState.errors.confirmPassword]} />
+</Field>
           </FieldGroup>
 
           <div className="rounded-md bg-blue-50/50 p-4 text-sm text-blue-800">

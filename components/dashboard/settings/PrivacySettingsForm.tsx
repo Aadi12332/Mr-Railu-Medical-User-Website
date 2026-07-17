@@ -60,7 +60,7 @@ const handleDownloadData = async () => {
     if (!token) return
 
     const res = await fetch(
-      "https://mr-telerxs-backend.vercel.app/api/v1/patient/settings/download-data",
+      "https://mr-telerxs-backend.onrender.com/api/v1/patient/settings/download-data",
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -106,7 +106,7 @@ const handleDownloadData = async () => {
       const token = window.localStorage.getItem("patientToken")
 
       const res = await fetch(
-        "https://mr-telerxs-backend.vercel.app/api/v1/patient/settings/privacy-policy",
+        "https://mr-telerxs-backend.onrender.com/api/v1/patient/settings/privacy-policy",
         {
           headers: {
             Authorization: `Bearer ${token}`,

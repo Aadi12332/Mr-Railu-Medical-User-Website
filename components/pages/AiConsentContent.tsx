@@ -23,25 +23,43 @@ export default function AiConsentContent({ data }: any) {
       ?.slice()
       ?.sort((a: any, b: any) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) || [];
 
-  const groups: any[] = [];
-  let current: any = null;
+const groups: any[] = [];
+let current: any = null;
 
-  sorted.forEach((item: any) => {
-    if (item.heading) {
-      if (current) groups.push(current);
+sorted.forEach((item: any) => {
+  const heading = item?.heading?.trim();
+  const body = item?.body?.trim();
 
-      current = {
-        title: item.heading,
-        items: [],
-      };
-
-      if (item.body) current.items.push(item.body);
-    } else if (current && item.body) {
-      current.items.push(item.body);
+  if (
+    heading === "Consent to Use Ambient Intelligence Tools" ||
+    heading === "AI Chatbot Disclosure & Notice"
+  ) {
+    if (current) {
+      groups.push(current);
     }
-  });
 
-  if (current) groups.push(current);
+    current = {
+      title: heading,
+      items: body ? [body] : [],
+    };
+
+    return;
+  }
+
+  if (current) {
+    if (heading && body) {
+      current.items.push(`${heading}: ${body}`);
+    } else if (heading) {
+      current.items.push(heading);
+    } else if (body) {
+      current.items.push(body);
+    }
+  }
+});
+
+if (current) {
+  groups.push(current);
+}
 
   const firstCard = groups[0];
   const secondCard = groups[1];

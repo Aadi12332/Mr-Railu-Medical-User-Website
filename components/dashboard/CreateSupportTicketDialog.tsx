@@ -90,7 +90,7 @@ const onSubmit = async (values: TicketFormValues) => {
     const token = window.localStorage.getItem("patientToken")
 
     const res = await fetch(
-      "https://mr-telerxs-backend.vercel.app/api/v1/patient/support",
+      "https://mr-telerxs-backend.onrender.com/api/v1/patient/support",
       {
         method: "POST",
         headers: {

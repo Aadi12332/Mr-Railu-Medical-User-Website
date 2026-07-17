@@ -31,7 +31,11 @@ export default function ExpertsSection({ data }: any) {
   const experts =
     data
       ?.slice()
-      ?.sort((a: any, b: any) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0)) || [];
+      ?.sort(
+        (a: any, b: any) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0),
+      ) || [];
+
+      console.log("Experts Data:", experts);
 
   return (
     <section className="py-16 bg-[#2195800D]">
@@ -85,51 +89,59 @@ export default function ExpertsSection({ data }: any) {
               ]}
             >
               <CarouselContent className=" -mx-2">
-              {(experts.length ? experts : new Array(5).fill(null)).map(
-  (ex: any, i: number) => {
-    const imageSrc =
-      ex?.imageUrl || ExpertImages[i % ExpertImages.length];
+                {(experts.length ? experts : new Array(5).fill(null)).map(
+                  (ex: any, i: number) => {
+                    const imageSrc =
+                      ex?.profileImageUrl || ex?.avatarUrl;
 
-    const Card = (
-      <div className="first:ml-6 pl-4 shrink-0 w-65 md:w-60 lg:w-[320px] bg-white rounded-2xl border border-slate-100 shadow-sm p-3 hover:shadow-md transition-shadow">
-        <div className="overflow-hidden rounded-xl aspect-square mb-3">
-          <Image
-            src={imageSrc}
-            alt={ex?.fullName || "expert"}
-            width={320}
-            height={320}
-            className="object-cover rounded-lg"
-          />
-        </div>
+                    const Card = (
+                      <div className="first:ml-6 pl-4 shrink-0 w-65 md:w-60 lg:w-[320px] bg-white rounded-2xl border border-slate-100 shadow-sm p-3 hover:shadow-md transition-shadow">
+                        <div className="overflow-hidden rounded-xl aspect-square mb-3">
+                          <Image
+                            src={imageSrc || ""}
+                            alt={ex?.fullName || "expert"}
+                            width={320}
+                            height={320}
+                            className="object-cover rounded-lg"
+                          />
+                        </div>
 
-        <div className="text-sm font-semibold text-slate-900">
-          {ex?.fullName || "Expert Name"}
-        </div>
+                        <div className="text-[14px] font-semibold text-slate-900">
+                          {ex?.fullName || "Expert Name"} 
+                        </div>
 
-        <p className="text-xs text-muted-foreground mt-2 leading-relaxed h-14 overflow-hidden">
-          {ex?.specialty || "Specialist"}
-          {ex?.experienceYears
-            ? ` • ${ex.experienceYears} yrs exp`
-            : ""}
-        </p>
-      </div>
-    );
+                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                          {ex?.specialty || "Specialist"}
+                          {ex?.experienceYears
+                            ? ` • ${ex.experienceYears} yrs exp`
+                            : ""}  {" "}
+                            (⭐ {ex?.rating ?? "0"})
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-2">{ex?.bio}</p>
+                      </div>
+                    );
 
-    return (
-      <div key={ex?.id ?? i}>
-        {ex?.destinationUrl ? (
-          <Link href={ex.destinationUrl}>{Card}</Link>
-        ) : (
-          Card
-        )}
-      </div>
-    );
-  }
-)}
+                    return (
+                      <div key={ex?.id ?? i}>
+                        {ex?.destinationUrl ? (
+                          <Link href={ex.destinationUrl}>{Card}</Link>
+                        ) : (
+                          Card
+                        )}
+                      </div>
+                    );
+                  },
+                )}
               </CarouselContent>
 
-              <CarouselPrevious className="left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border" size="icon-sm" />
-              <CarouselNext className="right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border" size="icon-sm" />
+              <CarouselPrevious
+                className="left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border"
+                size="icon-sm"
+              />
+              <CarouselNext
+                className="right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur rounded-full p-2 shadow hover:shadow-md border"
+                size="icon-sm"
+              />
             </Carousel>
           </div>
         </div>

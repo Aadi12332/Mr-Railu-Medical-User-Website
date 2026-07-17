@@ -6,47 +6,100 @@ import { Card } from "@/components/ui/card";
 import { FileText } from "lucide-react";
 
 const buildSections = (sections: any[] = []) => {
-  const sorted = sections
-    ?.slice()
-    ?.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+  const sorted =
+    sections
+      ?.slice()
+      ?.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) || [];
 
   const groups: any[] = [];
   let current: any = null;
 
-  const isValidHeading = (heading?: string) => {
-    if (!heading) return false;
-    const h = heading.trim().toLowerCase();
-    if (!h) return false;
-    if (/^\d+$/.test(h)) return false;
-    if (h.includes("table of contents")) return false;
-    if (h.startsWith("•")) return false;
-    return true;
-  };
+  const ignoredHeadings = [
+    "table of contents",
+    "last updated: january 29, 2026",
+    "medvidi website terms and conditions of use",
+  ];
 
-  const generateId = (text: string, index: number) =>
-    text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .replace(/\s+/g, "-")
-      .concat(`-${index}`);
+  sorted.forEach((item: any, index: number) => {
+    const heading = item?.heading?.trim();
+    const body = item?.body?.trim();
 
-  sorted.forEach((item, index) => {
-    if (isValidHeading(item.heading)) {
-      if (current) groups.push(current);
+    if (!heading) {
+      if (current && body) {
+        current.content.push(body);
+      }
+      return;
+    }
+
+    if (ignoredHeadings.includes(heading.toLowerCase())) {
+      return;
+    }
+
+    const isMainSection =
+      [
+        "Introduction",
+        "Services and Features",
+        "Member Account and Registration",
+        "Information Collection, Use and Disclosure",
+        "No Provider-Patient Relationship / No Medical Advice",
+        "User Acknowledgements",
+        "Do Not Share Protected Health Information",
+        "Express Consent to Billing Methods",
+        "Permitted Uses of Website Content",
+        "Rules Governing User Conduct",
+        "Website Does Not Collect Information About Minors",
+        "Disclaimer of Liability and No Warranty",
+        "Information You Provide",
+        "Links to Third-Party Websites",
+        "Do Not Submit Ideas or Creative Material",
+        "Agreement to Indemnify",
+        "Operation of the Website",
+        "Online Privacy and Communications",
+        "Proprietary Rights",
+        "Health Disclaimer for Visitors and Members",
+        "Intellectual Property Infringement",
+        "No Assignment of Terms",
+        "Enforcement of Terms and Conditions",
+        "Affiliate Disclaimer",
+        "Agreement and Acknowledgment",
+        "Subscriptions",
+      ].includes(heading);
+
+    if (isMainSection) {
+      if (current) {
+        groups.push(current);
+      }
 
       current = {
-        id: generateId(item.heading, index),
-        title: item.heading,
+        id: `${heading
+          .toLowerCase()
+          .replace(/[^\w\s]/g, "")
+          .replace(/\s+/g, "-")}-${index}`,
+        title: heading,
         content: [],
       };
 
-      if (item.body) current.content.push(item.body);
-    } else if (current && item.body) {
-      current.content.push(item.body);
+      if (body) {
+        current.content.push(body);
+      }
+
+      return;
+    }
+
+    if (current) {
+      if (heading && body) {
+        current.content.push(`${heading}: ${body}`);
+      } else if (heading) {
+        current.content.push(heading);
+      } else if (body) {
+        current.content.push(body);
+      }
     }
   });
 
-  if (current) groups.push(current);
+  if (current) {
+    groups.push(current);
+  }
 
   return groups;
 };

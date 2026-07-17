@@ -34,7 +34,6 @@ const conditionImages = [
 ];
 
 export default function HeroSection({ data, conditions }: any) {
-  console.log({ da: data?.ctaLabel });
   const categories =
     conditions
       ?.slice()
@@ -104,7 +103,7 @@ export default function HeroSection({ data, conditions }: any) {
                           key={c.name}
                           className="pl-4 shrink-0 w-52 md:w-64 lg:w-72"
                         >
-                          <Link href={c.to || "#"}>
+                          <div>
                             <div className="relative overflow-hidden rounded-2xl bg-[#E2EBEC] p-6 flex flex-col items-center gap-4 text-center hover:shadow-lg transition-all duration-300">
                               <div className="absolute -top-20 -left-16 size-52 rounded-full bg-[#0084D41C]"></div>
 
@@ -121,7 +120,7 @@ export default function HeroSection({ data, conditions }: any) {
                                 {c.name}
                               </span>
                             </div>
-                          </Link>
+                          </div>
                         </div>
                       );
                     })}
