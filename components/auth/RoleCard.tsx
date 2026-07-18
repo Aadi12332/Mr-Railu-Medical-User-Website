@@ -20,17 +20,17 @@ export default function RoleCard({ role, path }: Props) {
     ? "Access your, appointments, and prescriptions"
     : "Manage appointments, patients, and consultations";
 
-  const handleClick = () => {
-    if (role === "provider") {
-      const providerBase = (
-        process.env.NEXT_PUBLIC_PROVIDER_PANEL_URL ||
-        "https://mr-telerxs-backend.onrender.com/api"
-      ).replace(/\/+$/g, "");
-      router.push(`${providerBase}/provider-login`);
-    } else {
-      router.push(path || `/${role}-login`);
-    }
-  };
+const handleClick = () => {
+  if (role === "provider") {
+    window.open(
+      "https://mr-railu-medical-provider.vercel.app/provider-login",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  } else {
+    router.push(path || `/${role}-login`);
+  }
+};
 
   const Icon = isPatient ? Heart : Stethoscope;
 
